@@ -23,10 +23,10 @@ memUnit子类之间禁止成员组合，即memUnit类中禁止存在另一个mem
 - 用法：  
     - 继承memManager类  
     - 实现纯虚函数void save_fetch(memPara para) override{}
-    - setUrl(const WCHAR* wcptr)设置文件路径  
-    - upload()上传文件到内存  
-    - download()下载文件到硬盘
 
+setUrl(const WCHAR* wcptr)设置文件路径  
+upload()上传文件到内存  
+download()下载文件到硬盘  
 - 构造原理：
     - memManager执行自身的save_fetch()，并执行其中的GWPP()来检视指针指向的下属memUnit是否被构造。  
     - 若没被构造，则构造并执行其save_fetch；若构造过了，则直接赋指针。  
