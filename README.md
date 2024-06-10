@@ -9,7 +9,7 @@ Headonly库，硬盘与内存统一管理库，同时有反射、序列化等功
     - 实现一个构造函数anyClass(memManager* m):memUnit(m){}，**下文记为构造函数M**   
     - 实现纯虚函数void save_fetch(memPara para) override{}  
     - （可选）实现虚函数fetchInit(){},并标记isFetchInit为true  
-    - GWPP(const WCHAR* key, Types& varST, memPara para);在反射函数内部，填写想要管理的变量。具体见demo。
+    - GWPP(const WCHAR* key, Types& varST, memPara para);在save_fetch函数内部，填写想要管理的变量。具体见demo。
 
 每个memUnit在创建时需指定一个memManager以隶属。memManager内部维护了一个列表，用以记录所有的memUnit。  
 memUnit子类之间禁止成员组合，即memUnit类中禁止存在另一个memUnit。  
