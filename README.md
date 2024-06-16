@@ -33,6 +33,7 @@ download()下载文件到硬盘
     - 如此嵌套，直到memManager的save_fetch()被执行完。  
 
 因此，在上传或下载时，所有悬空于memManager之外的指针（内存单元）将会被忽略。  
+不过，在析构时，所有记录的memUnit都会被析构，无论其是否悬空。  
 memManager继承了memUnit，并在内部记录了所有隶属此类的memUnit。  
 除此之外，内部还存储了依赖文件表、入口表、出口表。  
 ### memPtr => 基本内存单元的智能指针  
