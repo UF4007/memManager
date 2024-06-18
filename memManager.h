@@ -479,10 +479,15 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		inline void setUrl(const WCHAR* wcptr) {
 			wcscpy_s(url, wcptr);
 		}
+		// 如果url为空则返回nullptr
 		inline WCHAR* getFileName()
 		{
-			return &wcsrchr(url, L'\\')[1];
+			if (url[0])
+				return &wcsrchr(url, L'\\')[1];
+			return nullptr;
 		}
+		bool deserialize(WCHAR* Ptr, UINT StringSize);
+		void serialize(BYTE_CHAIN* bc);
 	private:
 		void thisCons();
 		void thisDest();
@@ -496,8 +501,6 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		std::vector<memApp*>* findPtr(memUnit* ptrINI, memPtrCorr** ptr);
 		std::vector<memApp*>* pushPtr(memUnit* ptrINI);
 		VOID deletePtrTable();
-		memUnit* fileSplit(memUnit** subfile, memUnit** ingressIn);
-		BOOL fileMerge();
 		void RawSerialize(BYTE_CHAIN* bc);
 		void RawDeserialize(WCHAR* seriStr, UINT size);
 	};
@@ -668,7 +671,10 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 			WaitForSingleObject(global_mutex, INFINITE);
 			for (auto i : global_load)
 			{
-				if (wcscmp(i->getFileName(), fileName) == 0)
+				WCHAR* fn = i->getFileName();
+				if (fn == nullptr)
+					continue;
+				if (wcscmp(fn, fileName) == 0)
 				{
 					ptrManager = i;
 					ReleaseMutex(global_mutex);
@@ -1690,71 +1696,63 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 	//save，下载到硬盘，成功返回true，失败返回false
 	inline BOOL memManager::download()
 	{
-		ptrTable = new std::set<memPtrCorr>();
+		DeleteFileW(url);
 
-		//进入读写迭代
-		memPara mp;
-		mp.order = ORD_SAVE;
-		mp.appSegment = pushPtr(this);
-		this->save_fetch(mp);
+		BYTE_CHAIN* bc = new BYTE_CHAIN(512);
 
-		//加载出、入口接口表
-		mp.appSegment = pushPtr(this->subFiles);
-		this->subFiles->save_fetch(mp);
-		mp.appSegment = pushPtr(this->ingressInte);
-		this->ingressInte->save_fetch(mp);
+		this->serialize(bc);
 
-		//整体写入
-		BOOL ret = this->fileMerge();
+		HANDLE hFile = CreateFile(url, FILE_GENERIC_READ | FILE_GENERIC_WRITE, NULL, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+		if (!hFile)
+		{
+			return 0;
+		}
+		UINT dwErr = GetLastError();
 
-		//清空指针对应表，并返回
-		deletePtrTable();
-		return ret;
+		BYTE* d_file = (BYTE*)calloc(1, bc->size);
+		bc->Export(d_file, bc->size);
+		WORD unicode_identifier = 0xfeff;
+		WriteFile(hFile, d_file, bc->size, NULL, NULL);
+
+		CloseHandle(hFile);
+		delete bc;
+		free(d_file);
+
+		return 1;
 	}
 	//fetch，上传到内存，成功返回true，失败返回false，若失败不会影响原内容。
 	inline BOOL memManager::upload()
 	{
-		ptrTable = new std::set<memPtrCorr>();
-
-		//分节分割
-		memUnit* sf = NULL, * in = NULL, * mu = this->fileSplit(&sf, &in);
-
-		if (!mu || !sf || !in)
+		HANDLE hFile = CreateFile(url, FILE_GENERIC_READ | FILE_GENERIC_WRITE, NULL, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+		if (!hFile)
 		{
-			deletePtrTable();
+			return 0;
+		}
+		DWORD fileSizeH, fileSizeL, sizeRead = 0;
+		fileSizeL = GetFileSize(hFile, &fileSizeH);
+		UINT64 fileSize = fileSizeH;
+		fileSize = (fileSize << 32);
+		fileSize += fileSizeL;
+		if (!fileSize)
+		{
+			CloseHandle(hFile);
 			return 0;
 		}
 
-		//清空此实例下的所有memUnit并重置此实例，为加载做准备。
-		for (auto i : *memUnits)
+		WCHAR* bytes = (WCHAR*)calloc(1, fileSize + 512);
+		BOOL ret = false;
+		if (ReadFile(hFile, bytes, fileSize, &sizeRead, NULL))
 		{
-			i->mngr = NULL;
-			if (i->sharedPtr)
-				i->sharedPtr->content = NULL;
-			delete i;
+			CloseHandle(hFile);
+			ret = this->deserialize(bytes, fileSize);
 		}
-		thisDest();
-		thisCons();
-
-		//进入读写迭代
-		memPara mp;
-		mp.order = ORD_FETCH;
-		mp.appSegment = findPtr(mu);
-		this->save_fetch(mp);
-
-		//加载出、入口接口表
-		mp.appSegment = findPtr(sf);
-		this->subFiles->save_fetch(mp);
-		mp.appSegment = findPtr(in);
-		this->ingressInte->save_fetch(mp);
-
-		//清空指针对应表，并返回
-		deletePtrTable();
-		return 1;
+		free(bytes);
+		return ret;
 	}
 	//根据url查找subfile
 	inline memPtr<Subfile> memManager::findSubfile(const WCHAR* fileUrl)
 	{
+		assert(fileUrl || !("target manager's url cannot be null"));
 		for (auto i : *subFiles)
 		{
 			if (wcscmp(fileUrl, i->fileName) == 0)
@@ -1938,6 +1936,86 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		//清空指针对应表，并返回
 		this->mngr->deletePtrTable();
 	}
+	inline bool memManager::deserialize(WCHAR* Ptr, UINT StringSize)
+	{
+		ptrTable = new std::set<memPtrCorr>();
+
+		//分节分割
+		memUnit* firstmu = NULL;
+		//读文件头
+		memUnit* subfile = (memUnit*)_wtop(Ptr);
+		WCHAR* ptrByte = Ptr + wcslen(Ptr) + 1;
+		memUnit* ingressIn = (memUnit*)_wtop(ptrByte);
+		ptrByte += wcslen(ptrByte) + 1;
+		firstmu = (memUnit*)_wtop(ptrByte);
+		ptrByte += wcslen(ptrByte) + 1;
+
+		this->RawDeserialize(ptrByte, StringSize);
+
+		if (!firstmu || !subfile || !ingressIn)
+		{
+			deletePtrTable();
+			return 0;
+		}
+
+		//清空此实例下的所有memUnit并重置此实例，为加载做准备。
+		for (auto i : *memUnits)
+		{
+			i->mngr = NULL;
+			if (i->sharedPtr)
+				i->sharedPtr->content = NULL;
+			delete i;
+		}
+		thisDest();
+		thisCons();
+
+		//进入读写迭代
+		memPara mp;
+		mp.order = ORD_FETCH;
+		mp.appSegment = findPtr(firstmu);
+		this->save_fetch(mp);
+
+		//加载出、入口接口表
+		mp.appSegment = findPtr(subfile);
+		this->subFiles->save_fetch(mp);
+		mp.appSegment = findPtr(ingressIn);
+		this->ingressInte->save_fetch(mp);
+
+		//清空指针对应表，并返回
+		deletePtrTable();
+		return 1;
+	}
+	inline void memManager::serialize(BYTE_CHAIN* bc)
+	{
+		ptrTable = new std::set<memPtrCorr>();
+
+		//进入读写迭代
+		memPara mp;
+		mp.order = ORD_SAVE;
+		mp.appSegment = pushPtr(this);
+		this->save_fetch(mp);
+
+		//加载出、入口接口表
+		mp.appSegment = pushPtr(this->subFiles);
+		this->subFiles->save_fetch(mp);
+		mp.appSegment = pushPtr(this->ingressInte);
+		this->ingressInte->save_fetch(mp);
+
+		//写文件头
+		WCHAR wc[20];
+		_ptow_s((POINTER_L)this->subFiles, wc, 10);
+		bc->Push((BYTE*)wc, (wcslen(wc) + 1) * sizeof(WCHAR));
+		_ptow_s((POINTER_L)this->ingressInte, wc, 10);
+		bc->Push((BYTE*)wc, (wcslen(wc) + 1) * sizeof(WCHAR));
+		_ptow_s((POINTER_L)this, wc, 10);
+		bc->Push((BYTE*)wc, (wcslen(wc) + 1) * sizeof(WCHAR));
+
+		//整体写入
+		this->RawSerialize(bc);
+
+		//清空指针对应表，并返回
+		deletePtrTable();
+	}
 	inline void memManager::RawSerialize(BYTE_CHAIN* bc)
 	{
 		WCHAR wc[20];
@@ -2004,43 +2082,6 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 			this->ptrTable->insert(i);					//读完小节中的内容，将小节(memUnit)写入总表中
 		}
 	}
-	inline memUnit* memManager::fileSplit(memUnit** subfile, memUnit** ingressIn)
-	{
-		memUnit* firstmu = NULL;
-		HANDLE hFile = CreateFile(url, FILE_GENERIC_READ | FILE_GENERIC_WRITE, NULL, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-		if (!hFile)
-		{
-			return 0;
-		}
-		DWORD fileSizeH, fileSizeL, sizeRead = 0;
-		fileSizeL = GetFileSize(hFile, &fileSizeH);
-		INT64 fileSize = fileSizeH;
-		fileSize = (fileSize << 32);
-		fileSize += fileSizeL;
-		if (!fileSize)
-		{
-			CloseHandle(hFile);
-			return 0;
-		}
-
-		WCHAR* bytes = (WCHAR*)calloc(1, fileSize + 512);
-		if (ReadFile(hFile, bytes, fileSize, &sizeRead, NULL))
-		{
-			CloseHandle(hFile);
-			//读文件头
-			*subfile = (memUnit*)_wtop(bytes);
-			WCHAR* ptrByte = bytes + wcslen(bytes) + 1;
-			*ingressIn = (memUnit*)_wtop(ptrByte);
-			ptrByte += wcslen(ptrByte) + 1;
-			firstmu = (memUnit*)_wtop(ptrByte);
-			ptrByte += wcslen(ptrByte) + 1;
-
-			this->RawDeserialize(ptrByte, fileSize);
-		}
-		free(bytes);
-		return firstmu;
-
-	}
 	inline BOOL GetPrivateProfileStringW(std::vector<memApp*>* lpAppSegment, LPCTSTR lpKeyName, DWORD nSize, LPCTSTR lpString)
 	{
 		for (auto i : *lpAppSegment)
@@ -2101,39 +2142,6 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		memcpy_s(&i->value->at(0), len, (void*)lpString, len);
 		lpAppSegment->push_back(i);
 		return 0;
-	}
-	inline BOOL memManager::fileMerge()
-	{
-		DeleteFileW(url);
-
-		BYTE_CHAIN* bc = new BYTE_CHAIN(512);
-		//写文件头
-		WCHAR wc[20];
-		_ptow_s((POINTER_L)this->subFiles, wc, 10);
-		bc->Push((BYTE*)wc, (wcslen(wc) + 1) * sizeof(WCHAR));
-		_ptow_s((POINTER_L)this->ingressInte, wc, 10);
-		bc->Push((BYTE*)wc, (wcslen(wc) + 1) * sizeof(WCHAR));
-		_ptow_s((POINTER_L)this, wc, 10);
-		bc->Push((BYTE*)wc, (wcslen(wc) + 1) * sizeof(WCHAR));
-
-		this->RawSerialize(bc);
-		HANDLE hFile = CreateFile(url, FILE_GENERIC_READ | FILE_GENERIC_WRITE, NULL, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-		if (!hFile)
-		{
-			return 0;
-		}
-		UINT dwErr = GetLastError();
-
-		BYTE* d_file = (BYTE*)calloc(1, bc->size);
-		bc->Export(d_file, bc->size);
-		WORD unicode_identifier = 0xfeff;
-		WriteFile(hFile, d_file, bc->size, NULL, NULL);
-
-		CloseHandle(hFile);
-		delete bc;
-		free(d_file);
-
-		return 1;
 	}
 
 	//出入口相关函数
@@ -2409,18 +2417,31 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 
 
 
-		//序列化测试项
+		//序列化测试项(memUnit)
 		BYTE_CHAIN serializeBC(512);
 		testManagerA->anothert1->num = 2.72;
 		testManagerA->anothert1->serialize(&serializeBC);
-		WCHAR serializeDump[1000];
+		WCHAR serializeDump[3000];
 		serializeBC.Export((BYTE*)serializeDump, serializeBC.size);
-		testManagerA.release();
 
-		//反序列化测试项
+		//反序列化测试项(memUnit)
 		testManagerB = new testManager();
 		testManagerB->anothert1 = new testUnit(*testManagerB);
 		testManagerB->anothert1->deserialize(serializeDump, serializeBC.size);
+		testManagerB.release();
+
+		//序列化测试项(memManager)
+		if (true)
+		{
+			serializeBC.clear();
+			testManagerA->serialize(&serializeBC);
+			serializeBC.Export((BYTE*)serializeDump, serializeBC.size);
+			testManagerA.release();
+
+			//反序列化测试项(memManager)
+			testManagerB = new testManager();
+			testManagerB->deserialize(serializeDump, serializeBC.size);
+		}
 
 		//内存泄漏测试项2
 		}
@@ -2456,6 +2477,6 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 // 
 // 
 // 
-//TODO：进行优化。反序列化时，拆包小节不是统一拆，而要交由save_fetch去做，这样能在读取时知道变量类型，就可直接使用进行字节转换，而不用将所有类型的变量转换成WCHAR。
+//TODO：进行优化。反序列化时，拆包小节不是统一拆，而要交由save_fetch去做，这样能在读取时知道变量类型，就可直接使用进行字节对齐，而不用将所有类型的变量转换成WCHAR。
 //		进行安全性改进，使用更好的宽字符处理程序，避免异常
 //
