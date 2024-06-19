@@ -23,11 +23,11 @@
 #define ORD_SERIALIZE 4			//序列化
 #define ORD_DESERIALIZE 5		//反序列化
 
-#define MEM_SUCCESS				0
-#define MEM_NOTFOUND_KEYWORDS	1
-#define MEM_NOTFOUND_FILE		2
-#define MEM_EMPTY_EGRESS		3
-#define MEM_EMPTY_INGRESS		4
+#define MEM_SUCCESS				0	//成功从出口中获取变量
+#define MEM_NOTFOUND_FILE		2	//与出口绑定的入口memManager没有加载
+#define MEM_NOTFOUND_KEYWORDS	1	//没有找到
+#define MEM_EMPTY_EGRESS		3	//出口是空的
+#define MEM_EMPTY_INGRESS		4	//入口memManager找到，关键字找到，但是入口所指向的内存是空的
 
 #if defined(_WIN64) || defined(__x86_64__) || defined(__ppc64__) || defined(__aarch64__) || defined(__powerpc64__) || defined(__s390x__)
 #define POINTER_L long long
@@ -90,6 +90,17 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 			ReflectResultKeyValue* reflection_single;
 		};
 		SHORT order;
+		inline bool isConstruct()
+		{
+			switch (order)
+			{
+			case ORD_FETCH:
+			case ORD_REFLECTION_R:
+			case ORD_DESERIALIZE:
+				return true;
+			}
+			return false;
+		}
 	};
 	struct memPtrCorr;
 	class memUnit;
@@ -98,9 +109,9 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 	class Egress;
 	class Ingress;
 	class Subfile;
-	template<typename First, typename...Args> class pGeneric;
+	template<typename First, typename...Args> class pVariant;
 	template<class cast> class memVectorEgress;
-	template<typename... Args> class genVector;
+	template<typename... Args> class memVectorVariant;
 	struct memPtrComm {
 		int count;
 		memUnit* content;
@@ -180,7 +191,7 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		}
 		friend class memUnit;
 		friend class memManager;
-		template<typename First, typename...Args> friend class pGeneric;
+		template<typename First, typename...Args> friend class pVariant;
 		template<class cast> friend struct pEgress;
 		void operator=(const memPtr<mu, releaseable>& mp);
 		void operator=(mu* pmu);
@@ -268,7 +279,7 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 			p_memUnit
 			/*p_memVector,
 			p_generic,
-			p_genVector,
+			p_memVectorVariant,
 			p_egress,
 			p_egressVector*/
 		}type;
@@ -394,7 +405,7 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		template<class T> friend void GWPP_Struct(memUnit* mu, const WCHAR* key1, const WCHAR* key2, T& var, memPara para);
 		friend class memWcs;
 		template<class mu, bool releaseable> friend class memPtr;
-		template<typename First, typename...Args> friend class pGeneric;
+		template<typename First, typename...Args> friend class pVariant;
 		friend class memManager;
 		inline memUnit(memManager* manager);
 		virtual ~memUnit();
@@ -447,7 +458,7 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		template<class mu, bool releaseable>
 		void GWPP(const WCHAR* key, memPtr<mu, releaseable>& varMU, memPara para);
 		template<typename First, typename...Args>
-		void GWPP(const WCHAR* key, pGeneric<First, Args...>& varGe, memPara para);
+		void GWPP(const WCHAR* key, pVariant<First, Args...>& varGe, memPara para);
 		template<class ptr_in_Vec>
 		void GWPP_Array(std::vector<ptr_in_Vec>* vec, memPara para);
 	private:
@@ -457,7 +468,7 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		{
 			return NULL;
 		}
-		//如果pGeneric指定了memManager或非memUnit为参数，这里就会报错										The foolish package manager in C++ forced me to write this foolish function.
+		//如果pVariant指定了memManager或非memUnit为参数，这里就会报错										The foolish package manager in C++ forced me to write this foolish function.
 		template<class mu> inline static mu* getNewClass(memManager* m) { return new mu(m); }
 	};
 	class memManager :public memUnit {
@@ -486,7 +497,9 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 				return &wcsrchr(url, L'\\')[1];
 			return nullptr;
 		}
+		template<SHORT para_order = ORD_DESERIALIZE>
 		bool deserialize(WCHAR* Ptr, UINT StringSize);
+		template<SHORT para_order = ORD_SERIALIZE>
 		void serialize(BYTE_CHAIN* bc);
 	private:
 		void thisCons();
@@ -506,7 +519,7 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 	};
 	template<class mu, bool releaseable = true> using pmemVector = memPtr<memVector<mu, releaseable>>;
 	template<class cast> using pmemVectorEgress = memPtr<memVectorEgress<cast>>;
-	template<typename... Args> using pgenVector = memPtr<genVector<Args...>>;
+	template<typename... Args> using pmemVectorVariant = memPtr<memVectorVariant<Args...>>;
 	//基本数据单元的vector
 	//与STL的vector有区别：memVector中，在template中填基于memUnit的派生类的名称，容器中存的是此派生类的memPtr
 	template<class mu, bool releaseable>
@@ -729,7 +742,7 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		}
 	};
 	template<typename First, typename...Args>
-	class pGeneric final {				//不会有人要继承pGeneric吧？想被模板搞死吗？
+	class pVariant final {				//不会有人要继承pVariant吧？想被模板搞死吗？
 		UINT type;
 		memPtr<memUnit> ptr;
 		template<typename Target, UINT i>
@@ -760,7 +773,7 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		template<bool _void>
 		inline void createIter(UINT i, memManager* mngr)
 		{
-			assert(!("An error has happened when creating pGeneric from an archive file. \n Matched type not found."));
+			assert(!("An error has happened when creating pVariant from an archive file. \n Matched type not found."));
 		}
 		template<bool _void, typename IterFirst, typename... IterArgs>
 		inline void createIter(UINT i, memManager* mngr)
@@ -782,17 +795,17 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		}
 	public:
 		friend class memUnit;
-		inline pGeneric()
+		inline pVariant()
 		{
 			type = 0;
 		}
-		template<typename mu> inline pGeneric(mu* pmu)
+		template<typename mu> inline pVariant(mu* pmu)
 		{
 			static_assert(std::is_base_of_v<memUnit, mu>, "template is not Base of memUnit");
 			setType<mu>();
 			ptr = memPtr<memUnit>(pmu);
 		}
-		template<typename mu, bool releaseable> inline pGeneric(const memPtr<mu, releaseable>& mp)
+		template<typename mu, bool releaseable> inline pVariant(const memPtr<mu, releaseable>& mp)
 		{
 			setType<mu>();
 			ptr = memPtr<memUnit>(mp);
@@ -868,14 +881,14 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 			ptr.release();
 		}
 	};
-	template<typename... Args> class genVector :public std::vector<pGeneric<Args...>>, public memUnit {
+	template<typename... Args> class memVectorVariant :public std::vector<pVariant<Args...>>, public memUnit {
 	protected:
 		inline void save_fetch(memPara para) override{
 			GWPP_Array(this, para);
 		}
 		friend class memUnit;
 	public:
-		inline genVector(memManager* manager) :memUnit(manager) {}
+		inline memVectorVariant(memManager* manager) :memUnit(manager) {}
 	};
 	inline BOOL GetPrivateProfileStringW(std::vector<memApp*>* lpAppSegment, LPCTSTR lpKeyName, DWORD nSize, LPCTSTR lpString);
 	inline BOOL GetPrivateProfileStringW(std::vector<memApp*>* lpAppSegment, LPCTSTR lpKeyName, std::vector<WCHAR>& wc);
@@ -912,9 +925,11 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		assert(wcslen(key) < maxKey || !("variable key is too long."));
 		switch (para.order)
 		{
+		case ORD_DESERIALIZE:
 		case ORD_FETCH:
 			GetPrivateProfileStringW(para.appSegment, key, size, varWC);
 			break;
+		case ORD_SERIALIZE:
 		case ORD_SAVE:
 			WritePrivateProfileStringW(para.appSegment, key, varWC);
 			break;
@@ -924,16 +939,14 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		case ORD_REFLECTION_W:
 			para.reflection_single->WriteMU(key, varWC, size);
 			break;
-		case ORD_SERIALIZE:
-			break;
-		case ORD_DESERIALIZE:
-			break;
 		}
 	}
 	inline void memUnit::GWPP(const WCHAR* key, bool& var, memPara para)
 	{
 		switch (para.order)
 		{
+		case ORD_DESERIALIZE:
+		case ORD_SERIALIZE:
 		case ORD_FETCH:
 		case ORD_SAVE:
 			GWPP(key, (char&)var, para);
@@ -943,10 +956,6 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 			break;
 		case ORD_REFLECTION_W:
 			para.reflection_single->WriteMU(key, var);
-			break;
-		case ORD_SERIALIZE:
-			break;
-		case ORD_DESERIALIZE:
 			break;
 		}
 	}
@@ -955,6 +964,7 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		assert(wcslen(key) < maxKey || !("variable key is too long."));
 		switch (para.order)
 		{
+		case ORD_DESERIALIZE:
 		case ORD_FETCH:
 		{
 			WCHAR wc[5];
@@ -962,6 +972,7 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 			var = _wtoi(wc);
 		}
 			break;
+		case ORD_SERIALIZE:
 		case ORD_SAVE:
 		{
 			WCHAR wc[5];
@@ -975,16 +986,14 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		case ORD_REFLECTION_W:
 			para.reflection_single->WriteMU(key, var);
 			break;
-		case ORD_SERIALIZE:
-			break;
-		case ORD_DESERIALIZE:
-			break;
 		}
 	}
 	inline void memUnit::GWPP(const WCHAR* key, unsigned char& var, memPara para)
 	{
 		switch (para.order)
 		{
+		case ORD_SERIALIZE:
+		case ORD_DESERIALIZE:
 		case ORD_FETCH:
 		case ORD_SAVE:
 			GWPP(key, (char&)var, para);
@@ -994,10 +1003,6 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 			break;
 		case ORD_REFLECTION_W:
 			para.reflection_single->WriteMU(key, var);
-			break;
-		case ORD_SERIALIZE:
-			break;
-		case ORD_DESERIALIZE:
 			break;
 		}
 	}
@@ -1005,6 +1010,8 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 	{
 		switch (para.order)
 		{
+		case ORD_SERIALIZE:
+		case ORD_DESERIALIZE:
 		case ORD_FETCH:
 		case ORD_SAVE:
 			GWPP(key, (char&)var, para);
@@ -1014,10 +1021,6 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 			break;
 		case ORD_REFLECTION_W:
 			para.reflection_single->WriteMU(key, var);
-			break;
-		case ORD_SERIALIZE:
-			break;
-		case ORD_DESERIALIZE:
 			break;
 		}
 	}
@@ -1026,6 +1029,7 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		assert(wcslen(key) < maxKey || !("variable key is too long."));
 		switch (para.order)
 		{
+		case ORD_DESERIALIZE:
 		case ORD_FETCH:
 		{
 			WCHAR wc[7];
@@ -1033,6 +1037,7 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 			var = _wtoi(wc);
 		}
 			break;
+		case ORD_SERIALIZE:
 		case ORD_SAVE:
 		{
 			WCHAR wc[7];
@@ -1046,16 +1051,14 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		case ORD_REFLECTION_W:
 			para.reflection_single->WriteMU(key, var);
 			break;
-		case ORD_SERIALIZE:
-			break;
-		case ORD_DESERIALIZE:
-			break;
 		}
 	}
 	inline void memUnit::GWPP(const WCHAR* key, unsigned short& var, memPara para)
 	{
 		switch (para.order)
 		{
+		case ORD_SERIALIZE:
+		case ORD_DESERIALIZE:
 		case ORD_FETCH:
 		case ORD_SAVE:
 			GWPP(key, (short&)var, para);
@@ -1066,9 +1069,6 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		case ORD_REFLECTION_W:
 			para.reflection_single->WriteMU(key, var);
 			break;
-		case ORD_SERIALIZE:
-			break;
-		case ORD_DESERIALIZE:
 			break;
 		}
 	}
@@ -1077,6 +1077,7 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		assert(wcslen(key) < maxKey || !("variable key is too long."));
 		switch (para.order)
 		{
+		case ORD_DESERIALIZE:
 		case ORD_FETCH:
 		{
 			WCHAR wc[12];
@@ -1084,6 +1085,7 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 			var = _wtoi(wc);
 		}
 			break;
+		case ORD_SERIALIZE:
 		case ORD_SAVE:
 		{
 			WCHAR wc[12];
@@ -1097,16 +1099,14 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		case ORD_REFLECTION_W:
 			para.reflection_single->WriteMU(key, var);
 			break;
-		case ORD_SERIALIZE:
-			break;
-		case ORD_DESERIALIZE:
-			break;
 		}
 	}
 	inline void memUnit::GWPP(const WCHAR* key, UINT32& var, memPara para)
 	{
 		switch (para.order)
 		{
+		case ORD_SERIALIZE:
+		case ORD_DESERIALIZE:
 		case ORD_FETCH:
 		case ORD_SAVE:
 			GWPP(key, (INT32&)var, para);
@@ -1116,10 +1116,6 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 			break;
 		case ORD_REFLECTION_W:
 			para.reflection_single->WriteMU(key, var);
-			break;
-		case ORD_SERIALIZE:
-			break;
-		case ORD_DESERIALIZE:
 			break;
 		}
 	}
@@ -1127,6 +1123,8 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 	{
 		switch (para.order)
 		{
+		case ORD_SERIALIZE:
+		case ORD_DESERIALIZE:
 		case ORD_FETCH:
 		case ORD_SAVE:
 			GWPP(key, (INT32&)var, para);
@@ -1136,10 +1134,6 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 			break;
 		case ORD_REFLECTION_W:
 			para.reflection_single->WriteMU(key, var);
-			break;
-		case ORD_SERIALIZE:
-			break;
-		case ORD_DESERIALIZE:
 			break;
 		}
 	}
@@ -1147,6 +1141,8 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 	{
 		switch (para.order)
 		{
+		case ORD_SERIALIZE:
+		case ORD_DESERIALIZE:
 		case ORD_FETCH:
 		case ORD_SAVE:
 			GWPP(key, (INT32&)var, para);
@@ -1157,16 +1153,14 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		case ORD_REFLECTION_W:
 			para.reflection_single->WriteMU(key, var);
 			break;
-		case ORD_SERIALIZE:
-			break;
-		case ORD_DESERIALIZE:
-			break;
 		}
 	}
 	inline void memUnit::GWPP(const WCHAR* key, INT64& varLONG, memPara para)
 	{
 		switch (para.order)
 		{
+		case ORD_SERIALIZE:
+		case ORD_DESERIALIZE:
 		case ORD_FETCH:
 		case ORD_SAVE:
 			GWPP(key, (UINT64&)varLONG, para);
@@ -1177,10 +1171,6 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		case ORD_REFLECTION_W:
 			para.reflection_single->WriteMU(key, varLONG);
 			break;
-		case ORD_SERIALIZE:
-			break;
-		case ORD_DESERIALIZE:
-			break;
 		}
 	}
 	inline void memUnit::GWPP(const WCHAR* key, UINT64& varLONG, memPara para)
@@ -1188,6 +1178,7 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		assert(wcslen(key) < maxKey || !("variable key is too long."));
 		switch (para.order)
 		{
+		case ORD_DESERIALIZE:
 		case ORD_FETCH:
 		{
 			WCHAR wc[22];
@@ -1196,6 +1187,7 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 			varLONG = std::stoull(wstr);
 		}
 			break;
+		case ORD_SERIALIZE:
 		case ORD_SAVE:
 		{
 			std::wstring wideString = std::to_wstring(varLONG);
@@ -1208,10 +1200,6 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		case ORD_REFLECTION_W:
 			para.reflection_single->WriteMU(key, varLONG);
 			break;
-		case ORD_SERIALIZE:
-			break;
-		case ORD_DESERIALIZE:
-			break;
 		}
 	}
 	inline void memUnit::GWPP(const WCHAR* key, FLOAT& var, memPara para)
@@ -1219,6 +1207,7 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		assert(wcslen(key) < maxKey || !("variable key is too long."));
 		switch (para.order)
 		{
+		case ORD_DESERIALIZE:
 		case ORD_FETCH:
 		{
 			WCHAR wc[12];
@@ -1228,6 +1217,7 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 			memcpy_s(&var, sizeof(FLOAT), &i, sizeof(UINT32));
 		}
 			break;
+		case ORD_SERIALIZE:
 		case ORD_SAVE:
 		{
 			std::wstring wideString = std::to_wstring((UINT32&)var);
@@ -1240,10 +1230,6 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		case ORD_REFLECTION_W:
 			para.reflection_single->WriteMU(key, var);
 			break;
-		case ORD_SERIALIZE:
-			break;
-		case ORD_DESERIALIZE:
-			break;
 		}
 	}
 	inline void memUnit::GWPP(const WCHAR* key, double& var, memPara para)
@@ -1251,6 +1237,7 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		assert(wcslen(key) < maxKey || !("variable key is too long."));
 		switch (para.order)
 		{
+		case ORD_DESERIALIZE:
 		case ORD_FETCH:
 		{
 			WCHAR wc[22];
@@ -1260,6 +1247,7 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 			memcpy_s(&var, sizeof(double), &i, sizeof(UINT64));
 		}
 			break;
+		case ORD_SERIALIZE:
 		case ORD_SAVE:
 		{
 			std::wstring wideString = std::to_wstring((UINT64&)var);
@@ -1271,10 +1259,6 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 			break;
 		case ORD_REFLECTION_W:
 			para.reflection_single->WriteMU(key, var);
-			break;
-		case ORD_SERIALIZE:
-			break;
-		case ORD_DESERIALIZE:
 			break;
 		}
 	}
@@ -1294,6 +1278,7 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		assert(wcslen(key) < maxKey || !("variable key is too long."));
 		switch (para.order)
 		{
+		case ORD_DESERIALIZE:
 		case ORD_FETCH:				//读
 		{
 			WCHAR wc[20];
@@ -1319,6 +1304,7 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 				varMU->fetchInit();
 		}
 			break;
+		case ORD_SERIALIZE:
 		case ORD_SAVE:				//写
 		{
 			if (varMU.isEmpty())return;
@@ -1339,19 +1325,16 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		case ORD_REFLECTION_W:
 			para.reflection_single->WriteMU(key, varMU);
 			break;
-		case ORD_SERIALIZE:
-			break;
-		case ORD_DESERIALIZE:
-			break;
 		}
 	}
 	//读写泛型指针
 	template<typename First, typename...Args>
-	inline void memUnit::GWPP(const WCHAR* key, pGeneric<First, Args...>& varGe, memPara para)
+	inline void memUnit::GWPP(const WCHAR* key, pVariant<First, Args...>& varGe, memPara para)
 	{
 		assert(wcslen(key) < maxKey || !("variable key is too long."));
 		switch (para.order)
 		{
+		case ORD_DESERIALIZE:
 		case ORD_FETCH:
 		{
 			WCHAR wc[20];
@@ -1380,6 +1363,7 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 				varGe.ptr->fetchInit();
 		}
 			break;
+		case ORD_SERIALIZE:
 		case ORD_SAVE:
 		{					//写
 			if (varGe.isEmpty())return;
@@ -1404,10 +1388,6 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 			break;
 		case ORD_REFLECTION_W:
 			break;
-		case ORD_SERIALIZE:
-			break;
-		case ORD_DESERIALIZE:
-			break;
 		}
 	}
 	//读写数组
@@ -1418,6 +1398,7 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		unsigned int k = 0;
 		switch (para.order)
 		{
+		case ORD_DESERIALIZE:
 		case ORD_FETCH:
 		{
 			this->GWPP(L"size", k, para);
@@ -1430,6 +1411,7 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 			}
 		}
 			break;
+		case ORD_SERIALIZE:
 		case ORD_SAVE:
 		{
 			for (auto i : *vec)
@@ -1446,17 +1428,27 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 			break;
 		case ORD_REFLECTION_R:
 		{
-
+			for (auto i : *vec)
+			{
+				if (i.isFilled())
+				{
+					_itow_s(k, wc, 10);
+					para.reflection->context.emplace_back(wc, i);
+					k++;
+				}
+			}
+			para.reflection->context.emplace_back(L"size", k);
 		}
 			break;
 		case ORD_REFLECTION_W:
 		{
-
+			for (unsigned int i = 0; i < k; i++)
+			{
+				ptr_in_Vec ptr;
+				_itow_s(i, wc, 10);
+				para.reflection_single->WriteMU(wc, ptr);
+			}
 		}
-			break;
-		case ORD_SERIALIZE:
-			break;
-		case ORD_DESERIALIZE:
 			break;
 		}
 	}
@@ -1464,9 +1456,11 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 	inline void memWcs::save_fetch_struct(memUnit* mu, const WCHAR* key, memPara para) {
 		switch (para.order)
 		{
+		case ORD_DESERIALIZE:
 		case ORD_FETCH:
 			GetPrivateProfileStringW(para.appSegment, key, wc);
 			break;
+		case ORD_SERIALIZE:
 		case ORD_SAVE:
 			mu->GWPP(key, &wc[0], wc.size(), para);
 			break;
@@ -1487,10 +1481,6 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 			}
 		}
 			break;
-		case ORD_SERIALIZE:
-			break;
-		case ORD_DESERIALIZE:
-			break;
 		}
 	}
 	//（内部函数）被动式读写指针：只在现有数据中找，找不到就赋空值。
@@ -1500,6 +1490,7 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		assert(wcslen(key) < maxKey || !("variable key is too long."));
 		switch (para.order)
 		{
+		case ORD_DESERIALIZE:
 		case ORD_FETCH:
 		{
 			WCHAR wc[20];
@@ -1520,6 +1511,7 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 			}
 		}
 			break;
+		case ORD_SERIALIZE:
 		case ORD_SAVE:
 		{
 			if (varMU.isEmpty())return;
@@ -1534,10 +1526,6 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		case ORD_REFLECTION_R:
 			break;
 		case ORD_REFLECTION_W:
-			break;
-		case ORD_SERIALIZE:
-			break;
-		case ORD_DESERIALIZE:
 			break;
 		}
 	}
@@ -1700,7 +1688,7 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 
 		BYTE_CHAIN* bc = new BYTE_CHAIN(512);
 
-		this->serialize(bc);
+		this->serialize<ORD_SAVE>(bc);
 
 		HANDLE hFile = CreateFile(url, FILE_GENERIC_READ | FILE_GENERIC_WRITE, NULL, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 		if (!hFile)
@@ -1744,7 +1732,7 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		if (ReadFile(hFile, bytes, fileSize, &sizeRead, NULL))
 		{
 			CloseHandle(hFile);
-			ret = this->deserialize(bytes, fileSize);
+			ret = this->deserialize<ORD_FETCH>(bytes, fileSize);
 		}
 		free(bytes);
 		return ret;
@@ -1936,6 +1924,7 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		//清空指针对应表，并返回
 		this->mngr->deletePtrTable();
 	}
+	template<SHORT para_order>
 	inline bool memManager::deserialize(WCHAR* Ptr, UINT StringSize)
 	{
 		ptrTable = new std::set<memPtrCorr>();
@@ -1971,7 +1960,7 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 
 		//进入读写迭代
 		memPara mp;
-		mp.order = ORD_FETCH;
+		mp.order = para_order;
 		mp.appSegment = findPtr(firstmu);
 		this->save_fetch(mp);
 
@@ -1985,13 +1974,14 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		deletePtrTable();
 		return 1;
 	}
+	template<SHORT para_order>
 	inline void memManager::serialize(BYTE_CHAIN* bc)
 	{
 		ptrTable = new std::set<memPtrCorr>();
 
 		//进入读写迭代
 		memPara mp;
-		mp.order = ORD_SAVE;
+		mp.order = para_order;
 		mp.appSegment = pushPtr(this);
 		this->save_fetch(mp);
 
@@ -2254,7 +2244,7 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		}
 	public:
 		pEgress<testUnit> egressTest;
-		pGeneric<testUnit, testUnit2> genetest;
+		pVariant<testUnit, testUnit2> genetest;
 		testUnit2(memManager* manager) :memUnit(manager) {};
 	};
 	inline void testmain()
@@ -2469,7 +2459,7 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 //
 //5 若继承memVector，key禁止取为数字名和"size"
 //
-//6 千万别手贱给pGeneric的变参模板调换顺序，或者在中间删掉一个，不然就读不出存档了！！
+//6 千万别手贱给pVariant的变参模板调换顺序，或者在中间删掉一个，不然就读不出存档了！！
 //
 //7 若有一个新类继承memPtr，则使用vector时，必须重写一份基于此新类的vector
 //
@@ -2477,6 +2467,6 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 // 
 // 
 // 
-//TODO：进行优化。反序列化时，拆包小节不是统一拆，而要交由save_fetch去做，这样能在读取时知道变量类型，就可直接使用进行字节对齐，而不用将所有类型的变量转换成WCHAR。
+//TODO：进行优化。序列化时，拆包小节不是统一拆，而要交由save_fetch去做，这样能在读取时知道变量类型，就可直接使用进行字节对齐，而不用将所有类型的变量转换成WCHAR。
 //		进行安全性改进，使用更好的宽字符处理程序，避免异常
 //
