@@ -47,7 +47,7 @@ memManager继承了memUnit，并在内部记录了所有隶属此类的memUnit�
 ### memStruct => 任意可存储结构体  
 任意结构体，只要拥有save_fetch_struct(memUnit* mu, const WCHAR* key, memPara para)成员函数。  
 save_fetch_struct中，使用GWPP_Struct(memUnit* mu, const WCHAR* key1, const WCHAR* key2, Types& var, memPara para)来填写想要管理的变量。  
-### pGeneric => 泛型智能指针  
+### pVariant => 泛型智能指针  
 模板内填写所有该指针可能指向的memUnit子类。  
 ### pEgress => 跨越内存单元管理器的“出口”  
 用于memManager之间的通信。  
