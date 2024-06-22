@@ -37,10 +37,10 @@ download()下载文件到硬盘
 memManager继承于memUnit。在内部记录所有隶属此类的memUnit。  
 此外，memManager内部还存储了依赖文件表、入口表、出口表。（详见pEgress）  
 ### memPtr => 基本内存单元的智能指针  
-智能指针，类似于shared_ptr。  
-与其不同的是，此指针只能指向memUnit派生类。  
-memUnit内部设置了一个指针，用于指回memPtr所创建的中间体。这么做有两个好处，1是可以主动release()掉智能指针；2是让原始指针与memPtr在一定程度上能够混用，而不会出现计数错误的问题。  
+智能指针，类似于shared_ptr。与之不同的是，此指针只能指向memUnit派生类。  
+不同点之二：每个memUnit内部设置了一个指针，用于指回memPtr所创建的中间体。这么做有两个好处，1是可以主动release()掉智能指针；2是让原始指针与memPtr在一定程度上能够混用，而不会出现计数错误的问题。  
 使用isFilled()和isEmpty()判断其是否为空。  
+此指针不支持多态，因为在最终的存档中不包含类型信息，读取存档时，依靠的是此指针编译期的模板类型来正确进行反序列化。  
 **memUnit中成员memPtr的指向，不能跨越这个memUnit的memManager。**  
 ### memVector => vector内存单元  
 是一个同时继承了std::vector和memUnit的类。  
