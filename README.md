@@ -34,10 +34,12 @@ download()下载文件到硬盘
 
 因此，在上传或下载时，所有悬空于memManager之外的指针（内存单元）将会被忽略。  
 不过，在析构时，所有记录的memUnit都会被析构，无论其是否悬空。  
-memManager继承了memUnit，并在内部记录了所有隶属此类的memUnit。  
-除此之外，内部还存储了依赖文件表、入口表、出口表。  
+memManager继承于memUnit。在内部记录所有隶属此类的memUnit。  
+此外，memManager内部还存储了依赖文件表、入口表、出口表。（详见pEgress）  
 ### memPtr => 基本内存单元的智能指针  
-智能指针，与shared_ptr不同的是，它可以主动release()。  
+智能指针，类似于shared_ptr。  
+与其不同的是，此指针只能指向memUnit派生类。  
+memUnit内部设置了一个指针，用于指回memPtr所创建的中间体。这么做有两个好处，1是可以主动release()掉智能指针；2是让原始指针与memPtr在一定程度上能够混用，而不会出现计数错误的问题。  
 使用isFilled()和isEmpty()判断其是否为空。  
 **memUnit中成员memPtr的指向，不能跨越这个memUnit的memManager。**  
 ### memVector => vector内存单元  
@@ -45,12 +47,23 @@ memManager继承了memUnit，并在内部记录了所有隶属此类的memUnit�
 这个vector中保存的是memPtr<>，不是类实例。  
 有template<> using pmemVector = memPtr<memVector<>>;  
 ### memStruct => 任意可存储结构体  
-任意结构体，只要拥有save_fetch_struct(memUnit* mu, const WCHAR* key, memPara para)成员函数。  
-save_fetch_struct中，使用GWPP_Struct(memUnit* mu, const WCHAR* key1, const WCHAR* key2, Types& var, memPara para)来填写想要管理的变量。  
+拥有save_fetch_struct()成员函数的任意结构体。  
+save_fetch_struct中，使用GWPP_Struct()来填写想要管理的变量。  
 ### pVariant => 泛型智能指针  
 模板内填写所有该指针可能指向的memUnit子类。  
+本质上，保存了一个memPtr智能指针和一个表示类型的UINT。  
 ### pEgress => 跨越内存单元管理器的“出口”  
 用于memManager之间的通信。  
-本质是一个智能指针，指向一个Egress（内部类）。  
-模板中，填写想要指向的其他memManager类中memUnit成员的类名。  
+pEgress<>模板中，填写想要指向的对方memManager类中成员memUnit的类名。  
+本质是一个智能指针，指向一个内部类Egress。  
+Egress记录了对方memManager的文件名、键名和类类型。  
+在使用makeEIPair()后，会在自身memManager内创建一个Egress，并让pEgress指向这个Egress，并在对方memManager内创建一个Ingress，Ingress指向目标memUnit。这个Egress-Ingress Pair将拥有相同的键名和类型。  
+使用getTarget()方法尝试通过Egress的文件名、键名和类型数据获取对方Ingress所指向的memUnit。  
+此库维护了一个全局文件表（带锁），记录了当前加载的所有memManager。getTarget()中，Egress将会尝试从全局文件表中找到这个文件名。因此，调用getTarget()前，要确保对方memManager已经以某种形式载入到内存。    
+getTarget()返回值意义见文件开头的宏定义MEM_系列。  
+### pFunction -> 选调函数  
+使用宏INITIALIZE_PFUNCTION()填写函数参数类型、分组号、所有的函数指针。   
+参数类型与分组号引导pFunction模板实例化，所有的函数指针则用于初始化这个实例化模板的一个常量数组。  
+本质上，pFunction只保存了一个表示类型的UINT。  
+通过函数指针来赋值这个UINT；通过这个UINT来选择调用常量数组中的函数指针。  
 ### 具体细节、反射、序列化等其他内容见demo。  
