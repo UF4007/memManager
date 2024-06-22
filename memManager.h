@@ -2,19 +2,21 @@
 //Super Super fast json!			------Head-Only------
 
 #pragma once
-#define MEM_MANAGER_DISABLE_WARINIGS 5104 4244 4267
+#define MEM_MANAGER_DISABLE_WARINIGS 4244 4267
 #pragma warning(disable: MEM_MANAGER_DISABLE_WARINIGS)
 #include <iostream>
-#include<vector>
-#include<set>
-#include<string>
-#include<cassert>
+#include <vector>
+#include <set>
+#include <string>
+#include <cassert>
 #include <sstream>
 #include <locale>
 #include <codecvt>
 #include "memUnitMacro.h"
-#include"byteChain.h"
 #include <type_traits>
+#include <windows.h>
+
+#define NOMINMAX 0
 
 #define ORD_SAVE 0				//把数据从内存保存到硬盘
 #define ORD_FETCH 1				//从硬盘中拿数据到内存
@@ -23,11 +25,11 @@
 #define ORD_SERIALIZE 4			//序列化
 #define ORD_DESERIALIZE 5		//反序列化
 
-#define MEM_SUCCESS				0	//成功从出口中获取变量
-#define MEM_NOTFOUND_FILE		2	//与出口绑定的入口memManager没有加载
-#define MEM_NOTFOUND_KEYWORDS	1	//没有找到
 #define MEM_EMPTY_EGRESS		3	//出口是空的
+#define MEM_NOTFOUND_FILE		2	//与出口绑定的入口memManager没有加载
+#define MEM_NOTFOUND_KEYWORDS	1	//没有在入口memManager找到出口关键字
 #define MEM_EMPTY_INGRESS		4	//入口memManager找到，关键字找到，但是入口所指向的内存是空的
+#define MEM_SUCCESS				0	//成功从出口中获取变量
 
 #if defined(_WIN64) || defined(__x86_64__) || defined(__ppc64__) || defined(__aarch64__) || defined(__powerpc64__) || defined(__s390x__)
 #define POINTER_L long long
@@ -81,7 +83,7 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 
 	//两级前向声明
 	struct memApp;
-	struct ReflectResultKeyValue;
+	class ReflectResultKeyValue;
 	struct ReflectResult;
 	struct memPara {
 		union {
@@ -146,6 +148,37 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 				}
 		}
 		inline void cdd(memPtrComm* ptrOperation);
+		//退化，将此指针引用次数自减，但当减为0时，不会进行memUnit析构，而是使memUnit回到没有挂载智能指针的状态。
+		inline void degeneracy()
+		{
+			if (ptr)
+				if (ptr->count)
+				{
+					if (ptr->count == 1)
+					{
+						if (ptr->content)
+							ptr->content->sharedPtr = nullptr;
+						delete ptr;
+					}
+					else
+						(ptr->count)--;
+				}
+			ptr = NULL;
+		}
+		template<class any, bool _r>
+		inline void equalAny(const memPtr<any, _r>& mp)
+		{
+			cdd();
+			if (mp.isEmpty())
+			{
+				ptr = NULL;
+			}
+			else
+			{
+				ptr = mp.ptr;
+				(ptr->count)++;
+			}
+		}
 	public:
 		inline memPtr()
 		{
@@ -193,6 +226,7 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		friend class memManager;
 		template<typename First, typename...Args> friend class pVariant;
 		template<class cast> friend struct pEgress;
+		template<class any, bool _r> friend class memPtr;
 		void operator=(const memPtr<mu, releaseable>& mp);
 		void operator=(mu* pmu);
 		void swap(memPtr& sw);
@@ -236,7 +270,7 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 			static_assert(releaseable == true, "this memPtr was definded to cannot be release");
 			if (isFilled())
 			{
-				memUnit* i = ptr->content;
+				memUnit* i = ptr->content;	//这里不能优化。虽然在memUnit基类的析构函数中也会执行相同的操作，但是C++会先执行派生类的析构函数。而如果在派生类的析构函数中，此指针未被擦除，将导致未定义行为。
 				ptr->content = NULL;
 				delete(i);
 			}
@@ -259,46 +293,28 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 	public:
 		static constexpr bool value = decltype(test(std::declval<T>()))::value;
 	};
-	struct ReflectResultKeyValue {
-		wchar_t key[maxKey];
-		enum {
-			void_,
-			p_wchar,
-			bool_,
-			char_,
-			u8,
-			i8,
-			u16,
-			i16,
-			u32,
-			i32,
-			u64,
-			i64,
-			f32,
-			f64,
-			p_memUnit
-			/*p_memVector,
-			p_generic,
-			p_memVectorVariant,
-			p_egress,
-			p_egressVector*/
-		}type;
-		union {
-			wchar_t* wchar;
-			bool _bool;
-			char _char;
-			unsigned char u8;
-			signed char i8;
-			unsigned short u16;
-			short i16;
-			unsigned int u32;
-			int i32;
-			unsigned long long u64;
-			long long i64;
-			float f32;
-			double f64;
-			memUnit* ptr;
-		}value;
+	class ReflectResultKeyValue {
+		friend class memUnit;
+		template<bool _void>
+		inline void MatchVariant(void* vtptr, UINT& type, memPtr<memUnit>& ptr)
+		{
+			type = 0;
+			ptr = NULL;
+		}
+		template<bool _void, typename IterFirst, typename... IterArgs>
+		inline void MatchVariant(void* vtptr, UINT& type, memPtr<memUnit>& ptr)
+		{
+			if (memUnit::get_vtable_ptr<IterFirst>::ptr() == vtptr)
+			{
+				key[0] = L'\0';
+				ptr = value.ptr;
+			}
+			else
+			{
+				type++;
+				MatchVariant<false, IterArgs...>(vtptr, type, ptr);
+			}
+		}
 		template<bool isSet, class _T, class e_T>
 		inline void SetOrGetType(_T& thisSide, _T& memUnitSide, e_T et) {
 			if constexpr (isSet)
@@ -338,16 +354,84 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 				if(memUnit::get_vtable_ptr<_MU>::ptr() == *(void**)std::addressof(*value.ptr))		//若禁用了RTTI，则使用虚表指针来判断。
 				{
 					key[0] = L'\0';
-					va = reinterpret_cast<_MU*>(value.ptr);
+					va = reinterpret_cast<_MU*>(value.ptr);			//硬赋值在多重继承的时候可能会报错，所以没写重载让memUnit*赋值memPtr。等到报错的情况再处理。
 				}
 			}
 		};
+		template<bool isSet, class First, class ...Args>inline void TypeFunc(pVariant<First, Args...>& va) {
+			if constexpr (isSet)
+			{
+				type = p_variant;
+				value.ptr = reinterpret_cast<memUnit*>(*(va.ptr));
+			}
+			else
+			{
+				va.type = 1;
+				MatchVariant<false, First, Args...>(*(void**)std::addressof(*value.ptr), va.type, va.ptr);
+			}
+		}
+		template<class _T>
+		inline void WriteMU(const WCHAR* muProperty_key, _T& muProperty){
+			if (wcscmp(muProperty_key, key) == 0)
+			{
+				TypeFunc<false>(muProperty);
+			}
+		}
+		inline void WriteMU(const WCHAR* muProperty_key, WCHAR* muProperty, UINT size) {
+			if (wcscmp(muProperty_key, key) == 0)
+			{
+				key[0] = L'\0';
+				wcscpy_s(muProperty, size, value.wchar);
+			}
+		}
+	public:
+		wchar_t key[maxKey];
+		enum {
+			void_,
+			p_wchar,
+			bool_,
+			char_,
+			u8,
+			i8,
+			u16,
+			i16,
+			u32,
+			i32,
+			u64,
+			i64,
+			f32,
+			f64,
+			enum_,
+			p_memUnit,
+			p_variant
+			/*p_memVector,
+			p_generic,
+			p_memVectorVariant,
+			p_egress,
+			p_egressVector*/
+		}type;
+		union {
+			wchar_t* wchar;
+			bool _bool;
+			char _char;
+			unsigned char u8;
+			signed char i8;
+			unsigned short u16;
+			short i16;
+			unsigned int u32;
+			int i32;
+			unsigned long long u64;
+			long long i64;
+			float f32;
+			double f64;
+			memUnit* ptr;
+		}value;
 		inline ReflectResultKeyValue() {
 			key[0] = L'\0';
 			type = void_;
 			value.u64 = 0;
 		}
-		template<class _T, typename std::enable_if<!std::is_convertible<_T, const wchar_t*>::value, int>::type = 0>
+		template<class _T, typename std::enable_if<!std::is_convertible<_T, const wchar_t*>::value && !std::is_convertible<_T, memUnit*>::value, int>::type = 0>
 		inline ReflectResultKeyValue(const WCHAR* _key, _T& va) {
 			wcscpy_s(key, _key);
 			TypeFunc<true>(va);
@@ -357,19 +441,10 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 			value.wchar = (wchar_t*)va;
 			type = p_wchar;
 		}
-		template<class _T>
-		inline void WriteMU(const WCHAR* muProperity_key, _T& muProperity){
-			if (wcscmp(muProperity_key, key) == 0)
-			{
-				TypeFunc<false>(muProperity);
-			}
-		}
-		inline void WriteMU(const WCHAR* muProperity_key, WCHAR* muProperity, UINT size) {
-			if (wcscmp(muProperity_key, key) == 0)
-			{
-				key[0] = L'\0';
-				wcscpy_s(muProperity, size, value.wchar);
-			}
+		inline ReflectResultKeyValue(const WCHAR* _key, memUnit* va) {
+			wcscpy_s(key, _key);
+			value.ptr = va;
+			type = p_memUnit;
 		}
 	};
 	struct ReflectResult {
@@ -388,14 +463,14 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 					if constexpr (std::is_default_constructible<T>::value)	//memManager
 					{
 						T temp = T();
-						ret = *(void**)std::addressof(temp);
+						return *(void**)std::addressof(temp);
 					}
 					else													//memUnit
 					{
 						T temp = T(NULL);
-						ret = *(void**)std::addressof(temp);
+						return *(void**)std::addressof(temp);
 					}
-				};
+				}();
 				return ret;
 			}
 		};
@@ -408,7 +483,6 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		template<typename First, typename...Args> friend class pVariant;
 		friend class memManager;
 		inline memUnit(memManager* manager);
-		virtual ~memUnit();
 		inline memManager* getManager()
 		{
 			return mngr;
@@ -430,7 +504,8 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 			return !(inputKW.key[0]);		//如果写入成功，GWPP会将key的第一个字符置为'\0'
 		}
 		bool deserialize(WCHAR* Ptr, UINT StringSize);
-		void serialize(BYTE_CHAIN* bc);
+		void serialize(std::vector<WCHAR>* bc);
+		virtual ~memUnit();
 	protected:
 		virtual void save_fetch(memPara para) = 0;
 		//fetchInit 与 构造函数的区别：
@@ -452,8 +527,11 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		void GWPP(const WCHAR* key, UINT64& varLONG, memPara para);
 		void GWPP(const WCHAR* key, FLOAT& var, memPara para);
 		void GWPP(const WCHAR* key, double& var, memPara para);
+		template<class _enum>
+		std::enable_if_t<std::is_enum<_enum>::value, void>
+		GWPP(const WCHAR* key, _enum& var, memPara para);
 		template<typename memStruct>
-		std::enable_if_t<!is_based_on_memPtr<memStruct>::value, void>
+		std::enable_if_t<!is_based_on_memPtr<memStruct>::value && !std::is_enum<memStruct>::value, void>
 		GWPP(const WCHAR* key, memStruct& varMU, memPara para);
 		template<class mu, bool releaseable>
 		void GWPP(const WCHAR* key, memPtr<mu, releaseable>& varMU, memPara para);
@@ -500,7 +578,7 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		template<SHORT para_order = ORD_DESERIALIZE>
 		bool deserialize(WCHAR* Ptr, UINT StringSize);
 		template<SHORT para_order = ORD_SERIALIZE>
-		void serialize(BYTE_CHAIN* bc);
+		void serialize(std::vector<WCHAR>* bc);
 	private:
 		void thisCons();
 		void thisDest();
@@ -511,10 +589,11 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		//
 		std::set<memPtrCorr>* ptrTable = NULL;
 		std::vector<memApp*>* findPtr(memUnit* ptrINI);
+		std::vector<memApp*>* findPtr(memUnit* ptrINI, memPtr<memUnit>* self);
 		std::vector<memApp*>* findPtr(memUnit* ptrINI, memPtrCorr** ptr);
 		std::vector<memApp*>* pushPtr(memUnit* ptrINI);
 		VOID deletePtrTable();
-		void RawSerialize(BYTE_CHAIN* bc);
+		void RawSerialize(std::vector<WCHAR>* bc);
 		void RawDeserialize(WCHAR* seriStr, UINT size);
 	};
 	template<class mu, bool releaseable = true> using pmemVector = memPtr<memVector<mu, releaseable>>;
@@ -576,7 +655,7 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		memUnit* ptrINI;
 		memPtr<memUnit>* ptrRUN;
 		std::vector<memApp*>* appSegment;
-		inline BOOL operator<(const memPtrCorr& ptr) const
+		inline bool operator<(const memPtrCorr& ptr) const
 		{
 			return ptr.ptrINI < ptrINI;
 		}
@@ -641,8 +720,8 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		std::vector<Egress*> pointedByEgress;
 		inline void save_fetch(memPara para)
 		{
-			GWPP(L"keyword", keywords, maxKW, para);
-			GWPP(L"type", type, maxKW, para);
+			//GWPP(L"keyword", keywords, maxKW, para);
+			//GWPP(L"type", type, maxKW, para);
 			GWPP_Passive(L"mu", mu, para);
 		}
 	};
@@ -743,7 +822,7 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 	};
 	template<typename First, typename...Args>
 	class pVariant final {				//不会有人要继承pVariant吧？想被模板搞死吗？
-		UINT type;
+		UINT type;							//从1开始，不是从0开始
 		memPtr<memUnit> ptr;
 		template<typename Target, UINT i>
 		constexpr inline UINT getTypeIter()
@@ -767,7 +846,7 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		template<typename Target>
 		inline void setType()
 		{
-			const UINT targetType = getTypeIter<Target, 1, First, Args...>();
+			static const UINT targetType = getTypeIter<Target, 1, First, Args...>();
 			type = targetType;
 		}
 		template<bool _void>
@@ -795,9 +874,15 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		}
 	public:
 		friend class memUnit;
+		friend class ReflectResultKeyValue;
 		inline pVariant()
 		{
 			type = 0;
+			ptr = nullptr;
+		}
+		inline pVariant(std::nullptr_t) {
+			type = 0;
+			ptr = nullptr;
 		}
 		template<typename mu> inline pVariant(mu* pmu)
 		{
@@ -808,7 +893,7 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		template<typename mu, bool releaseable> inline pVariant(const memPtr<mu, releaseable>& mp)
 		{
 			setType<mu>();
-			ptr = memPtr<memUnit>(mp);
+			ptr.equalAny(mp);
 		}
 		//ptr will execute its destructor automatically
 		template<typename mu, bool releaseable> inline void operator=(const memPtr<mu, releaseable>& mp)
@@ -854,6 +939,9 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 			type = 0;
 			ptr = NULL;
 		}
+		inline bool operator==(const pVariant<First, Args...> mp)const {
+			return ptr == mp.ptr;
+		}
 		inline bool isEmpty() const
 		{
 			return ptr.isEmpty();
@@ -881,6 +969,7 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 			ptr.release();
 		}
 	};
+	//tuple
 	template<typename... Args> class memVectorVariant :public std::vector<pVariant<Args...>>, public memUnit {
 	protected:
 		inline void save_fetch(memPara para) override{
@@ -890,9 +979,66 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 	public:
 		inline memVectorVariant(memManager* manager) :memUnit(manager) {}
 	};
+	//variant of function pointer
+	template<typename illg, int ID = 0> class pFunction { static_assert(!std::is_same_v<illg, illg>, "not a function"); };
+	template<typename Ret, typename ...Args, int ID> class pFunction<Ret(Args...), ID> {
+		friend class memUnit;
+		using funcPtr = Ret(*)(Args...);
+		UINT type;
+		inline void save_fetch_struct(memUnit* mu, const WCHAR* key, memPara para)
+		{
+			GWPP_Struct(mu, key, L"f:", type, para);
+		}
+		inline static constexpr UINT getSizeofFunctions()
+		{
+			//Functions相当于此pFunction的variant参数。 
+			//如果没有初始化此类模板实例的Functions，那么这里将会报错
+			static constexpr UINT ret = sizeof(Functions);
+			return ret;
+		}
+	public:
+		static const funcPtr Functions[];
+		inline Ret operator()(Args...args)const {
+			assert(type < getSizeofFunctions() / sizeof(funcPtr) || !("pFunction is empty or invaild"));
+			return Functions[type](std::forward<Args>(args)...);
+		}
+		inline pFunction() { type = 0xffffffff; }
+		inline pFunction(funcPtr newPtr) { this->operator=(newPtr); }
+		inline void operator=(funcPtr newPtr) {
+			//函数指针居然没法constexpr，造孽
+			for (UINT i = 0; i < getSizeofFunctions() / sizeof(funcPtr); i++)
+			{
+				if (newPtr == Functions[i]) {
+					type = i;
+					return;
+				}
+			}
+			assert(false || !("this function is not match in function list"));
+		}
+		inline bool operator==(const pFunction<Ret(Args...), ID> mp)const {
+			if (type == mp.type)
+				return true;
+			return false;
+		}
+		inline bool operator==(funcPtr ptr)const {
+			assert(type < getSizeofFunctions() / sizeof(funcPtr) || !("pFunction is empty or invaild"));
+			if (ptr == Functions[type])
+				return true;
+			return false;
+		}
+		inline bool isFilled()const {
+			return type < getSizeofFunctions() / sizeof(funcPtr);
+		}
+		inline bool isEmpty()const {
+			return !this->isFilled();
+		}
+	};
+	//用于初始化pFunction内部的variant的宏
+#define INITIALIZE_PFUNCTION(Signature,ID, ...) template<> const mem::pFunction<Signature,ID>::funcPtr mem::pFunction<Signature,ID>::Functions[] = { __VA_ARGS__ };
 	inline BOOL GetPrivateProfileStringW(std::vector<memApp*>* lpAppSegment, LPCTSTR lpKeyName, DWORD nSize, LPCTSTR lpString);
 	inline BOOL GetPrivateProfileStringW(std::vector<memApp*>* lpAppSegment, LPCTSTR lpKeyName, std::vector<WCHAR>& wc);
 	inline BOOL WritePrivateProfileStringW(std::vector<memApp*>* lpAppSegment, LPCTSTR lpKeyName, LPCTSTR lpString);
+	inline void PushWcharVector(std::vector<WCHAR>* bc, const WCHAR* wc, UINT len);
 	
 	//基本数据单元
 	//所有需要存储到硬盘的类，必须继承自此类。
@@ -912,9 +1058,9 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 			auto i = mngr->memUnits->find(this);
 			if (*i == this)
 				mngr->memUnits->erase(i);
-			if (sharedPtr)
-				sharedPtr->content = NULL;
 		}
+		if (sharedPtr)
+			sharedPtr->content = NULL;
 	}
 
 
@@ -1183,15 +1329,15 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		{
 			WCHAR wc[22];
 			GetPrivateProfileStringW(para.appSegment, key, 22, wc);
-			std::wstring wstr(wc);
-			varLONG = std::stoull(wstr);
+			varLONG = _wtoll(wc);
 		}
 			break;
 		case ORD_SERIALIZE:
 		case ORD_SAVE:
 		{
-			std::wstring wideString = std::to_wstring(varLONG);
-			WritePrivateProfileStringW(para.appSegment, key, wideString.c_str());
+			WCHAR wc[22];
+			_lltow_s(varLONG, wc, 10);
+			WritePrivateProfileStringW(para.appSegment, key, wc);
 		}
 			break;
 		case ORD_REFLECTION_R:
@@ -1202,7 +1348,7 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 			break;
 		}
 	}
-	inline void memUnit::GWPP(const WCHAR* key, FLOAT& var, memPara para)
+	inline void memUnit::GWPP(const WCHAR* key, float& var, memPara para)
 	{
 		assert(wcslen(key) < maxKey || !("variable key is too long."));
 		switch (para.order)
@@ -1212,16 +1358,16 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		{
 			WCHAR wc[12];
 			GetPrivateProfileStringW(para.appSegment, key, 12, wc);
-			std::wstring wstr(wc);
-			UINT32 i = std::stoull(wstr);
-			memcpy_s(&var, sizeof(FLOAT), &i, sizeof(UINT32));
+			int a = _wtoi(wc);
+			var = reinterpret_cast<float&>(a);
 		}
 			break;
 		case ORD_SERIALIZE:
 		case ORD_SAVE:
 		{
-			std::wstring wideString = std::to_wstring((UINT32&)var);
-			WritePrivateProfileStringW(para.appSegment, key, wideString.c_str());
+			WCHAR wc[12];
+			_itow_s(reinterpret_cast<int&>(var), wc, 10);
+			WritePrivateProfileStringW(para.appSegment, key, wc);
 		}
 			break;
 		case ORD_REFLECTION_R:
@@ -1242,16 +1388,16 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		{
 			WCHAR wc[22];
 			GetPrivateProfileStringW(para.appSegment, key, 22, wc);
-			std::wstring wstr(wc);
-			UINT64 i = std::stoull(wstr);
-			memcpy_s(&var, sizeof(double), &i, sizeof(UINT64));
+			long long a = _wtoll(wc);
+			var = reinterpret_cast<double&>(a);
 		}
 			break;
 		case ORD_SERIALIZE:
 		case ORD_SAVE:
 		{
-			std::wstring wideString = std::to_wstring((UINT64&)var);
-			WritePrivateProfileStringW(para.appSegment, key, wideString.c_str());
+			WCHAR wc[22];
+			_itow_s(reinterpret_cast<long long&>(var), wc, 10);
+			WritePrivateProfileStringW(para.appSegment, key, wc);
 		}
 			break;
 		case ORD_REFLECTION_R:
@@ -1262,10 +1408,16 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 			break;
 		}
 	}
+	//读写枚举
+	template<class _enum>
+	inline std::enable_if_t<std::is_enum<_enum>::value, void>
+	memUnit::GWPP(const WCHAR* key, _enum& var, memPara para) {
+		GWPP(key, reinterpret_cast<std::underlying_type<_enum>::type&>(var), para);
+	}
 	//读写自定义结构体。要求该结构体实现save_fetch_struct方法
 	template<typename memStruct>
 	//检查函数是否为memPtr的子类，若是则禁用此模板函数
-	inline std::enable_if_t<!is_based_on_memPtr<memStruct>::value, void>
+	inline std::enable_if_t<!is_based_on_memPtr<memStruct>::value && !std::is_enum<memStruct>::value, void>
 	memUnit::GWPP(const WCHAR* key, memStruct& varST, memPara para)
 	{
 		//自定义结构体若没有save_fetch_struct()方法，这里会报错。
@@ -1385,8 +1537,10 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		}
 			break;
 		case ORD_REFLECTION_R:
+			para.reflection->context.emplace_back(key, varGe);
 			break;
 		case ORD_REFLECTION_W:
+			para.reflection_single->WriteMU(key, varGe);
 			break;
 		}
 	}
@@ -1402,12 +1556,11 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		case ORD_FETCH:
 		{
 			this->GWPP(L"size", k, para);
+			vec->resize(k);
 			for (unsigned int i = 0; i < k; i++)
 			{
-				ptr_in_Vec ptr;
 				_itow_s(i, wc, 10);
-				this->GWPP(wc, ptr, para);
-				vec->push_back(ptr);
+				this->GWPP(wc, vec->at(i), para);
 			}
 		}
 			break;
@@ -1442,11 +1595,10 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 			break;
 		case ORD_REFLECTION_W:
 		{
-			for (unsigned int i = 0; i < k; i++)
+			for (unsigned int i = 0; i < vec->size(); i++)
 			{
-				ptr_in_Vec ptr;
 				_itow_s(i, wc, 10);
-				para.reflection_single->WriteMU(wc, ptr);
+				para.reflection_single->WriteMU(wc, vec->at(i));
 			}
 		}
 			break;
@@ -1642,7 +1794,7 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		for (auto i : *memUnits)
 		{
 			i->mngr = NULL;
-			if (i->sharedPtr)
+			if (i->sharedPtr)						//这里不能优化。理由见memPtr的release
 				i->sharedPtr->content = NULL;
 			delete i;
 		}
@@ -1686,9 +1838,10 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 	{
 		DeleteFileW(url);
 
-		BYTE_CHAIN* bc = new BYTE_CHAIN(512);
+		std::vector<WCHAR> bc = {};
+		bc.reserve(1000);
 
-		this->serialize<ORD_SAVE>(bc);
+		this->serialize<ORD_SAVE>(&bc);
 
 		HANDLE hFile = CreateFile(url, FILE_GENERIC_READ | FILE_GENERIC_WRITE, NULL, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 		if (!hFile)
@@ -1697,14 +1850,10 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		}
 		UINT dwErr = GetLastError();
 
-		BYTE* d_file = (BYTE*)calloc(1, bc->size);
-		bc->Export(d_file, bc->size);
 		WORD unicode_identifier = 0xfeff;
-		WriteFile(hFile, d_file, bc->size, NULL, NULL);
+		WriteFile(hFile, &bc[0], bc.size() * sizeof(WCHAR), NULL, NULL);
 
 		CloseHandle(hFile);
-		delete bc;
-		free(d_file);
 
 		return 1;
 	}
@@ -1732,7 +1881,7 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		if (ReadFile(hFile, bytes, fileSize, &sizeRead, NULL))
 		{
 			CloseHandle(hFile);
-			ret = this->deserialize<ORD_FETCH>(bytes, fileSize);
+			ret = this->deserialize<ORD_FETCH>(bytes, fileSize / sizeof(WCHAR));
 		}
 		free(bytes);
 		return ret;
@@ -1845,6 +1994,17 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 			return NULL;
 		return (*k).appSegment;
 	}
+	inline std::vector<memApp*>* memManager::findPtr(memUnit* ptrINI, memPtr<memUnit>* self)
+	{
+		memPtrCorr i;
+		i.ptrINI = ptrINI;
+		auto k = ptrTable->find(i);
+		if (k == ptrTable->cend())
+			return NULL;
+		memPtr<memUnit>*& a = const_cast<memPtr<memUnit>*&>((*k).ptrRUN);
+		a = self;
+		return (*k).appSegment;
+	}
 	inline std::vector<memApp*>* memManager::findPtr(memUnit* ptrINI, memPtrCorr** ptr)
 	{
 		memPtrCorr i;
@@ -1897,21 +2057,23 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		//进入读写迭代
 		memPara mp;
 		mp.order = ORD_FETCH;
-		mp.appSegment = this->mngr->findPtr(mu);
+		memPtr<memUnit> self = this;
+		mp.appSegment = this->mngr->findPtr(mu, &self);
 		this->save_fetch(mp);
 
 		//清空指针对应表，并返回
 		this->mngr->deletePtrTable();
+		self.degeneracy();
 		return true;
 	}
-	inline void memUnit::serialize(BYTE_CHAIN* bc)
+	inline void memUnit::serialize(std::vector<WCHAR>* bc)
 	{
 		this->mngr->ptrTable = new std::set<memPtrCorr>();
 
 		//写文件头
 		WCHAR wc[20];
 		_ptow_s((POINTER_L)this, wc, 10);
-		bc->Push((BYTE*)wc, (wcslen(wc) + 1) * sizeof(WCHAR));
+		PushWcharVector(bc, wc, wcslen(wc) + 1);
 
 		//进入读写迭代
 		memPara mp;
@@ -1961,7 +2123,8 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		//进入读写迭代
 		memPara mp;
 		mp.order = para_order;
-		mp.appSegment = findPtr(firstmu);
+		memPtr<memUnit> self = this;
+		mp.appSegment = findPtr(firstmu, &self);
 		this->save_fetch(mp);
 
 		//加载出、入口接口表
@@ -1972,10 +2135,11 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 
 		//清空指针对应表，并返回
 		deletePtrTable();
+		self.degeneracy();
 		return 1;
 	}
 	template<SHORT para_order>
-	inline void memManager::serialize(BYTE_CHAIN* bc)
+	inline void memManager::serialize(std::vector<WCHAR>* bc)
 	{
 		ptrTable = new std::set<memPtrCorr>();
 
@@ -1994,11 +2158,11 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		//写文件头
 		WCHAR wc[20];
 		_ptow_s((POINTER_L)this->subFiles, wc, 10);
-		bc->Push((BYTE*)wc, (wcslen(wc) + 1) * sizeof(WCHAR));
+		PushWcharVector(bc, wc, wcslen(wc) + 1);
 		_ptow_s((POINTER_L)this->ingressInte, wc, 10);
-		bc->Push((BYTE*)wc, (wcslen(wc) + 1) * sizeof(WCHAR));
+		PushWcharVector(bc, wc, wcslen(wc) + 1);
 		_ptow_s((POINTER_L)this, wc, 10);
-		bc->Push((BYTE*)wc, (wcslen(wc) + 1) * sizeof(WCHAR));
+		PushWcharVector(bc, wc, wcslen(wc) + 1);
 
 		//整体写入
 		this->RawSerialize(bc);
@@ -2006,27 +2170,29 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		//清空指针对应表，并返回
 		deletePtrTable();
 	}
-	inline void memManager::RawSerialize(BYTE_CHAIN* bc)
+	inline void memManager::RawSerialize(std::vector<WCHAR>* bc)
 	{
 		WCHAR wc[20];
-		BYTE null[2 * sizeof(WCHAR)] = {};
+		WCHAR null[2] = {};
 		for (auto k : *this->ptrTable)
 		{
 			_ptow_s((POINTER_L)k.ptrINI, wc, 10);
-			bc->Push(null, 2 * sizeof(WCHAR));
-			bc->Push((BYTE*)wc, (wcslen(wc) + 1) * sizeof(WCHAR));
+			PushWcharVector(bc, null, 2);
+			PushWcharVector(bc, wc, wcslen(wc) + 1);
 			for (auto i : *(k.appSegment))
 			{
-				bc->Push((BYTE*)i->key, (wcslen(i->key) + 1) * sizeof(WCHAR));
-				bc->Push((BYTE*)&i->value->at(0), (wcslen((WCHAR*)&i->value->at(0)) + 1) * sizeof(WCHAR));
+				PushWcharVector(bc, i->key, wcslen(i->key) + 1);
+				PushWcharVector(bc, &i->value->at(0), wcslen(&i->value->at(0)) + 1);
 			}
 		}
+		PushWcharVector(bc, null, 2);
+		PushWcharVector(bc, null, 2);
 	}
 	inline void memManager::RawDeserialize(WCHAR* ptrByte, UINT fileSize)
 	{
 		ptrByte += 2;
 		memPtrCorr i;
-		WCHAR* ptrByteEnd = ptrByte + fileSize / sizeof(WCHAR);
+		WCHAR* ptrByteEnd = ptrByte + fileSize;
 		while (ptrByte < ptrByteEnd)
 		{
 			i.ptrINI = (memUnit*)_wtop(ptrByte);		//读小节名
@@ -2133,6 +2299,12 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		lpAppSegment->push_back(i);
 		return 0;
 	}
+	inline void PushWcharVector(std::vector<WCHAR>* bc,const WCHAR* wc, UINT len) {
+		for (UINT i = 0; i < len; i++)
+		{
+			bc->push_back(wc[i]);
+		}
+	}
 
 	//出入口相关函数
 	inline Egress::~Egress()
@@ -2182,6 +2354,11 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 
 
 	//Trial code(demo)
+#ifdef MEM_DEBUG
+	inline int testFoo(int a, int b) { return a + b; }
+	inline int testFoo2(int a, int b) { return a * b; }
+	inline int testFoo3(int a, int b) { return a - b; }
+	INITIALIZE_PFUNCTION(int(int, int), 75342, testFoo, testFoo2, testFoo3);
 	class testManager;
 	class testUnit2;
 	class testUnit :public memUnit {
@@ -2216,6 +2393,7 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		float n9;
 		double n10;
 		memWcs wc;
+		enum { ea, eb, ec }n11;
 	private:
 		void save_fetch(memPara para) override{
 			GWPP(L"anothert1", anothert1, para);
@@ -2234,6 +2412,7 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 			GWPP(L"n9", n9, para);
 			GWPP(L"n10", n10, para);
 			GWPP(L"wc", wc, para);
+			GWPP(L"n11", n11, para);
 		}
 	};
 	class testUnit2 :public memUnit {
@@ -2241,10 +2420,12 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		void save_fetch(memPara para) override {
 			GWPP(L"egressTest", egressTest, para);
 			GWPP(L"genetest", genetest, para);
+			GWPP(L"funcTest", funcTest, para);
 		}
 	public:
 		pEgress<testUnit> egressTest;
 		pVariant<testUnit, testUnit2> genetest;
+		pFunction<int(int, int),75342> funcTest;
 		testUnit2(memManager* manager) :memUnit(manager) {};
 	};
 	inline void testmain()
@@ -2282,6 +2463,7 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		testManagerA->vec->emplace_back(new testUnit(*testManagerA));
 		memPtr<testUnit> t5 = memUnit::memCopy(testUnitB);
 		testManagerA->tu2 = new testUnit2(*testManagerA);
+		memPtr<testUnit2> testUnitC = testManagerA->tu2;
 		
 		//泛型指针测试
 		testManagerA->tu2->genetest = testUnitA;
@@ -2313,6 +2495,7 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		testManagerA->n8 = UINT64_MAX;
 		testManagerA->n9 = 3.1415926535897932f;
 		testManagerA->n10 = 3.1415926535897932;
+		testManagerA->n11 = testManager::ec;
 
 		testManagerA->n1 = INT8_MIN;
 		testManagerA->n3 = INT16_MIN;
@@ -2333,6 +2516,10 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 			i->wc = L"Hello World. 太慢了，太慢了！十万元素要花3秒！";
 		}*/
 
+		//pFunction测试
+		testUnitC->funcTest = testFoo2;
+		testUnitC->funcTest = testFoo3;
+
 		int ret = testManagerA->download();
 
 		memPtr<testManager> testManagerB = new testManager();
@@ -2340,10 +2527,13 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		testManagerB->upload();
 
 
+		int fooTestRet = testManagerB->tu2->funcTest(10, 5);
 
 		//ingress/egress测试项
 		testManagerB->setUrl(url2);
 		testManagerA->tu2->egressTest.makeEIPair(*testManagerA, testManagerB->anothert1, L"ingressTest");
+
+		//指针测试项
 
 		//ingress/egress速度测试项
 		/*for (int i = 0; i < 100000; i++)
@@ -2358,6 +2548,7 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		testManagerB->download();
 		testManagerA->download();
 
+		testManagerA.release();
 		testManagerA.release();
 		testManagerB.release();
 
@@ -2390,6 +2581,10 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		memUnit* refTestMu = *testManagerA;
 		refTestMu->reflectionRead(&refRes);
 
+		ReflectResult refRes2;
+		memUnit* refTestMu2 = *testManagerA->tu2;
+		refTestMu2->reflectionRead(&refRes2);
+
 		//写
 		ULONGLONG refNum = 123456;
 		ReflectResultKeyValue refKW = ReflectResultKeyValue(L"num",(UINT&)refNum);
@@ -2405,38 +2600,40 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 		refKW = ReflectResultKeyValue(L"anothert1", testManagerA->vec);			//非法内存单元指针写入
 		refSuccess = refTestMu->reflectionWrite(refKW);
 
+		memUnit* refTestVariant = *testManagerA->anothert1;
+		refKW = ReflectResultKeyValue(L"genetest", refTestVariant);
+		refTestMu2->reflectionWrite(refKW);
+
 
 
 		//序列化测试项(memUnit)
-		BYTE_CHAIN serializeBC(512);
+		std::vector<WCHAR> serializeDump = {};
 		testManagerA->anothert1->num = 2.72;
-		testManagerA->anothert1->serialize(&serializeBC);
-		WCHAR serializeDump[3000];
-		serializeBC.Export((BYTE*)serializeDump, serializeBC.size);
+		testManagerA->anothert1->serialize(&serializeDump);
 
 		//反序列化测试项(memUnit)
 		testManagerB = new testManager();
 		testManagerB->anothert1 = new testUnit(*testManagerB);
-		testManagerB->anothert1->deserialize(serializeDump, serializeBC.size);
+		testManagerB->anothert1->deserialize(&serializeDump[0], serializeDump.size());
+		serializeDump.clear();
 		testManagerB.release();
 
 		//序列化测试项(memManager)
 		if (true)
 		{
-			serializeBC.clear();
-			testManagerA->serialize(&serializeBC);
-			serializeBC.Export((BYTE*)serializeDump, serializeBC.size);
+			testManagerA->serialize(&serializeDump);
 			testManagerA.release();
 
 			//反序列化测试项(memManager)
 			testManagerB = new testManager();
-			testManagerB->deserialize(serializeDump, serializeBC.size);
+			testManagerB->deserialize(&serializeDump[0], serializeDump.size());
 		}
 
 		//内存泄漏测试项2
 		}
 		return;
 	}
+#endif // DEBUG
 }
 #pragma warning(default: MEM_MANAGER_DISABLE_WARINIGS)
 
@@ -2459,7 +2656,7 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 //
 //5 若继承memVector，key禁止取为数字名和"size"
 //
-//6 千万别手贱给pVariant的变参模板调换顺序，或者在中间删掉一个，不然就读不出存档了！！
+//6 千万别手贱给pVariant的变参模板、pFunction的初始化表调换顺序，或者在中间删掉一个，不然就读不出存档了！！
 //
 //7 若有一个新类继承memPtr，则使用vector时，必须重写一份基于此新类的vector
 //
