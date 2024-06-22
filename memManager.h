@@ -2430,8 +2430,7 @@ inline errno_t _lltow_s(long long value, wchar_t(&str)[size], const int radix) {
 	};
 	inline void testmain()
 	{
-		sizeof('\0');
-		WCHAR url[100] = L"C:\\Users\\R\\Desktop\\newsave.guma";
+		WCHAR url[100] = L"C:\\Users\\R\\Desktop\\newsave.guma";	//如果在其他计算机执行，需要改为另一个有效的路径
 		WCHAR url2[100] = L"C:\\Users\\R\\Desktop\\oldsave.guma";
 		sizeof(memPtr<testUnit>);
 
