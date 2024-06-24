@@ -60,9 +60,9 @@ Egress记录了对方memManager的文件名、键名和类类型。
 使用getTarget()方法尝试通过Egress的文件名、键名和类型数据获取对方Ingress所指向的memUnit。  
 此库维护了一个全局文件表（带锁），记录了当前加载的所有memManager。getTarget()中，Egress将会尝试从全局文件表中找到这个文件名。因此，调用getTarget()前，要确保对方memManager已经以某种形式载入到内存。    
 getTarget()返回值意义见文件开头的宏定义MEM_系列。  
-### pFunction -> 选调函数  
+### pFunction => 选调函数指针  
 使用宏INITIALIZE_PFUNCTION()填写函数参数类型、分组号、所有的函数指针。   
-参数类型与分组号引导pFunction模板实例化，所有的函数指针则用于初始化这个实例化模板的一个常量数组。  
+参数类型与分组号引导pFunction模板实例化，所有的函数指针则用于初始化这个模板实例化内部的一个常量数组。  
 本质上，pFunction只保存了一个表示类型的UINT。  
 通过函数指针来赋值这个UINT；通过这个UINT来选择调用常量数组中的函数指针。  
 ### 具体细节、反射、序列化等其他内容见mem::testmain()。  
