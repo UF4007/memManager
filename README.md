@@ -34,6 +34,8 @@ download()下载文件到硬盘
 
 因此，在上传或下载时，所有悬空于memManager之外的指针（内存单元）将会被忽略。  
 memManager继承于memUnit。内部记录所有隶属此类的memUnit。在析构时，所有记录的memUnit都会被析构，无论其是否悬空。  
+各个memUnit的析构顺序是其指针的绝对值大小，因此memUnit的析构顺序无法保证。  
+在memManager整体析构时，会先将子memUnit的mngr属性清空，再执行子memUnit的析构函数。  
 此外，memManager内部还存储了依赖文件表、入口表、出口表。（详见pEgress）  
 ### memPtr => 基本内存单元的智能指针  
 智能指针，类似于shared_ptr。与之不同的是，此指针只能指向memUnit派生类。  
