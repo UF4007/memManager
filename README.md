@@ -8,8 +8,9 @@
 - ESP32  
 
 #### 如何使用
-
 这是一个headonly库。把memManager文件夹复制到源目录下，在源代码中`#include "memManager/memManager.h"` 即可
+
+C++标准：17或更高
 
 #### 示例代码
 
