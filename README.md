@@ -84,8 +84,8 @@ int main(){
   - [智能指针](#智能指针)
   - [文件出入口](#文件出入口)
   - [variant](#variant)
-  - [pair](#pair)
-  - [tuple](#tuple)
+  - [pair](#pair)	（拟支持）
+  - [tuple](#tuple)	（拟支持）
   - [pFunction](#pfunction)
   - [任意结构体的内存直接序列化](#任意结构体的内存直接序列化)
   - [自定义序列化](#自定义序列化)
@@ -128,17 +128,25 @@ int main(){
 - `memUnit` 之间禁止成员组合，即 `memUnit` 类中禁止存在成员 `memUnit`
 
 #### 方法与属性
-- *`memManager* getManager();`*
+- ***`memManager* getManager();`***
 	- 获取管理该 `memUnit` 对象的 `memManager` 指针。
- - *`void serialize(std::vector<uint8_t> bc);`*
+<br>
+
+ - ***`void serialize(std::vector<uint8_t> bc);`***
  	- 二进制序列化函数，将单个 `memUnit` 对象保存到字节流中。
   	- **信息有损：** 忽视所有指针。
- - *`bool deserialize(uint8_t Ptr, uint32_t StringSize);`*
+<br>
+
+ - ***`bool deserialize(uint8_t Ptr, uint32_t StringSize);`***
  	- 二进制反序列化函数，从字节流恢复 `memUnit` 对象。
- - *`void serializeJson(std::string* bc);`*
+<br>
+
+ - ***`void serializeJson(std::string* bc);`***
  	- JSON序列化函数。
   	- **信息有损：** 其中的 **每个** 指针都会转化成一个子 `memUnit` 对象节点，而无视指针间的指向关系；同时若有循环引用，则节点变为字符串 "Recurring Object"。
- - *`bool deserializeJson(const char* Ptr, uint32_t StringSize);`*
+<br>
+
+ - ***`bool deserializeJson(const char* Ptr, uint32_t StringSize);`***
  	- JSON反序列化函数。
 
 ## memManager  
@@ -154,13 +162,21 @@ int main(){
 #### 方法与属性
 - *`setUrl(const WCHAR* wcptr)`*
 	- 设置文件路径
+<br>
+
 - *`void serialize(std::vector<uint8_t> bc);`*
  	- 二进制序列化函数，将单个 `memUnit` 对象保存到字节流中。
   	- **信息无损：** 能正确处理所有根索引可及的内存单元，能正确指示指针间的指向、嵌套、多态（需要结构设计合理，具体见[impPtr](#impPtr)）。
+<br>
+
 - *`bool deserialize(uint8_t Ptr, uint32_t StringSize);`*
  	- 二进制反序列化函数，从字节流恢复 `memUnit` 对象。
+<br>
+
 - *`upload()`*
 	- 上传文件到内存
+<br>
+
 - *`download()`*
 	- 下载文件到硬盘
 
@@ -172,8 +188,8 @@ int main(){
 #### 智能指针
 #### 文件出入口
 #### variant
-#### pair
-#### tuple
+#### pair	（拟支持）
+#### tuple	（拟支持）
 #### pFunction
 #### 任意结构体的内存直接序列化
 #### 自定义序列化
@@ -238,7 +254,6 @@ int main(){
 - 使用 `getTarget()` 方法尝试通过 `Egress` 的文件名、键名和类型数据获取对方 `Ingress` 所指向的 `memUnit`
 - 此库维护了一个全局文件表（带锁），记录了当前加载的所有 `memManager`
 - `getTarget()` 中，`Egress` 将会尝试从全局文件表中找到这个文件名。因此，调用 `getTarget()` 前，要确保对方 `memManager` 已经以某种形式载入到内存
-- `getTarget()` 返回值意义见文件开头的宏定义 `MEM_` 系列
 
 ## 线程安全
 
