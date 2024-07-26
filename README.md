@@ -1,12 +1,15 @@
-## memManager
+# memManager
 
 [English](README-en.md)  
-* 统一实现了C++结构体的内存RAII、磁盘存储、跨文件引用、静态反射、二进制序列化、json序列化。
-* headonly库，方便使用。  
-* 使用的库：rapidJson  
-* 目前适用：Windows64/32，ESP32  
+### 统一实现了C++结构体的内存RAII、磁盘存储、跨文件引用、静态反射、二进制序列化、json序列化。 
 
-### 如何使用
+#### 支持平台
+- Windows64/32
+- ESP32  
+
+#### 如何使用
+
+这是一个headonly库。把memManager文件夹复制到源目录下，在源代码中`#include "memManager/memManager.h"` 即可
 
 #### 示例代码
 
@@ -69,7 +72,7 @@ int main(){
 
 ---  
 
-### 目录
+### 文档目录
 
 - [memUnit](#memUnit)
 - [memManager](#memManager)
@@ -103,78 +106,119 @@ int main(){
   - [Egress](#Egress)
   - [pEgress](#pEgress)
 - [线程安全](#线程安全)
+- [使用的库](#使用的库)
 
 ---
 
-### memUnit  
-- 每个 `memUnit` 在创建时需指定一个 `memManager` 以隶属。`memManager` 内部维护了一个列表，用以记录所有的 `memUnit`
-- `memUnit` 子类之间禁止成员组合，即 `memUnit` 类中禁止存在另一个 `memUnit`
+## memUnit  
+- `memUnit` 是内存管理的基础单元，封装了内存操作的通用逻辑。
+- 每个 `memUnit` 对象都与一个 `memManager` 对象关联，后者管理着内存的分配和释放。
+- `memUnit` 在创建时需指定一个 `memManager` 以隶属。
+- `memManager` 内部维护了一个列表，用以记录所有的 `memUnit`。
+- `memManager` 析构时，其下属所有的 `memUnit` 都会被析构。
 
-### memManager  
+#### 使用条件
+- 用户类继承 `memUnit`
+- 实现纯虚函数 `void save_fetch(mem::memPara para) override {}`
+- 实现构造函数 `user(mem::memManager* m) :memUnit(m) {}`
+- 若上面的两个函数不可见，则需添加权限宏 `MEM_PERMISSION`
+
+#### 限制
+- `memUnit` 不能分配在栈上
+- `memUnit` 之间禁止成员组合，即 `memUnit` 类中禁止存在成员 `memUnit`
+
+#### 方法
+- *`memManager* getManager();`*
+	- 获取管理该 `memUnit` 对象的 `memManager` 指针。
+ - *`void serialize(std::vector<uint8_t> bc);`*
+ 	- 二进制序列化函数，将单个 `memUnit` 对象保存到字节流中。
+  	- **信息有损：** 忽视所有指针。
+ - *`bool deserialize(uint8_t Ptr, uint32_t StringSize);`*
+ 	- 二进制反序列化函数，从字节流恢复 `memUnit` 对象。
+ - *`void serializeJson(std::string* bc);`*
+ 	- JSON序列化函数。
+  	- **信息有损：** 其中的 **每个** 指针都会转化成一个子 `memUnit` 对象节点，而无视指针间的指向关系；同时若有循环引用，则节点变为字符串 "Recurring Object"。
+ - *`bool deserializeJson(const char* Ptr, uint32_t StringSize);`*
+ 	- JSON反序列化函数。
+
+## memManager  
+- 一个 `memManager` 类的实例，就相当于一个磁盘上的文件，可以下载（保存）数据到磁盘，上传（加载）数据到内存。
+- `memManager` 类继承了 `memUnit` 类，在其 `memManager` 上保存的指针，将充当根索引。
+- 沿着根索引查找不到的指针，将视为悬空指针。序列化时将不会保存这些指针。
+
+#### 使用条件
 - 继承 `memManager` 类
 - 实现纯虚函数 `void save_fetch(memPara para) override{}`
-- `setUrl(const WCHAR* wcptr)` 设置文件路径
-- `upload()` 上传文件到内存
-- `download()` 下载文件到硬盘
+- 若纯虚函数不可见，则需添加权限宏 `MEM_PERMISSION`
 
-### 支持的数据类型
-##### 算术类型与枚举
-##### 原生数组
-##### STL容器
-##### 字符串
-##### 智能指针
-##### 文件出入口
-##### variant
-##### pair
-##### tuple
-##### pFunction
-##### 任意结构体的内存直接序列化
-##### 自定义序列化
+- *`setUrl(const WCHAR* wcptr)`*
+	- 设置文件路径
+- *`void serialize(std::vector<uint8_t> bc);`*
+ 	- 二进制序列化函数，将单个 `memUnit` 对象保存到字节流中。
+  	- **信息无损：** 能正确处理所有根索引可及的内存单元，能正确指示指针间的指向、嵌套、多态（需要结构设计合理，具体见[impPtr](#impPtr)）。
+- *`bool deserialize(uint8_t Ptr, uint32_t StringSize);`*
+ 	- 二进制反序列化函数，从字节流恢复 `memUnit` 对象。
+- *`upload()`*
+	- 上传文件到内存
+- *`download()`*
+	- 下载文件到硬盘
 
-### 智能指针
+## 支持的数据类型
+#### 算术类型与枚举
+#### 原生数组
+#### STL容器
+#### 字符串
+#### 智能指针
+#### 文件出入口
+#### variant
+#### pair
+#### tuple
+#### pFunction
+#### 任意结构体的内存直接序列化
+#### 自定义序列化
 
-##### dumbPtr
+## 智能指针
 
-##### impPtr
+#### dumbPtr
 
-##### memPtr
-- 基本内存单元的智能指针，类似于 `shared_ptr`
-- 此指针只能指向 `memUnit` 派生类
-- 每个 `memUnit` 内部设置了一个指针，用于指回 `memPtr` 所创建的中间体
-- 使用 `isFilled()` 和 `isEmpty()` 判断其是否为空
-- 此指针不支持多态，因最终存档中不包含类型信息，依靠此指针编译期的模板类型正确进行反序列化
-- `memUnit` 中成员 `memPtr` 的指向，不能跨越 `memUnit` 的 `memManager`
+#### impPtr
 
-### 两种二进制序列化
-（根据提供的信息，此处略）
+#### memPtr
+- 基本内存单元的智能指针，类似于 `shared_ptr`。
+- 此指针只能指向 `memUnit` 派生类。
+- 每个 `memUnit` 内部设置了一个指针，用于指回 `memPtr` 所创建的中间体。
+- 使用 `isFilled()` 和 `isEmpty()` 判断其是否为空。
+- `memUnit` 中成员 `memPtr` 的指向，不能跨越 `memUnit` 的 `memManager`。当序列化时检测到跨越行为，断言将失败。
 
-### 序列化原理
-（根据提供的信息，此处略）
+## 两种二进制序列化
 
-### 反序列化构造原理
+#### memUnit的序列化
+
+#### memManager的序列化
+
+## 序列化原理
+
+## 反序列化构造原理
 
 - 从硬盘中读取并构造时，执行顺序如下：
-  - 执行构造函数M
+  - 执行构造函数
   - 执行 `save_fetch`，读取各变量
-  - 若 `isFetchInit` 为 `true`，则其他 `memUnit` 在构造时，每次通过指针读取到此 `memUnit` 时，执行一次
 
-### 析构原理
+## 析构原理
 
 - `memManager` 内部记录所有隶属此类的 `memUnit`
 - 在析构时，所有记录的 `memUnit` 都会被析构，无论其是否悬空
 - 各个 `memUnit` 的析构顺序是其指针的绝对值大小，因此 `memUnit` 的析构顺序无法保证
-- 在 `memManager` 整体析构时，会先将子 `memUnit` 的 `mngr` 属性清空，再执行子 `memUnit` 的析构函数
+- 在 `memManager` 整体析构时，会先将子 `memUnit` 的 `mngr` 属性清空，指针信息清除，再执行子 `memUnit` 的析构函数
 
-### 自定义格式
-（根据提供的信息，此处略）
+## 自定义格式
 
-### JSON序列化与反序列化
-（根据提供的信息，此处略）
+## JSON序列化与反序列化
 
-### 静态反射
-（根据提供的信息，此处略）
+## 静态反射
+（此功能目前还在实现中）
 
-### 跨文件引用：出入口机制
+## 跨文件引用：出入口机制
 
 #### Ingress
 
@@ -195,8 +239,10 @@ int main(){
 - `getTarget()` 中，`Egress` 将会尝试从全局文件表中找到这个文件名。因此，调用 `getTarget()` 前，要确保对方 `memManager` 已经以某种形式载入到内存
 - `getTarget()` 返回值意义见文件开头的宏定义 `MEM_` 系列
 
-### 线程安全
+## 线程安全
 
 - 以 `memManager` 为单位加锁后，能保证此 `memManager` 及其下属 `memUnit` 是线程安全的
-- `memUnit` 的反射、序列化等操作，需要借助 `memManager` 共享部分数据
-- 因此对 `memUnit` 加锁，不能保证其安全
+- `memUnit` 的反射、序列化等操作，需要借助 `memManager` 共享部分数据。因此对 `memUnit` 加锁，不能保证其安全
+  
+### 使用的库：
+* **rapidJson**  ：用于JSON支持  
