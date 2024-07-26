@@ -108,7 +108,7 @@ int main(){
 
 ---
 
-### memUnit
+### memUnit  
 - 继承`memUnit`类
 - 实现构造函数 `anyClass(memManager* m):memUnit(m){}`
 - 实现纯虚函数 `void save_fetch(memPara para) override{}`
@@ -117,7 +117,7 @@ int main(){
 - 每个 `memUnit` 在创建时需指定一个 `memManager` 以隶属。`memManager` 内部维护了一个列表，用以记录所有的 `memUnit`
 - `memUnit` 子类之间禁止成员组合，即 `memUnit` 类中禁止存在另一个 `memUnit`
 
-### memManager
+### memManager  
 - 继承 `memManager` 类
 - 实现纯虚函数 `void save_fetch(memPara para) override{}`
 - `setUrl(const WCHAR* wcptr)` 设置文件路径
@@ -125,22 +125,26 @@ int main(){
 - `download()` 下载文件到硬盘
 
 ### 支持的数据类型
-- 算术类型与枚举
-- 原生数组
-- STL容器
-- 字符串
-- 智能指针
-- 文件出入口
-- variant
-- pair
-- tuple
-- pFunction
-- 任意结构体的内存直接序列化
-- 自定义序列化
+##### 算术类型与枚举
+##### 原生数组
+##### STL容器
+##### 字符串
+##### 智能指针
+##### 文件出入口
+##### variant
+##### pair
+##### tuple
+##### pFunction
+##### 任意结构体的内存直接序列化
+##### 自定义序列化
 
 ### 智能指针
 
-#### memPtr
+##### dumbPtr
+
+##### impPtr
+
+##### memPtr
 - 基本内存单元的智能指针，类似于 `shared_ptr`
 - 此指针只能指向 `memUnit` 派生类
 - 每个 `memUnit` 内部设置了一个指针，用于指回 `memPtr` 所创建的中间体
