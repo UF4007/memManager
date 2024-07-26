@@ -16,7 +16,7 @@
 ```C++
 #include "memManager/memManager.h"
 
-struct testU : public mem::memUnit {
+struct testU : public mem::memUnit {			//继承memUnit
 
 	int id;						//定义成员变量
 	std::string name;
@@ -31,7 +31,7 @@ struct testU : public mem::memUnit {
 	MEM_PERMISSION					//权限宏(如果是public可以不写)
 };
 
-struct testM : public mem::memManager {
+struct testM : public mem::memManager {			//继承memManager
 
 	std::vector<mem::memPtr<testU>> vec;		//此库能正确序列化指针关系
 	
