@@ -1,5 +1,5 @@
-硬盘与内存统一管理库(Headonly)，同时有反射、序列化等功能。  
-目前仅能用于Windows64/32位环境  
+在memUnit/memManager类中统一实现了内存RAII、磁盘存储、跨文件引用、静态反射、二进制序列化、json序列化。  
+目前适用环境：Windows64/32，ESP32  
 **用例见demo暨功能测试函数 mem::testmain()**  
 此库不保证线程安全，按需自行加锁。  
 ## 各类型简介  
@@ -43,16 +43,9 @@ memManager继承于memUnit。内部记录所有隶属此类的memUnit。在析�
 使用isFilled()和isEmpty()判断其是否为空。  
 此指针不支持多态，因为在最终的存档中不包含类型信息，读取存档时，依靠的是此指针编译期的模板类型来正确进行反序列化。  
 **memUnit中成员memPtr的指向，不能跨越这个memUnit的memManager。**  
-### memVector => vector内存单元  
-是一个同时继承了std::vector和memUnit的类。  
-这个vector中保存的是memPtr<>，不是类实例。  
-有template<> using pmemVector = memPtr<memVector<>>;  
 ### memStruct => 任意可存储结构体  
 拥有save_fetch_struct()成员函数的任意结构体。  
-save_fetch_struct中，使用GWPP_Struct()来填写想要管理的变量。  
-### pVariant => 泛型智能指针  
-模板内填写所有该指针可能指向的memUnit子类。  
-本质上，保存了一个memPtr智能指针和一个表示类型的UINT。  
+save_fetch_struct中，使用GWPP_memcpy()来填写想要管理的变量。  
 ### pEgress => 跨越内存单元管理器的“出口”  
 用于memManager之间的通信。  
 pEgress<>模板中，填写想要指向的对方memManager类中成员memUnit的类名。  
