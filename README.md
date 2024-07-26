@@ -165,12 +165,12 @@ int main(){
 <br>
 
 - ***`void serialize(std::vector<uint8_t> bc);`***
- 	- 二进制序列化函数，将单个 `memUnit` 对象保存到字节流中。
+ 	- 二进制序列化函数，将 `memManager` 及其下属所有 `memUnit` 对象保存到字节流中。
   	- **信息无损：** 能正确处理所有根索引可及的内存单元，能正确指示指针间的指向、嵌套、多态（需要结构设计合理，具体见[impPtr](#impPtr)）。
 <br>
 
 - ***`bool deserialize(uint8_t Ptr, uint32_t StringSize);`***
- 	- 二进制反序列化函数，从字节流恢复 `memUnit` 对象。
+ 	- 二进制反序列化函数，从字节流恢复 `memManager` 对象及其所有下属 `memUnit`。
 <br>
 
 - ***`upload()`***
