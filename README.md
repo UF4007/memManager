@@ -143,7 +143,7 @@ int main(){
 
  - ***`void serializeJson(std::string* bc);`***
  	- JSON序列化函数。
-  	- **信息有损：** 其中的 **每个** 指针都会转化成一个子 `memUnit` 对象节点，而无视指针间的指向关系；同时若有循环引用，则节点变为字符串 "Recurring Object"。
+  	- **信息有损：** 其中的 **每个** 指针都会转化成一个子 `memUnit` 对象节点或 `null` ，而无视指针间的指向关系；同时若有循环引用，则节点变为字符串 "Recurring Object"。
 <br>
 
  - ***`bool deserializeJson(const char* Ptr, uint32_t StringSize);`***
@@ -160,24 +160,24 @@ int main(){
 - 若纯虚函数不可见，则需添加权限宏 `MEM_PERMISSION`
 
 #### 方法与属性
-- *`setUrl(const WCHAR* wcptr)`*
+- ***`setUrl(const WCHAR* wcptr)`***
 	- 设置文件路径
 <br>
 
-- *`void serialize(std::vector<uint8_t> bc);`*
+- ***`void serialize(std::vector<uint8_t> bc);`***
  	- 二进制序列化函数，将单个 `memUnit` 对象保存到字节流中。
   	- **信息无损：** 能正确处理所有根索引可及的内存单元，能正确指示指针间的指向、嵌套、多态（需要结构设计合理，具体见[impPtr](#impPtr)）。
 <br>
 
-- *`bool deserialize(uint8_t Ptr, uint32_t StringSize);`*
+- ***`bool deserialize(uint8_t Ptr, uint32_t StringSize);`***
  	- 二进制反序列化函数，从字节流恢复 `memUnit` 对象。
 <br>
 
-- *`upload()`*
+- ***`upload()`***
 	- 上传文件到内存
 <br>
 
-- *`download()`*
+- ***`download()`***
 	- 下载文件到硬盘
 
 ## 支持的数据类型
