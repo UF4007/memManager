@@ -117,7 +117,7 @@ int main(){
 - `memManager` 内部维护了一个列表，用以记录所有的 `memUnit`。
 - `memManager` 析构时，其下属所有的 `memUnit` 都会被析构。
 
-#### 使用条件
+#### 使用方式
 - 用户类继承 `memUnit`
 - 实现纯虚函数 `void save_fetch(mem::memPara para) override {}`
 - 实现构造函数 `user(mem::memManager* m) :memUnit(m) {}`
@@ -127,7 +127,7 @@ int main(){
 - `memUnit` 不能分配在栈上
 - `memUnit` 之间禁止成员组合，即 `memUnit` 类中禁止存在成员 `memUnit`
 
-#### 方法
+#### 方法与属性
 - *`memManager* getManager();`*
 	- 获取管理该 `memUnit` 对象的 `memManager` 指针。
  - *`void serialize(std::vector<uint8_t> bc);`*
@@ -146,11 +146,12 @@ int main(){
 - `memManager` 类继承了 `memUnit` 类，在其 `memManager` 上保存的指针，将充当根索引。
 - 沿着根索引查找不到的指针，将视为悬空指针。序列化时将不会保存这些指针。
 
-#### 使用条件
+#### 使用方式
 - 继承 `memManager` 类
 - 实现纯虚函数 `void save_fetch(memPara para) override{}`
 - 若纯虚函数不可见，则需添加权限宏 `MEM_PERMISSION`
 
+#### 方法与属性
 - *`setUrl(const WCHAR* wcptr)`*
 	- 设置文件路径
 - *`void serialize(std::vector<uint8_t> bc);`*
