@@ -1,63 +1,199 @@
-统一实现了C++结构体的内存RAII、磁盘存储、跨文件引用、静态反射、二进制序列化、json序列化。  
-目前适用环境：Windows64/32，ESP32  
-**用例见demo暨功能测试函数 mem::testmain()**  
-此库不保证线程安全，按需自行加锁。  
-## 各类型简介  
-### memUnit => 基本内存单元  
-- 用法：  
-    - 继承memUnit类  
-    - 实现一个构造函数anyClass(memManager* m):memUnit(m){}，**下文记为构造函数M**   
-    - 实现纯虚函数void save_fetch(memPara para) override{}  
-    - （可选）实现虚函数fetchInit(){},并标记isFetchInit为true  
-    - GWPP(const WCHAR* key, Types& varST, memPara para);在save_fetch函数内部，填写想要管理的变量。具体见demo。
+## memManager
 
-每个memUnit在创建时需指定一个memManager以隶属。memManager内部维护了一个列表，用以记录所有的memUnit。  
-memUnit子类之间禁止成员组合，即memUnit类中禁止存在另一个memUnit。  
-- 从硬盘中读取并构造时，执行顺序如下：  
-    - 执行构造函数M  
-    - 执行save_fetch，读取各变量  
-    - 若isFetchInit为true，则其他memUnit在构造时，**每次**通过指针读取到此memUnit时，执行一次
+[English](README-en.md)  
+* 统一实现了C++结构体的内存RAII、磁盘存储、跨文件引用、静态反射、二进制序列化、json序列化。
+* headonly库，方便使用。  
+* 使用的库：rapidJson  
+* 目前适用：Windows64/32，ESP32  
 
-### memManager => 内存单元管理器  
-**一个此类，代表一个硬盘文件**  
-- 用法：  
-    - 继承memManager类  
-    - 实现纯虚函数void save_fetch(memPara para) override{}
+### 如何使用
 
-setUrl(const WCHAR* wcptr)设置文件路径  
-upload()上传文件到内存  
-download()下载文件到硬盘  
-- 构造原理：
-    - memManager执行自身的save_fetch()，并执行其中的GWPP()来检视指针指向的下属memUnit是否被构造。  
-    - 若没被构造，则构造并执行其save_fetch；若构造过了，则直接赋指针。  
-    - 如此嵌套，直到memManager的save_fetch()被执行完。  
+#### 示例代码
 
-因此，在上传或下载时，所有悬空于memManager之外的指针（内存单元）将会被忽略。  
-memManager继承于memUnit。内部记录所有隶属此类的memUnit。在析构时，所有记录的memUnit都会被析构，无论其是否悬空。  
-各个memUnit的析构顺序是其指针的绝对值大小，因此memUnit的析构顺序无法保证。  
-在memManager整体析构时，会先将子memUnit的mngr属性清空，再执行子memUnit的析构函数。  
-此外，memManager内部还存储了依赖文件表、入口表、出口表。（详见pEgress）  
-### memPtr => 基本内存单元的智能指针  
-智能指针，类似于shared_ptr。与之不同的是，此指针只能指向memUnit派生类。  
-不同点之二：每个memUnit内部设置了一个指针，用于指回memPtr所创建的中间体。这么做有两个好处，1是可以通过memPtr::release()，主动移除memUnit；2是让原始指针与memPtr在一定程度上能够混用，而不会出现计数错误的问题。  
-使用isFilled()和isEmpty()判断其是否为空。  
-此指针不支持多态，因为在最终的存档中不包含类型信息，读取存档时，依靠的是此指针编译期的模板类型来正确进行反序列化。  
-**memUnit中成员memPtr的指向，不能跨越这个memUnit的memManager。**  
-### memStruct => 任意可存储结构体  
-拥有save_fetch_struct()成员函数的任意结构体。  
-save_fetch_struct中，使用GWPP_memcpy()来填写想要管理的变量。  
-### pEgress => 跨越内存单元管理器的“出口”  
-用于memManager之间的通信。  
-pEgress<>模板中，填写想要指向的对方memManager类中成员memUnit的类名。  
-本质是一个智能指针，指向一个内部类Egress。  
-Egress记录了对方memManager的文件名、键名和类类型。  
-在使用makeEIPair()后，会在自身memManager内创建一个Egress，并让pEgress指向这个Egress，并在对方memManager内创建一个Ingress，Ingress指向目标memUnit。这个Egress-Ingress Pair将拥有相同的键名和类型。  
-使用getTarget()方法尝试通过Egress的文件名、键名和类型数据获取对方Ingress所指向的memUnit。  
-此库维护了一个全局文件表（带锁），记录了当前加载的所有memManager。getTarget()中，Egress将会尝试从全局文件表中找到这个文件名。因此，调用getTarget()前，要确保对方memManager已经以某种形式载入到内存。    
-getTarget()返回值意义见文件开头的宏定义MEM_系列。  
-### pFunction => 选调函数指针  
-使用宏INITIALIZE_PFUNCTION()填写函数参数类型、分组号、所有的函数指针。   
-参数类型与分组号引导pFunction模板实例化，所有的函数指针则用于初始化这个模板实例化内部的一个常量数组。  
-本质上，pFunction只保存了一个表示类型的UINT。  
-通过函数指针来赋值这个UINT；通过这个UINT来选择调用常量数组中的函数指针。  
-### 具体细节、反射、序列化等其他内容见mem::testmain()。  
+```C++
+#include "memManager/memManager.h"
+
+struct testU : public mem::memUnit {
+
+	//定义成员变量
+	int id;
+	std::string name;
+
+	//实现纯虚函数save_fetch，把所有要保存的变量写进去
+	void save_fetch(mem::memPara para) override {
+		GWPP("id", id, para);
+		GWPP("name", name, para);
+	}
+
+	//实现构造函数并传递memManager指针
+	testU(mem::memManager* m) :memUnit(m) {}
+
+	//权限宏(如果是public可以不写)
+	MEM_PERMISSION
+};
+
+struct testM : public mem::memManager {
+
+	//此库能正确序列化指针关系
+	std::vector<mem::memPtr<testU>> vec;
+	
+	void save_fetch(mem::memPara para) override {
+		GWPP("vec", vec, para);
+	}
+};
+
+int main(){
+	testM* a = new testM();
+
+	a->vec.push_back(new testU(a));
+	a->vec.push_back(new testU(a));
+
+	a->vec[0]->id = 42;
+	a->vec[0]->name = "Hello world";
+	a->vec[1]->id = 36;
+
+	a->setUrl("D:\\test");	//设置一个有效的目录
+	a->download();
+
+	testM* b = new testM();
+	b->setUrl("D:\\test");
+	b->upload();
+
+	if (b->vec.size())
+	{
+		std::cout << b->vec[0]->id << std::endl;
+		std::cout << b->vec[0]->name << std::endl;
+		std::cout << b->vec[1]->id << std::endl;
+	}
+	else
+	{
+		std::cout << "failed." << std::endl;
+	}
+}
+```
+
+---  
+
+### 目录
+
+- [memUnit](#memUnit)
+- [memManager](#memManager)
+- [支持的数据类型](#支持的数据类型)
+  - [算术类型与枚举](#算术类型与枚举)
+  - [原生数组](#原生数组)
+  - [STL容器](#stl容器)
+  - [字符串](#字符串)
+  - [智能指针](#智能指针)
+  - [文件出入口](#文件出入口)
+  - [variant](#variant)
+  - [pair](#pair)
+  - [tuple](#tuple)
+  - [pFunction](#pfunction)
+  - [任意结构体的内存直接序列化](#任意结构体的内存直接序列化)
+  - [自定义序列化](#自定义序列化)
+- [智能指针](#智能指针)
+  - [dumbPtr](#dumbPtr)
+  - [impPtr](#impPtr)
+  - [memPtr](#memptr)
+- [两种二进制序列化](#两种二进制序列化)
+- [序列化原理](#序列化原理)
+- [反序列化构造原理](#反序列化构造原理)
+- [析构原理](#析构原理)
+- [自定义格式](#自定义格式)
+- [JSON序列化与反序列化](#json序列化与反序列化)
+- [静态反射](#静态反射)
+- [跨文件引用：出入口机制](#跨文件引用出入口机制)
+  - [pEgress](#pegress)
+- [线程安全](#线程安全)
+
+---
+
+### memUnit
+- 继承`memUnit`类
+- 实现构造函数 `anyClass(memManager* m):memUnit(m){}`
+- 实现纯虚函数 `void save_fetch(memPara para) override{}`
+- 可选：实现虚函数 `fetchInit(){}` 并标记 `isFetchInit` 为 `true`
+- `GWPP(const WCHAR* key, Types& varST, memPara para);` 在 `save_fetch` 函数内部，填写想要管理的变量
+- 每个 `memUnit` 在创建时需指定一个 `memManager` 以隶属。`memManager` 内部维护了一个列表，用以记录所有的 `memUnit`
+- `memUnit` 子类之间禁止成员组合，即 `memUnit` 类中禁止存在另一个 `memUnit`
+
+### memManager
+- 继承 `memManager` 类
+- 实现纯虚函数 `void save_fetch(memPara para) override{}`
+- `setUrl(const WCHAR* wcptr)` 设置文件路径
+- `upload()` 上传文件到内存
+- `download()` 下载文件到硬盘
+
+### 支持的数据类型
+- 算术类型与枚举
+- 原生数组
+- STL容器
+- 字符串
+- 智能指针
+- 文件出入口
+- variant
+- pair
+- tuple
+- pFunction
+- 任意结构体的内存直接序列化
+- 自定义序列化
+
+### 智能指针
+
+#### memPtr
+- 基本内存单元的智能指针，类似于 `shared_ptr`
+- 此指针只能指向 `memUnit` 派生类
+- 每个 `memUnit` 内部设置了一个指针，用于指回 `memPtr` 所创建的中间体
+- 使用 `isFilled()` 和 `isEmpty()` 判断其是否为空
+- 此指针不支持多态，因最终存档中不包含类型信息，依靠此指针编译期的模板类型正确进行反序列化
+- `memUnit` 中成员 `memPtr` 的指向，不能跨越 `memUnit` 的 `memManager`
+
+### 两种二进制序列化
+（根据提供的信息，此处略）
+
+### 序列化原理
+（根据提供的信息，此处略）
+
+### 反序列化构造原理
+
+- 从硬盘中读取并构造时，执行顺序如下：
+  - 执行构造函数M
+  - 执行 `save_fetch`，读取各变量
+  - 若 `isFetchInit` 为 `true`，则其他 `memUnit` 在构造时，每次通过指针读取到此 `memUnit` 时，执行一次
+
+### 析构原理
+
+- `memManager` 内部记录所有隶属此类的 `memUnit`
+- 在析构时，所有记录的 `memUnit` 都会被析构，无论其是否悬空
+- 各个 `memUnit` 的析构顺序是其指针的绝对值大小，因此 `memUnit` 的析构顺序无法保证
+- 在 `memManager` 整体析构时，会先将子 `memUnit` 的 `mngr` 属性清空，再执行子 `memUnit` 的析构函数
+
+### 自定义格式
+（根据提供的信息，此处略）
+
+### JSON序列化与反序列化
+（根据提供的信息，此处略）
+
+### 静态反射
+（根据提供的信息，此处略）
+
+### 跨文件引用：出入口机制
+
+#### pEgress
+
+- 用于 `memManager` 之间的通信
+- `pEgress<>` 模板中，填写想要指向的对方 `memManager` 类中成员 `memUnit` 的类名
+- 本质是一个智能指针，指向一个内部类 `Egress`
+- `Egress` 记录了对方 `memManager` 的文件名、键名和类类型
+- 使用 `makeEIPair()` 后，会在自身 `memManager` 内创建一个 `Egress`，并让 `pEgress` 指向这个 `Egress`，并在对方 `memManager` 内创建一个 `Ingress`，`Ingress` 指向目标 `memUnit`
+- 这个 `Egress-Ingress Pair` 将拥有相同的键名和类型
+- 使用 `getTarget()` 方法尝试通过 `Egress` 的文件名、键名和类型数据获取对方 `Ingress` 所指向的 `memUnit`
+- 此库维护了一个全局文件表（带锁），记录了当前加载的所有 `memManager`
+- `getTarget()` 中，`Egress` 将会尝试从全局文件表中找到这个文件名。因此，调用 `getTarget()` 前，要确保对方 `memManager` 已经以某种形式载入到内存
+- `getTarget()` 返回值意义见文件开头的宏定义 `MEM_` 系列
+
+### 线程安全
+
+- 以 `memManager` 为单位加锁后，能保证此 `memManager` 及其下属 `memUnit` 是线程安全的
+- `memUnit` 的反射、序列化等操作，需要借助 `memManager` 共享部分数据
+- 因此对 `memUnit` 加锁，不能保证其安全
