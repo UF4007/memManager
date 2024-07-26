@@ -15,27 +15,22 @@
 
 struct testU : public mem::memUnit {
 
-	//定义成员变量
-	int id;
+	int id;						//定义成员变量
 	std::string name;
 
-	//实现纯虚函数save_fetch，把所有要保存的变量写进去
-	void save_fetch(mem::memPara para) override {
+	void save_fetch(mem::memPara para) override {	//实现纯虚函数save_fetch，把所有要保存的变量写进去
 		GWPP("id", id, para);
 		GWPP("name", name, para);
 	}
 
-	//实现构造函数并传递memManager指针
-	testU(mem::memManager* m) :memUnit(m) {}
+	testU(mem::memManager* m) :memUnit(m) {}	//实现构造函数并传递memManager指针
 
-	//权限宏(如果是public可以不写)
-	MEM_PERMISSION
+	MEM_PERMISSION					//权限宏(如果是public可以不写)
 };
 
 struct testM : public mem::memManager {
 
-	//此库能正确序列化指针关系
-	std::vector<mem::memPtr<testU>> vec;
+	std::vector<mem::memPtr<testU>> vec;		//此库能正确序列化指针关系
 	
 	void save_fetch(mem::memPara para) override {
 		GWPP("vec", vec, para);
@@ -52,7 +47,7 @@ int main(){
 	a->vec[0]->name = "Hello world";
 	a->vec[1]->id = 36;
 
-	a->setUrl("D:\\test");	//设置一个有效的目录
+	a->setUrl("D:\\test");		//设置一个有效的目录
 	a->download();
 
 	testM* b = new testM();
@@ -103,17 +98,15 @@ int main(){
 - [JSON序列化与反序列化](#json序列化与反序列化)
 - [静态反射](#静态反射)
 - [跨文件引用：出入口机制](#跨文件引用出入口机制)
-  - [pEgress](#pegress)
+  - [Ingress](#Ingress)
+  - [pIngress](#pIngress)
+  - [Egress](#Egress)
+  - [pEgress](#pEgress)
 - [线程安全](#线程安全)
 
 ---
 
 ### memUnit  
-- 继承`memUnit`类
-- 实现构造函数 `anyClass(memManager* m):memUnit(m){}`
-- 实现纯虚函数 `void save_fetch(memPara para) override{}`
-- 可选：实现虚函数 `fetchInit(){}` 并标记 `isFetchInit` 为 `true`
-- `GWPP(const WCHAR* key, Types& varST, memPara para);` 在 `save_fetch` 函数内部，填写想要管理的变量
 - 每个 `memUnit` 在创建时需指定一个 `memManager` 以隶属。`memManager` 内部维护了一个列表，用以记录所有的 `memUnit`
 - `memUnit` 子类之间禁止成员组合，即 `memUnit` 类中禁止存在另一个 `memUnit`
 
@@ -182,6 +175,12 @@ int main(){
 （根据提供的信息，此处略）
 
 ### 跨文件引用：出入口机制
+
+#### Ingress
+
+#### pIngress
+
+#### Egress
 
 #### pEgress
 
