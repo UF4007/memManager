@@ -71,6 +71,14 @@ int main(){
 }
 ```
 
+**详细Demo兼单元测试 :** 
+
+```C++
+#include "memManager/demo.h"
+
+mem_testmain();
+```
+
 ---  
 
 ### 文档目录
@@ -149,6 +157,17 @@ int main(){
 
  - ***`bool deserializeJson(const char* Ptr, uint32_t StringSize);`***
  	- JSON反序列化函数。
+<br>
+
+- ***`void GWPP_Any(const char* key, Type var, mem::memPara para)`***
+	- 简单地序列化任意结构体。
+ 	- 将结构体的内存直接复制，以进行序列化。Json将保存为base64格式。
+<br>
+
+- ***`void GWPP(const char* key, Type var, mem::memPara para)`***
+	- 按指定规律，序列化保存。
+ 	- 无论数组、指针、泛型如何嵌套，都能进行正确的序列化。
+  	- 对于不支持的数据类型，SFINAE将不通过。[支持的数据类型](#支持的数据类型)
 
 ## memManager  
 - 一个 `memManager` 类的实例，就相当于一个磁盘上的文件，可以下载（保存）数据到磁盘，上传（加载）数据到内存。
@@ -161,8 +180,12 @@ int main(){
 - 若纯虚函数不可见，则需添加权限宏 `MEM_PERMISSION`
 
 #### 方法与属性
-- ***`setUrl(const WCHAR* wcptr)`***
-	- 设置文件路径
+- ***`void setUrl(const WCHAR* wcptr);`***
+	- 设置文件路径。
+<br>
+
+- ***`char* getFileName();`***
+	- 获取路径中的文件名。
 <br>
 
 - ***`void serialize(std::vector<uint8_t> bc);`***
@@ -175,11 +198,23 @@ int main(){
 <br>
 
 - ***`upload()`***
-	- 上传文件到内存
+	- 根据 `setUrl` 设置的路径，上传文件到内存
 <br>
 
 - ***`download()`***
-	- 下载文件到硬盘
+	- 根据 `setUrl` 设置的路径，下载文件到硬盘
+<br>
+
+- ***`memPtr<Subfile> findSubfile(const char* fileName);`***
+	- 在全局范围内，查找该管理器依赖的子文件（子管理器）。
+<br>
+
+- ***`memPtr<Egress> findEgress(const memPtr<Subfile> subfile, const char* kw, const char* type);`***
+	- 在指定的子管理器中，根据关键字和类型名，查找“出口”
+<br>
+
+- ***`impPtr<Ingress> findIngress(const char* kw, const char* type);`***
+	- 根据关键字和类型名，查找该管理器的“入口”
 
 # (以下的文档还没有写完)
 
