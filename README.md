@@ -1,6 +1,6 @@
 # memManager
 
-[English](README-en.md)  
+[English(pending)](README-en.md)  
 ### 统一实现了C++结构体的内存RAII、磁盘存储、跨文件引用、静态反射、二进制序列化、json序列化。 
 
 #### 支持平台
@@ -93,7 +93,7 @@ mem_testmain();
   - [智能指针](#智能指针)
   - [文件出入口](#文件出入口)
   - [variant](#variant)
-  - [pair](#pair)	（拟支持）
+  - [pair](#pair)
   - [tuple](#tuple)	（拟支持）
   - [pFunction](#pfunction)
   - [任意结构体的内存直接序列化](#任意结构体的内存直接序列化)
@@ -222,11 +222,24 @@ mem_testmain();
 #### 算术类型与枚举
 #### 原生数组
 #### STL容器
+	- vector
+ 	- list
+	- deque
+ 	- array
+	- forward_list
+ 	- set
+	- unordered_set
+ 	- multiset
+ 	- unordered_multiset
+ 	- map
+	- unordered_map
+ 	- multimap
+ 	- unordered_multimap
 #### 字符串
 #### 智能指针
 #### 文件出入口
 #### variant
-#### pair	（拟支持）
+#### pair
 #### tuple	（拟支持）
 #### pFunction
 #### 任意结构体的内存直接序列化
