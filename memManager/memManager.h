@@ -73,6 +73,8 @@ namespace mem {
 			inline static const char json_type[] = "Variant Type";
 			inline static const char json_value[] = "Value";
 			inline static const char json_recurring[] = "Recurring Object";
+			inline static const char json_first[] = "First";
+			inline static const char json_second[] = "Second";
 #endif
 		protected:
 			memUnit(memManager* manager);

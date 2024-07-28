@@ -843,6 +843,7 @@ memUnit::GWPP(const char* key, _T& var, memPara& para) {
 }
 template<class _subType>
 inline constexpr size_t memUnit::getArrayValueTypeSize() {
+	//assert: the size must be less than 8 bytes
 	if constexpr (std::is_arithmetic<_subType>::value || std::is_enum<_subType>::value)
 	{
 		return sizeof(_subType) > 8 ? sizeof(uint32_t) : sizeof(_subType); //min
@@ -869,8 +870,8 @@ inline constexpr size_t memUnit::getArrayValueTypeSize() {
 	}
 	else
 	{
-		return 0;
 		static_assert(!std::is_same_v<_subType, _subType>, "not a vaild size for array!");
+		return 0;
 	}
 }
 template<class _arit>
@@ -1090,11 +1091,57 @@ memUnit::GWPP_Base(void* pValue, _stlCont& var, memPara& para) {
 		uint32_t vecSize;
 		if (lowlevel::BytesTo_mem(vecData, vecSize, dataPointer, this->mngr->binSeri.start, this->mngr->binSeri.end) == true)
 		{
-			size_t&& len = vecSize / _subSize;
-			for (int iter = 0; iter < len; iter++)
+			if constexpr (mem::is_array<_stlCont>::value)
 			{
-				_subType& subVar = *lowlevel::pushStlContainer(var);
-				this->GWPP_Base(vecData + iter * _subSize, subVar, para);
+				size_t len = std::min((size_t)vecSize / _subSize, var.size());
+				for (int iter = 0; iter < len; iter++)
+				{
+					_subType& subVar = var[iter];
+					this->GWPP_Base(vecData + iter * _subSize, subVar, para);
+				}
+			}
+			else
+			{
+				size_t&& len = vecSize / _subSize;
+				if constexpr (mem::is_forward_list<_stlCont>::value)
+				{
+					for (int iter = len - 1; iter >= 0; iter--)
+					{
+						_subType& subVar = *var.insert_after(var.before_begin(), _subType{});
+						this->GWPP_Base(vecData + iter * _subSize, subVar, para);
+					}
+				}
+				else if constexpr (mem::has_emplace_back<_stlCont>::value)
+				{
+					for (int iter = 0; iter < len; iter++)
+					{
+						var.emplace_back();
+						_subType& subVar = *std::prev(var.end());
+						this->GWPP_Base(vecData + iter * _subSize, subVar, para);
+					}
+				}
+				else if constexpr (mem::has_emplace<_stlCont>::value)
+				{
+					for (int iter = 0; iter < len; iter++)
+					{
+						if constexpr (mem::is_pair<_subType>::value)
+						{
+							std::pair<typename std::decay_t<typename _subType::first_type>, typename _subType::second_type> subPair;
+							this->GWPP_Base(vecData + iter * _subSize, subPair, para);
+							var.emplace(subPair);
+						}
+						else
+						{
+							_subType subVar;
+							this->GWPP_Base(vecData + iter * _subSize, subVar, para);
+							var.emplace(subVar);
+						}
+					}
+				}
+				else
+				{
+					static_assert(!std::is_same_v<_stlCont, _stlCont>, "Unsupported container type.");
+				}
 			}
 		}
 		else
@@ -1107,9 +1154,12 @@ memUnit::GWPP_Base(void* pValue, _stlCont& var, memPara& para) {
 	case memPara::binary_serialize_memManager:
 	{
 		std::vector<uint8_t> vecData;
-		for (auto& element : var)
+		for (const _subType& element : var)
 		{
-			this->GWPP_Base(&vecData, element, para);
+			if constexpr (mem::is_pair<_subType>::value)
+				this->GWPP_Base(&vecData, (std::pair<typename std::decay_t<typename _subType::first_type>, typename _subType::second_type>&)element, para);
+			else
+				this->GWPP_Base(&vecData, (_subType&)element, para);
 		}
 		std::vector<uint8_t>* dataVector = (std::vector<uint8_t>*)pValue;
 		uint32_t offset;
@@ -1130,10 +1180,13 @@ memUnit::GWPP_Base(void* pValue, _stlCont& var, memPara& para) {
 	{
 		rapidjson::Value* vlValue = (rapidjson::Value*)pValue;
 		*vlValue = rapidjson::kArrayType;
-		for (auto& element : var)
+		for (const _subType& element : var)
 		{
 			rapidjson::Value vlArr;
-			this->GWPP_Base(&vlArr, element, para);
+			if constexpr (mem::is_pair<_subType>::value)
+				this->GWPP_Base(&vlArr, (std::pair<typename std::decay_t<typename _subType::first_type>, typename _subType::second_type>&)element, para);
+			else
+				this->GWPP_Base(&vlArr, (_subType&)element, para);
 			vlValue->PushBack(vlArr, *this->mngr->rjson.allocator);
 		}
 	}
@@ -1144,11 +1197,57 @@ memUnit::GWPP_Base(void* pValue, _stlCont& var, memPara& para) {
 		rapidjson::Value* vlValue = (rapidjson::Value*)pValue;
 		if (vlValue->IsArray() == true)
 		{
-			size_t&& len = (size_t)vlValue->Size();
-			for (int iter = 0; iter < len; iter++)
+			if constexpr (mem::is_array<_stlCont>::value)
 			{
-				_subType& subVar = *lowlevel::pushStlContainer(var);
-				this->GWPP_Base(&vlValue->operator[](iter), subVar, para);
+				size_t len = std::min((size_t)vlValue->Size(), var.size());
+				for (int iter = 0; iter < len; iter++)
+				{
+					_subType& subVar = var[iter];
+					this->GWPP_Base(&vlValue->operator[](iter), subVar, para);
+				}
+			}
+			else
+			{
+				size_t&& len = (size_t)vlValue->Size();
+				if constexpr (mem::is_forward_list<_stlCont>::value)
+				{
+					for (int iter = len - 1; iter >= 0; iter--)
+					{
+						_subType& subVar = *var.insert_after(var.before_begin(), _subType{});
+						this->GWPP_Base(&vlValue->operator[](iter), subVar, para);
+					}
+				}
+				else if constexpr (mem::has_emplace_back<_stlCont>::value)
+				{
+					for (int iter = 0; iter < len; iter++)
+					{
+						var.emplace_back();
+						_subType& subVar = *std::prev(var.end());
+						this->GWPP_Base(&vlValue->operator[](iter), subVar, para);
+					}
+				}
+				else if constexpr (mem::has_emplace<_stlCont>::value)
+				{
+					for (int iter = 0; iter < len; iter++)
+					{
+						if constexpr (mem::is_pair<_subType>::value)
+						{
+							std::pair<typename std::decay_t<typename _subType::first_type>, typename _subType::second_type> subPair;
+							this->GWPP_Base(&vlValue->operator[](iter), subPair, para);
+							var.emplace(subPair);
+						}
+						else
+						{
+							_subType subVar;
+							this->GWPP_Base(&vlValue->operator[](iter), subVar, para);
+							var.emplace(subVar);
+						}
+					}
+				}
+				else
+				{
+					static_assert(!std::is_same_v<_stlCont, _stlCont>, "Unsupported container type.");
+				}
 			}
 		}
 		else
@@ -1289,30 +1388,30 @@ inline void memUnit::GWPP_Base(void* pValue, std::variant<Args...>& var, memPara
 	case memPara::binary_deserialize_memManager:
 	{
 		variantOfFile* dataPointer = (variantOfFile*)pValue;
-		uint32_t index;
-		lowlevel::SpecialCharsTo_mem<sizeof(variantOfFile::type)>(&dataPointer->typeHolder, dataPointer->type);
-		memcpy(&index, dataPointer->type, sizeof(variantOfFile::type));
-		lowlevel::pushVariantHelper<Args...> helper;
-		if (helper.push(index, var, this, &dataPointer->content, para) == false)
-			this->mngr->statusBadValue++;
+		uint32_t& index = dataPointer->type;
+		uint8_t* valuePos;
+		uint32_t length;
+		if (lowlevel::BytesTo_mem(valuePos, length, (uint8_t*)&dataPointer->offset, this->mngr->binSeri.start, this->mngr->binSeri.end) == true)
+		{
+			lowlevel::pushVariantHelper<Args...> helper;
+			if (helper.push(index, var, this, valuePos, para) == true)
+				break;
+		}
+		this->mngr->statusBadValue++;
 	}
 		break;
 	case memPara::binary_serialize_memUnit:
 	case memPara::binary_serialize_memManager:
 	{
-		std::vector<uint8_t>* dataVector = (std::vector<uint8_t>*)pValue;
-		uint32_t offset = dataVector->size();
+		std::vector<uint8_t> vecData;
 		std::visit([&](auto&& arg) {
-			this->GWPP_Base(dataVector, arg, para);
+			this->GWPP_Base(&vecData, arg, para);
 			}, var);
-		uint32_t delta = dataVector->size() - offset;
-		delta = sizeof(variantOfFile) - delta;
-		assert(delta > 0 || !"somehow causes the vairant memory allocate error");
-		dataVector->resize(dataVector->size() + delta);
-		variantOfFile* dataVariant = (variantOfFile*)(&*(dataVector->end() - 1) - sizeof(variantOfFile) + 1);
-		uint32_t index = var.index();
-		memcpy(dataVariant->type, &index, sizeof(variantOfFile::type));
-		lowlevel::mem_toSpecialChars<sizeof(variantOfFile::type)>(&dataVariant->typeHolder, dataVariant->type);
+		std::vector<uint8_t>* dataVector = (std::vector<uint8_t>*)pValue;
+		uint32_t offset;
+		lowlevel::mem_toBytes(offset, vecData.size(), dataVector, this->mngr->binSeri.bytes);
+		memcpy(&this->mngr->binSeri.bytes->at(offset), vecData.data(), vecData.size());
+		lowlevel::mem_toBytes<uint32_t>(var.index(), dataVector, nullptr);
 	}
 		break;
 #if MEM_REFLECTION_ON
@@ -1366,21 +1465,38 @@ inline void memUnit::GWPP_Base(void* pValue, std::variant<Args...>& var, memPara
 }
 template<class T1, class T2>
 inline void memUnit::GWPP_Base(void* pValue, std::pair<T1, T2>& var, memPara& para) {
-	static_assert(!std::is_same_v<T1, T2>, "this function is under programming.");
 	switch (para.order)
 	{
 	case memPara::binary_deserialize_memUnit:
 	case memPara::binary_deserialize_memManager:
 	{
-		uint8_t* dataPointer = (uint8_t*)pValue;
+		pairOfFile* dataPointer = (pairOfFile*)pValue;
+		uint32_t& index = dataPointer->sizeOfFirst;
+		uint8_t* valuePos;
+		uint32_t length;
+		if (lowlevel::BytesTo_mem(valuePos, length, (uint8_t*)&dataPointer->offset, this->mngr->binSeri.start, this->mngr->binSeri.end) == true)
+		{
+			this->GWPP_Base(valuePos, var.first, para);
+			this->GWPP_Base(valuePos + dataPointer->sizeOfFirst, var.second, para);
+			break;
+		}
+		this->mngr->statusBadValue++;
 	}
 	break;
 	case memPara::binary_serialize_memUnit:
 	case memPara::binary_serialize_memManager:
 	{
+		std::vector<uint8_t> vecData;
+		this->GWPP_Base(&vecData, var.first, para);
+		uint32_t sizeOfFirst = vecData.size();
+		this->GWPP_Base(&vecData, var.second, para);
 		std::vector<uint8_t>* dataVector = (std::vector<uint8_t>*)pValue;
+		uint32_t offset;
+		lowlevel::mem_toBytes(offset, vecData.size(), dataVector, this->mngr->binSeri.bytes);
+		memcpy(&this->mngr->binSeri.bytes->at(offset), vecData.data(), vecData.size());
+		lowlevel::mem_toBytes<uint32_t>(sizeOfFirst, dataVector, nullptr);
 	}
-		break;
+	break;
 #if MEM_REFLECTION_ON
 	case memPara::reflection_read:
 		//para.reflection->context.emplace_back(key, var);
@@ -1393,15 +1509,36 @@ inline void memUnit::GWPP_Base(void* pValue, std::pair<T1, T2>& var, memPara& pa
 	case memPara::rjson_seriazlize:
 	{
 		rapidjson::Value* vlValue = (rapidjson::Value*)pValue;
+		rapidjson::Value first, second;
+		this->GWPP_Base(&first, var.first, para);
+		this->GWPP_Base(&second, var.second, para);
+		rapidjson::GenericStringRef<char> jsonKeyFirst(json_first);
+		rapidjson::GenericStringRef<char> jsonKeySecond(json_second);
+		vlValue->SetObject();
+		vlValue->AddMember(jsonKeyFirst, first, *this->mngr->rjson.allocator);
+		vlValue->AddMember(jsonKeySecond, second, *this->mngr->rjson.allocator);
 	}
 	break;
 	case memPara::rjson_deseriazlize:
 	{
 		rapidjson::Value* vlValue = (rapidjson::Value*)pValue;
+		if (vlValue->IsObject())
+		{
+			if (vlValue->HasMember(json_first) && vlValue->HasMember(json_second))
+			{
+				rapidjson::Value& first = vlValue->operator[](json_first),
+					& second = vlValue->operator[](json_second);
+
+				this->GWPP_Base(&first, var.first, para);
+				this->GWPP_Base(&second, var.second, para);
+				break;
+			}
+		}
+		this->mngr->statusBadValue++;
 	}
 	break;
 #endif
-	}
+}
 }
 template<typename _memStruct>
 inline std::enable_if_t<mem::has_save_fetch_struct<_memStruct>::value, void>

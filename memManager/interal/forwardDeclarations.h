@@ -1,19 +1,20 @@
-#define __MEMMNGR_INTERNAL_HEADER_PERMISSION														friend class memUnit;\
-																									friend class memManager;\
-												template<typename mu2, bool releaseable2>			friend class memPtr;\
-												template<typename mu2, bool releaseable2>			friend class softPtr;\
-												template<typename mu2, bool releaseable2>			friend class dumbPtr;\
-																									friend struct memPara;\
-																									friend class ReflectResultKeyValue;\
-																									friend struct ReflectResult;\
-																									friend class Ingress;\
-																									friend class refIngress;\
-																									friend class Egress;\
-												template<class cast2>								friend struct pEgress;\
-																									friend class Subfile;\
-												template<class T2>									friend void GWPP_Struct(memUnit* mu3, const char* key1, const char* key2, T2& var, memPara para);\
-																									friend class lowlevel;\
-												template <typename T2>								friend struct has_save_fetch_struct;\
+#define __MEMMNGR_INTERNAL_HEADER_PERMISSION														friend class mem::memUnit;\
+																									friend class mem::memManager;\
+												template<typename mu2, bool releaseable2>			friend class mem::memPtr;\
+												template<typename mu2, bool releaseable2>			friend class mem::impPtr;\
+												template<typename mu2, bool releaseable2>			friend class mem::dumbPtr;\
+																									friend struct mem::memPara;\
+																									friend class mem::ReflectResultKeyValue;\
+																									friend struct mem::ReflectResult;\
+																									friend class mem::Ingress;\
+																									friend class mem::refIngress;\
+																									friend class mem::Egress;\
+												template<class cast2>								friend struct mem::pEgress;\
+																									friend class mem::Subfile;\
+																									friend class mem::lowlevel;\
+												template <typename T2>								friend struct mem::has_save_fetch_struct;\
+
+#define MEM_PERMISSION __MEMMNGR_INTERNAL_HEADER_PERMISSION
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

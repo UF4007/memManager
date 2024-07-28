@@ -98,6 +98,12 @@ struct is_vector<std::vector<T>> : std::true_type {};
 template <>
 struct is_vector<std::vector<bool>> : std::false_type {};					//notoriously
 
+template <typename T, typename = void>
+struct is_forward_list : std::true_type {};
+
+template <typename T>
+struct is_forward_list<T, std::void_t<decltype(std::declval<T>().size())>> : std::false_type {};
+
 template <typename T>
 struct is_stack : std::false_type {};
 
@@ -112,7 +118,7 @@ struct is_queue<std::queue<T, _container>> : std::true_type {};
 
 template <typename T>
 struct is_stl_container {
-	static constexpr bool value = (has_iterator<T>::value// || is_array<T>::value || is_stack<T>::value || is_queue<T>::value		//not allowed for special containers.
+	static constexpr bool value = (has_iterator<T>::value || is_array<T>::value// || is_stack<T>::value || is_queue<T>::value		//not allowed for special containers.
 		) && !is_string<T>::value
 		 && !std::is_same_v<T ,std::vector<bool>>;							//notoriously
 };
@@ -126,9 +132,8 @@ struct is_variant<std::variant<Args...>> : std::true_type {};
 template <typename T, typename = void>
 struct is_pair : std::false_type {};
 
-template <typename T>
-struct is_pair<T, std::void_t<typename std::tuple_element<0, T>::type, typename std::tuple_element<1, T>::type>>
-	: std::integral_constant<bool, std::is_same_v<T, std::pair<typename std::tuple_element<0, T>::type, typename std::tuple_element<1, T>::type>>> {};
+template <typename first, typename second>
+struct is_pair<std::pair<first, second>> : std::true_type {};
 
 template <typename, typename = void>
 struct has_emplace_back : std::false_type {};

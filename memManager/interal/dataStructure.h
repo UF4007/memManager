@@ -19,18 +19,15 @@ struct headerOfFile {
 
 
 struct variantOfFile{
-	uint8_t content[8];
-	uint8_t typeHolder;		//low half byte
-	uint8_t type[4];
+	uint32_t offset;
+	uint32_t type;
 };
 //how the variant save in the file
 
 
 struct pairOfFile {
-	uint8_t key[8];
-	uint8_t valueHolder1;	//high half byte
-	uint8_t valueHolder2;	//low half byte
-	uint8_t value[8];
+	uint32_t offset;
+	uint32_t sizeOfFirst;
 };
 //how the pair save in the file
 

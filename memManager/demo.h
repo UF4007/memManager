@@ -57,17 +57,94 @@ class testUnit2 :public testUnit {
 public:
 	testUnit2(memManager* manager) :testUnit(manager) {};
 	pEgress<testIngr> egressTest;
-	pVariant<testUnit, testUnit2> genetest;
+	std::variant<memPtr<testUnit>, memPtr<testUnit2>, int, std::string> genetest;
+	pVariant<testUnit, testUnit2> pvtest;		//aka std::variant<memPtr<>, memPtr<>>
 	pFunction<int(int, int), 75342> funcTest;
 	memPtr<testManager> ptrback;
-	std::vector<std::string> curiousTest[10];
-};
-class testStlContainer :public memUnit {
+	std::vector<memPtr<testStlContainer>> curiousTest[10];
+}; 
+#include <list>
+#include <unordered_set>
+#include <map>
+#include <unordered_map>
+#include <array>
+#include <forward_list>
+#include <bitset>
+class testStlContainer : public memUnit {
 	__MEMMNGR_INTERNAL_HEADER_PERMISSION
-private:
-	testStlContainer(memManager* manager) :memUnit(manager) {};
+public:
+	testStlContainer(memManager* manager) : memUnit(manager) {};
+
 	void save_fetch(memPara para) override {
+		GWPP("testList", testList, para);
+		GWPP("testDeque", testDeque, para);
+		GWPP("testForwardList", testForwardList, para);
+		GWPP("testArray", testArray, para);
+		GWPP("testSet", testSet, para);
+		GWPP("testUnorderedSet", testUnorderedSet, para);
+		GWPP("testMultiset", testMultiset, para);
+		GWPP("testUnorderedMultiset", testUnorderedMultiset, para);
+		GWPP("testMap", testMap, para);
+		GWPP("testUnorderedMap", testUnorderedMap, para);
+		GWPP("testMultimap", testMultimap, para);
+		GWPP("testUnorderedMultimap", testUnorderedMultimap, para);
+		//GWPP("testStack", testStack, para);						//unsupported yet
+		//GWPP("testQueue", testQueue, para);
+		//GWPP("testPriorityQueue", testPriorityQueue, para);
+		//GWPP("testBitset", testBitset, para);
+		//GWPP("testTuple", testTuple, para);
 	}
+
+	// List
+	std::list<int> testList;
+
+	// Deque
+	std::deque<int> testDeque;
+
+	// Set
+	std::set<int> testSet;
+
+	// Unordered Set
+	std::unordered_set<int> testUnorderedSet;
+
+	// Map
+	std::map<int, std::string> testMap;
+
+	// Unordered Map
+	std::unordered_map<int, std::string> testUnorderedMap;
+
+	// Stack (implemented using deque)
+	std::stack<int> testStack;
+
+	// Queue (implemented using deque)
+	std::queue<int> testQueue;
+
+	// Priority Queue (implemented using vector)
+	std::priority_queue<int> testPriorityQueue;
+
+	// Multiset
+	std::multiset<int> testMultiset;
+
+	// Multimap
+	std::multimap<int, std::string> testMultimap;
+
+	// Unordered Multiset
+	std::unordered_multiset<int> testUnorderedMultiset;
+
+	// Unordered Multimap
+	std::unordered_multimap<int, std::string> testUnorderedMultimap;
+
+	// Array
+	std::array<int, 10> testArray;
+
+	// Forward List
+	std::forward_list<int> testForwardList;
+
+	// Bitset
+	std::bitset<10> testBitset;
+
+	// Tuple
+	std::tuple<int, std::string, double> testTuple;
 };
 class testManager :public memManager {
 	__MEMMNGR_INTERNAL_HEADER_PERMISSION
@@ -154,6 +231,65 @@ inline void mem_testmain()
 		testManagerA->tu2 = new testUnit2(*testManagerA);
 		testManagerA->tu2->ptrback = testManagerA;
 		memPtr<testUnit2> testUnitC = testManagerA->tu2;
+
+		//all stl container adaptive
+		if (true)
+		{
+			testStlContainer* container = new testStlContainer(*testManagerA);
+			//vector is definitely supported
+
+			//List
+			container->testList.push_back(50);
+			container->testList.push_back(49);
+
+			//Deque
+			container->testDeque.push_back(48);
+			container->testDeque.push_back(47);
+
+			//ForwardList
+			container->testForwardList.push_front(45);
+			container->testForwardList.push_front(46);
+
+			//Array
+			container->testArray[0] = 44;
+			container->testArray[1] = 43;
+
+			//Set
+			container->testSet.emplace(42);
+			container->testSet.emplace(41);
+
+			//UnorderedSet
+			container->testUnorderedSet.emplace(40);
+			container->testUnorderedSet.emplace(39);
+
+			//Multiset
+			container->testMultiset.emplace(38);
+			container->testMultiset.emplace(37);
+
+			//UnorderedMultiset
+			container->testUnorderedMultiset.emplace(36);
+			container->testUnorderedMultiset.emplace(35);
+
+			//Map
+			container->testMap.emplace(34, "34 test");
+			container->testMap.emplace(33, "test 33");
+
+			//UnorderedMap
+			container->testUnorderedMap.emplace(32, "32 test uom");
+			container->testUnorderedMap.emplace(31, "test 31 uomap");
+
+			//Multimap
+			container->testMultimap.emplace(30, "30 test mm");
+			container->testMultimap.emplace(29, "29 test mm");
+
+			//UnorderedMultimap
+			container->testUnorderedMultimap.emplace(28, "28 test uomm");
+			container->testUnorderedMultimap.emplace(27, "27 test uomm");
+
+			testUnitC->curiousTest[2].push_back(container);
+			testUnitC->curiousTest[2].push_back(container);
+			testUnitC->curiousTest[5].push_back(container);
+		}
 
 		//variant test
 		testManagerA->tu2->genetest = testUnitA;
@@ -316,6 +452,7 @@ inline void mem_testmain()
 #if MEM_RJSON_ON
 		//rapid Json serialize
 		std::string serializeDumpJson;
+		testManagerA->tu2->genetest = std::string("variant string");
 		testManagerA->serializeJson(&serializeDumpJson);		//rapid json: i5-9300HF costs 1315ms for 500k meta units serialize, 1266ms for deserialize. No wonder.
 
 		//rapid Json deserialize

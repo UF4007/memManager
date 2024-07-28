@@ -84,8 +84,8 @@ class lowlevel {
 		offsetOut += sizeof(uint32_t);
 	}
 	//long value (length confirmed when compile)
-	template <typename _T, bool _forced = false>
-	inline static typename std::enable_if<(sizeof(_T) > 8 || _forced), void>::type
+	template <typename _T>
+	inline static typename std::enable_if<(sizeof(_T) > 8), void>::type
 	mem_toBytes(const _T& value, std::vector<uint8_t>* section, std::vector<uint8_t>* entireFile) noexcept {
 		uint32_t offset;
 		mem_toBytes(offset, sizeof(_T), section, entireFile);
@@ -155,7 +155,7 @@ class lowlevel {
 	//concrete write of memory
 	template <size_t size_T>
 	inline static typename std::enable_if<size_T <= 8, bool>::type
-	SpecialCharsTo_mem(uint8_t* holder, uint8_t* content) noexcept {
+	SpecialCharsTo_mem(const uint8_t* holder, uint8_t* content) noexcept {
 		for (uint8_t i = 0; i < size_T; i++)
 		{
 			if (*content == 0)
@@ -173,13 +173,13 @@ class lowlevel {
 	//short value
 	template <typename _T>
 	inline static typename std::enable_if<(sizeof(_T) <= 8), bool>::type
-	BytesTo_mem(_T& value, uint8_t* position, uint8_t* entireFile, uint8_t* endOfFile) noexcept {
+	BytesTo_mem(_T& value,const uint8_t* position, const uint8_t* entireFile, const uint8_t* endOfFile) noexcept {
 		constexpr uint8_t size_T = sizeof(_T);
 		memcpy(&value, position, size_T);
 		return true;
 	}
 	//read long value zone (only returns where the memory placed, checked before the return)
-	inline static bool BytesTo_mem(uint8_t*& valuePos, uint32_t& length, uint8_t* position, uint8_t* entireFile, uint8_t* endOfFile) noexcept {
+	inline static bool BytesTo_mem(uint8_t*& valuePos, uint32_t& length, const uint8_t* position, const uint8_t* entireFile, const uint8_t* endOfFile) noexcept {
 		uint32_t offset;
 		if (BytesTo_mem(offset, position, entireFile, endOfFile) == false)
 			return false;
@@ -188,19 +188,19 @@ class lowlevel {
 			length = 0;
 			return true;
 		}
-		uint8_t* lengthPosition = entireFile + offset;
+		const uint8_t* lengthPosition = entireFile + offset;
 		if (lengthPosition < entireFile)
 			return false;
 		if (lengthPosition + *(uint32_t*)lengthPosition > endOfFile)
 			return false;
-		valuePos = lengthPosition + sizeof(uint32_t);
+		valuePos = (uint8_t*)(lengthPosition + sizeof(uint32_t));
 		memcpy(&length, lengthPosition, sizeof(uint32_t));
 		return true;
 	}
 	//long value (length confirmed when compile, copy entire size when execute)
-	template <typename _T, bool _forced = false>
-	inline static typename std::enable_if<(sizeof(_T) > 8 || _forced), bool>::type
-	BytesTo_mem(_T& value, uint8_t* position, uint8_t* entireFile, uint8_t* endOfFile) noexcept {
+	template <typename _T>
+	inline static typename std::enable_if<(sizeof(_T) > 8), bool>::type
+	BytesTo_mem(_T& value, const uint8_t* position, const uint8_t* entireFile, const uint8_t* endOfFile) noexcept {
 		constexpr uint32_t size_T = sizeof(_T);
 		uint8_t* valuePos;
 		uint32_t length;
@@ -209,36 +209,6 @@ class lowlevel {
 		length = std::min(size_T, length);
 		memcpy(&value, valuePos, length);
 		return true;
-	}
-
-
-
-	//json serialize
-
-
-
-	//stl container adaptive
-	template<typename Container>
-	inline static auto pushStlContainer(Container& c) noexcept -> typename Container::iterator
-	{
-		if constexpr (mem::has_emplace_back<Container>::value)
-		{
-			c.emplace_back();
-			return std::prev(c.end());
-		}
-		else if constexpr (mem::has_emplace_front<Container>::value)
-		{
-			c.emplace_front();
-			return c.before_begin();
-		}
-		else if constexpr (mem::has_emplace<Container>::value)
-		{
-			return c.emplace();
-		}
-		else
-		{
-			static_assert(!std::is_same_v<Container, Container>, "Unsupported container type.");
-		}
 	}
 
 
