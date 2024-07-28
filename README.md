@@ -171,7 +171,7 @@ mem_testmain();
 
 ## memManager  
 - 一个 `memManager` 类的实例，就相当于一个磁盘上的文件，可以下载（保存）数据到磁盘，上传（加载）数据到内存。
-- `memManager` 类继承了 `memUnit` 类，在其 `memManager` 上保存的指针，将充当根索引。
+- `memManager` 类继承了 `memUnit` 类，"memManager is memUnit."。在 `memManager` 上保存的指针，将充当根索引。
 - 沿着根索引查找不到的指针，将视为悬空指针。序列化时将不会保存这些指针。
 
 #### 使用方式
