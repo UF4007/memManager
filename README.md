@@ -222,19 +222,20 @@ mem_testmain();
 #### 算术类型与枚举
 #### 原生数组
 #### STL容器
-	- vector
- 	- list
-	- deque
- 	- array
-	- forward_list
- 	- set
-	- unordered_set
- 	- multiset
- 	- unordered_multiset
- 	- map
-	- unordered_map
- 	- multimap
- 	- unordered_multimap
+- vector
+- list
+- deque
+- array
+- forward_list
+- set
+- unordered_set
+- multiset
+- unordered_multiset
+- map
+- unordered_map
+- multimap
+- unordered_multimap
+
 #### 字符串
 #### 智能指针
 #### 文件出入口
