@@ -116,6 +116,7 @@ mem_testmain();
   - [pEgress](#pEgress)
 - [线程安全](#线程安全)
 - [使用的库](#使用的库)
+- [联系作者](#联系作者)
 
 ---
 
@@ -316,4 +317,8 @@ mem_testmain();
 - `memUnit` 的反射、序列化等操作，需要借助 `memManager` 共享部分数据。因此对 `memUnit` 加锁，不能保证其安全
   
 ### 使用的库：
-* **rapidJson**  ：用于JSON支持  
+* **rapidJson**  ：用于JSON支持
+
+### 联系作者：
+* 在此项目中提出issue
+* 或+QQ：2219647655
