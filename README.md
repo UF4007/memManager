@@ -235,6 +235,9 @@ mem_testmain();
 - unordered_map
 - multimap
 - unordered_multimap
+- stack(暂不)
+- queue(暂不)
+- priority_queue(暂不)
 
 #### 字符串
 #### 智能指针
