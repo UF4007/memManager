@@ -95,6 +95,7 @@ mem_testmain();
   - [variant](#variant)
   - [pair](#pair)
   - [tuple](#tuple)	（拟支持）
+  - [optional](#optional)	（拟支持）
   - [pFunction](#pfunction)
   - [任意结构体的内存直接序列化](#任意结构体的内存直接序列化)
   - [自定义序列化](#自定义序列化)
@@ -246,6 +247,7 @@ mem_testmain();
 #### variant
 #### pair
 #### tuple	（拟支持）
+#### optional	（拟支持）
 #### pFunction
 #### 任意结构体的内存直接序列化
 #### 自定义序列化
