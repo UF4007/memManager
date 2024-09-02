@@ -315,8 +315,9 @@ mem_testmain();
 
 ## 线程安全
 
-- 以 `memManager` 为单位加锁后，能保证此 `memManager` 及其下属 `memUnit` 是线程安全的
-- `memUnit` 的反射、序列化等操作，需要借助 `memManager` 共享部分数据。因此对 `memUnit` 加锁，不能保证其安全
+- 以 `memManager` 为单位加锁后，能保证此 `memManager` 及其下属 `memUnit` 是线程安全的。
+- `memUnit` 的反射、序列化等操作，需要借助 `memManager` 共享部分数据。因此对 `memUnit` 加锁，不能保证其安全。
+- `memPtr` 系列智能指针是线程不安全的。
   
 ### 使用的库：
 * **rapidJson**  ：用于JSON支持
