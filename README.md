@@ -89,9 +89,9 @@ mem_testmain();
   - [原生数组](#原生数组)
   - [STL容器](#stl容器)
   - [原子量](#原子量)
-  - [unique_ptr](#unique_ptr)
   - [字符串](#字符串)
   - [memPtr系列指针](#memPtr系列指针)
+  - [unique_ptr<T extends memUnit>](#unique_ptr<T extends memUnit>)
   - [文件出入口](#文件出入口)
   - [variant](#variant)
   - [pair](#pair)
@@ -282,6 +282,7 @@ mem_testmain();
 #### 原子量
 #### 字符串
 #### memPtr系列指针
+#### unique_ptr<T extends memUnit>
 #### 文件出入口
 #### variant
 #### pair
