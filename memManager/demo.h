@@ -25,7 +25,7 @@ class testStlContainer;
 class testUnit :public memUnit {
 	//declare variables with MACRO
 public:
-	DECLARE_VAR3(
+	DECLARE_VARS(
 		memPtr<testUnit>, anotherone,
 		double, num,
 		std::string, str
@@ -35,7 +35,7 @@ public:
 };
 class testIngr :public Ingress {
 public:
-	DECLARE_VAR3(
+	DECLARE_VARS(
 		memPtr<testIngr>, anotherone,
 		double, num,
 		std::string, str
@@ -165,6 +165,7 @@ public:
 	uint64_t n8;
 	float n9;
 	double n10;
+	std::atomic<double> atom;
 	std::wstring wstr;
 	enum { ea, eb, ec }n11;
 	bool n12;
@@ -187,6 +188,7 @@ private:
 		GWPP("n8", n8, para);
 		GWPP("n9", n9, para);
 		GWPP("n10", n10, para);
+		GWPP("atom", atom, para);
 		GWPP("wstr", wstr, para);
 		GWPP("n11", n11, para);
 		GWPP("n12", n12, para);
@@ -220,6 +222,7 @@ inline void mem_testmain()
 		testManagerA->num = 4000;
 		testManagerA->setUrl(url);
 
+		testManagerA->atom.store(567.23);
 		testManagerA->wstr = L"t4";
 		testManagerA->vec.emplace_back(testUnitA);
 		testManagerA->vec.emplace_back(*testUnitB);

@@ -24,22 +24,24 @@
 #pragma warning(disable: __MEM_MANAGER_DISABLE_WARINIGS)
 #endif
 
-#include "interal\config.h"
-#include "interal\includes.h"
+#include "internal\config.h"
+#include "internal\includes.h"
 
 namespace mem {
-	//global constant
+#include "HAL\fileHAL.h"
+
+	//global const
 	constexpr size_t maxKey = 50;
-	constexpr size_t maxURL = MAX_NVS_PATH;
+	constexpr size_t maxURL = MEM_MAX_FILE_PATH;
 	constexpr size_t likelyBytesPerUnit = 100;			//reserve vector capacity we assumed for per memUnit.
 
 	//headonly version distinguish, prevent the linker from mixing differental versions when multi-reference.
 	inline namespace v247a {
 
-#include "interal\dataStructure.h"
-#include "interal\forwardDeclarations.h"
-#include "interal\sfinae.h"
-#include "interal\lowlevel.h"
+#include "internal\dataStructure.h"
+#include "internal\forwardDeclarations.h"
+#include "internal\sfinae.h"
+#include "internal\lowlevel.h"
 
 		// memory meta unit
 		class memUnit {
@@ -51,6 +53,7 @@ namespace mem {
 			static constexpr bool isGWPPValid = std::is_arithmetic<_T>::value ||
 				std::is_array<_T>::value ||
 				mem::is_stl_container<_T>::value ||
+				mem::is_atomic<_T>::value ||
 				mem::is_string<_T>::value ||
 				(std::is_enum<_T>::value && std::is_arithmetic<typename mem::enum_type<_T>::type>::value) ||
 				mem::is_variant<_T>::value ||
@@ -69,6 +72,7 @@ namespace mem {
 			void serialize(std::vector<uint8_t>* bc);						//binary deserialize a raw data format to a memUnit, ignore all pointers
 #if MEM_RJSON_ON
 			void serializeJson(std::string* bc);									//serialize a memUnit to json. for recurring objects, ignore then
+			bool deserializeJson(const std::string& bc);
 			bool deserializeJson(const char* Ptr, uint32_t StringSize);				//deserialize a memUnit from a json string
 			inline static const char json_type[] = "Variant Type";
 			inline static const char json_value[] = "Value";
@@ -102,6 +106,9 @@ namespace mem {
 			template<class _stlCont>
 			std::enable_if_t<mem::is_stl_container<_stlCont>::value, void>
 				GWPP_Base(void* pValue, _stlCont& var, memPara& para);				//read or write stl container
+			template<class _atom>
+			std::enable_if_t<mem::is_atomic<_atom>::value, void>
+				GWPP_Base(void* pValue, _atom& var, memPara& para);					//read or write atomic
 			template<class _string>
 			std::enable_if_t<mem::is_string<_string>::value, void>
 				GWPP_Base(void* pValue, _string& var, memPara& para);				//read or write string, always memcpy no matter what the content saved by container
@@ -181,7 +188,7 @@ namespace mem {
 			inline void operator<<(impPtr& right) { this->moveIn(right); }
 			void swap(dumbPtr<mu, releaseable>& right) = delete;
 			void swap(memPtr<mu, releaseable>& right) = delete;
-			inline void swap(impPtr<mu, releaseable>& right) { this->swap(right); }
+			inline void swap(impPtr<mu, releaseable>& right) { this->dumbPtr<mu, releaseable>::swap((dumbPtr<mu, releaseable>&)right); }
 		};
 
 		// memory pointer, which points and counts the same as dumbPtr, and it can save and fetch in GWPP like other variables.
@@ -201,10 +208,10 @@ namespace mem {
 			inline void operator<<(memPtr& right) { this->moveIn(right); }
 			void swap(dumbPtr<mu, releaseable>& right) = delete;
 			void swap(impPtr<mu, releaseable>& right) = delete;
-			inline void swap(memPtr<mu, releaseable>& right) { this->swap(right); }
+			inline void swap(memPtr<mu, releaseable>& right) { this->dumbPtr<mu, releaseable>::swap((dumbPtr<mu, releaseable>&)right); }
 		};
 
-		// special param of save_fetch function
+		// special param in save_fetch function
 		struct memPara {						//do not do any relative with this structure till you know how this lib works completely.
 			union {
 				struct {
@@ -446,13 +453,13 @@ namespace mem {
 			void operator=(memManager&& m) = delete;
 			memManager(const char* path);
 			virtual ~memManager();
-			char url[maxURL];
+            std::string url;
 			bool download();																								//save, download things from memory to disk. returns false if failed.
 			bool upload();																									//fetch, upload things from disk to memory. returns false if failed.
 			memPtr<Subfile> findSubfile(const char* fileName);																//find specific subfile in this memManager by path. subfile is the file be used for Egress
 			memPtr<Egress> findEgress(const memPtr<Subfile> subfile, const char* kw, const char* type);						//find Egress by keyword and type
 			impPtr<Ingress> findIngress(const char* kw, const char* type);													//find Ingress by keyword and type
-			inline void setUrl(const std::string scptr) { memcpy(url, scptr.c_str(), std::min(scptr.size(), sizeof(url))); }//set the path of the memManager
+			inline void setUrl(const std::string& scptr) { url = scptr; }                                                   //set the path of the memManager
 			char* getFileName();																							//if url is vacancy returns nullptr
 			bool deserialize(uint8_t* Ptr, uint32_t StringSize);															//binary deserialize the whole memManager
 			void serialize(std::vector<uint8_t>* bc);																		//binary serialize the whole memManager
@@ -486,30 +493,31 @@ namespace mem {
 			};
 
 			//global file list (files loaded)
-			inline static io::mutex global_mutex;
+			inline static std::mutex global_mutex;
 			inline static std::vector<memManager*> global_load;
 		};
 
 		template<typename..._Args, typename _Out>
 		inline static bool pVariantGet(std::variant<_Args...>& vari, _Out*& out) {
 			memPtr<_Out>* get = std::get_if<memPtr<_Out>>(&vari);
-			if (get)
-			{
-				out = **get;
-				return true;
-			}
-			else
-			{
-				out = nullptr;
-				return false;
-			}
-		};
+            if (get)
+            {
+                out = **get;
+                if (out)
+                    return true;
+            }
+            else
+            {
+                out = nullptr;
+            }
+            return false;
+        };
 
 		//variant of function pointer
 		template<typename illg, int ID> class pFunction { static_assert(!std::is_same_v<illg, illg>, "not a function"); };
 		template<typename Ret, typename ...Args, int ID> class pFunction<Ret(Args...), ID> {
 			__MEMMNGR_INTERNAL_HEADER_PERMISSION
-				using funcPtr = Ret(*)(Args...);
+			using funcPtr = Ret(*)(Args...);
 			uint32_t type;
 			constexpr static size_t save_fetch_size = sizeof(type);
 			inline void save_fetch_struct(uint8_t* content, memPara& para) { GWPP_memcpy(content, type, para); }
@@ -550,17 +558,22 @@ namespace mem {
 					return true;
 				return false;
 			}
-			inline bool isFilled()const {
-				return type < getSizeofFunctions() / sizeof(funcPtr);
-			}
-			inline bool isEmpty()const {
-				return !this->isFilled();
-			}
-		};
+			inline bool isFilled() const{
+                return type < getSizeofFunctions() / sizeof(funcPtr);
+            }
+            inline bool isEmpty() const{
+                return !this->isFilled();
+            }
+            inline funcPtr operator*() const  {
+                if (this->isFilled())
+                    return Functions[type];
+                return nullptr;
+            }
+        };
 		//MACRO: use to initialize variant (Functions) in pFunction 
 #define INITIALIZE_PFUNCTION(___Signature___,___ID___, ...) template<> const mem::pFunction<___Signature___,___ID___>::funcPtr mem::pFunction<___Signature___,___ID___>::Functions[] = { __VA_ARGS__ };
 
-#include "interal\definitions.h"
+#include "internal\definitions.h"
 	}
 }
 #ifdef _MSC_VER
