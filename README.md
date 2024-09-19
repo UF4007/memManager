@@ -33,7 +33,7 @@ struct testU : public mem::memUnit {			//继承memUnit
 
 struct testM : public mem::memManager {			//继承memManager
 
-	std::vector<mem::memPtr<testU>> vec;		//此库能正确序列化指针关系
+	std::vector<mem::memPtr<testU>> vec;		//此库能正确序列化memPtr系列智能指针的指向关系
 	
 	void save_fetch(mem::memPara para) override {
 		GWPP("vec", vec, para);
@@ -89,8 +89,9 @@ mem_testmain();
   - [原生数组](#原生数组)
   - [STL容器](#stl容器)
   - [原子量](#原子量)
+  - [unique_ptr](#unique_ptr)
   - [字符串](#字符串)
-  - [智能指针](#智能指针)
+  - [memPtr系列指针](#memPtr系列指针)
   - [文件出入口](#文件出入口)
   - [variant](#variant)
   - [pair](#pair)
@@ -99,7 +100,7 @@ mem_testmain();
   - [pFunction](#pfunction)
   - [非侵入式，任意结构体的内存直接序列化](#非侵入式，任意结构体的内存直接序列化)
   - [自定义序列化](#自定义序列化)
-- [智能指针](#智能指针)
+- [memPtr系列](#memPtr系列)
   - [dumbPtr](#dumbPtr)
   - [impPtr](#impPtr)
   - [memPtr](#memptr)
@@ -219,7 +220,7 @@ mem_testmain();
 - ***`impPtr<Ingress> findIngress(const char* kw, const char* type);`***
 	- 根据关键字和类型名，查找该管理器的“入口”
 
-## 智能指针
+## memPtr系列
 
 #### dumbPtr
 
@@ -280,7 +281,7 @@ mem_testmain();
 
 #### 原子量
 #### 字符串
-#### 智能指针
+#### memPtr系列指针
 #### 文件出入口
 #### variant
 #### pair
@@ -305,7 +306,7 @@ mem_testmain();
 
 - 用于 `memManager` 之间的通信
 - `pEgress<>` 模板中，填写想要指向的对方 `memManager` 类中成员 `memUnit` 的类名
-- 本质是一个智能指针，指向一个内部类 `Egress`
+- 本质是一个impPtr指针，指向一个内部类 `Egress`
 - `Egress` 记录了对方 `memManager` 的文件名、键名和类类型
 - 使用 `makeEIPair()` 后，会在自身 `memManager` 内创建一个 `Egress`，并让 `pEgress` 指向这个 `Egress`，并在对方 `memManager` 内创建一个 `Ingress`，`Ingress` 指向目标 `memUnit`
 - 这个 `Egress-Ingress Pair` 将拥有相同的键名和类型
@@ -321,8 +322,8 @@ mem_testmain();
 ## 线程安全
 
 - 以 `memManager` 为单位加锁后，能保证此 `memManager` 及其下属 `memUnit` 是线程安全的。
-- `memUnit` 的反射、序列化等操作，需要借助 `memManager` 共享部分数据。因此对 `memUnit` 加锁，不能保证其安全。
-- `memPtr` 系列智能指针是线程不安全的。
+- `memUnit` 的反射、序列化等操作，需要借助 `memManager` 共享部分数据。因此对同一 `memManager` 的不同 `memUnit` 加锁，不能保证其反射、序列化的线程安全。
+- 对 `memPtr` 系列指针及其控制块的任何修改操作均是线程不安全的；只读取则是线程安全的。
   
 ### 使用的库：
 * **rapidJson**  ：用于JSON支持
