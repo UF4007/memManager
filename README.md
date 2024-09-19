@@ -94,8 +94,8 @@ mem_testmain();
   - [文件出入口](#文件出入口)
   - [variant](#variant)
   - [pair](#pair)
-  - [tuple](#tuple)	（拟支持）
-  - [optional](#optional)	（拟支持）
+  - [tuple](#tuple)	（暂不，拟支持）
+  - [optional](#optional)	（暂不，拟支持）
   - [pFunction](#pfunction)
   - [非侵入式，任意结构体的内存直接序列化](#非侵入式，任意结构体的内存直接序列化)
   - [自定义序列化](#自定义序列化)
@@ -124,7 +124,7 @@ mem_testmain();
 
 ## memUnit  
 - `memUnit` 是内存管理的基础单元，封装了内存操作的通用逻辑。
-- 每个 `memUnit` 对象都与一个 `memManager` 对象关联，后者管理着内存的分配和释放。
+- 每个 `memUnit` 对象都与一个 `memManager` 对象关联， `memManager` 记录着每一块 `memUnit` 的分配和释放。
 - `memUnit` 在创建时需指定一个 `memManager` 以隶属。
 - `memManager` 内部维护了一个列表，用以记录所有的 `memUnit`。
 - `memManager` 析构时，其下属所有的 `memUnit` 都会被析构。
@@ -132,8 +132,8 @@ mem_testmain();
 #### 使用方式
 - 用户类继承 `memUnit`
 - 实现纯虚函数 `void save_fetch(mem::memPara para) override {}`
-- 实现构造函数 `user(mem::memManager* m) :memUnit(m) {}`
-- 若上面的两个函数不可见，则需添加权限宏 `MEM_PERMISSION`
+- 实现构造函数 `userClass(mem::memManager* m) :memUnit(m) {}`
+- 若上面的两个函数不为public，则需添加权限宏 `MEM_PERMISSION`
 
 #### 限制
 - `memUnit` 不能分配在栈上
@@ -147,6 +147,7 @@ mem_testmain();
  - ***`void serialize(std::vector<uint8_t> bc);`***
  	- 二进制序列化函数，将单个 `memUnit` 对象保存到字节流中。
   	- **信息有损：** 忽视所有指针。
+   	- 详见：[两种二进制序列化](#两种二进制序列化)
 <br>
 
  - ***`bool deserialize(uint8_t Ptr, uint32_t StringSize);`***
@@ -156,6 +157,7 @@ mem_testmain();
  - ***`void serializeJson(std::string* bc);`***
  	- JSON序列化函数。
   	- **信息有损：** 其中的 **每个** 指针都会转化成一个子 `memUnit` 对象节点或 `null` ，而无视指针间的指向关系；同时若有循环引用，则节点变为字符串 "Recurring Object"。
+   	- 详见：[JSON序列化与反序列化](#json序列化与反序列化)
 <br>
 
  - ***`bool deserializeJson(const char* Ptr, uint32_t StringSize);`***
@@ -221,39 +223,6 @@ mem_testmain();
 
 # (以下的文档还没有写完)
 
-## 支持的数据类型
-#### 算术类型与枚举
-#### 原生数组
-#### STL容器
-- vector
-- list
-- deque
-- array
-- forward_list
-- set
-- unordered_set
-- multiset
-- unordered_multiset
-- map
-- unordered_map
-- multimap
-- unordered_multimap
-- stack(暂不)
-- queue(暂不)
-- priority_queue(暂不)
-
-#### 原子量
-#### 字符串
-#### 智能指针
-#### 文件出入口
-#### variant
-#### pair
-#### tuple	（拟支持）
-#### optional	（拟支持）
-#### pFunction
-#### 非侵入式，任意结构体的内存直接序列化
-#### 自定义序列化
-
 ## 智能指针
 
 #### dumbPtr
@@ -291,6 +260,39 @@ mem_testmain();
 ## 自定义格式
 
 ## JSON序列化与反序列化
+
+## 支持的数据类型
+#### 算术类型与枚举
+#### 原生数组
+#### STL容器
+- vector
+- list
+- deque
+- array
+- forward_list
+- set
+- unordered_set
+- multiset
+- unordered_multiset
+- map
+- unordered_map
+- multimap
+- unordered_multimap
+- stack(暂不)
+- queue(暂不)
+- priority_queue(暂不)
+
+#### 原子量
+#### 字符串
+#### 智能指针
+#### 文件出入口
+#### variant
+#### pair
+#### tuple	（暂不，拟支持）
+#### optional	（暂不，拟支持）
+#### pFunction
+#### 非侵入式，任意结构体的内存直接序列化
+#### 自定义序列化
 
 ## 静态反射
 （此功能目前还在实现中）
