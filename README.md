@@ -91,7 +91,6 @@ mem_testmain();
   - [原子量](#原子量)
   - [字符串](#字符串)
   - [memPtr系列指针](#memPtr系列指针)
-  - [unique_ptr\<T extends memUnit\>](#unique_ptrt-extends-memunit)
   - [文件出入口](#文件出入口)
   - [variant](#variant)
   - [pair](#pair)
@@ -282,7 +281,6 @@ mem_testmain();
 #### 原子量
 #### 字符串
 #### memPtr系列指针
-#### unique_ptr\<T extends memUnit\>
 #### 文件出入口
 #### variant
 #### pair
