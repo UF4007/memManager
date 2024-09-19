@@ -145,47 +145,46 @@ mem_testmain();
 <br>
 
  - ***`void serialize(std::vector<uint8_t> bc);`***
- 	- 二进制序列化函数，将单个 `memUnit` 对象保存到字节流中。
+ - ***`bool deserialize(uint8_t* Ptr, uint32_t StringSize);`***
+ 	- 二进制序列化/反序列化，单一序列化，仅序列化memUnit。
   	- **信息有损：** 忽视所有指针。
    	- 详见：[两种二进制序列化](#两种二进制序列化)
 <br>
 
- - ***`bool deserialize(uint8_t Ptr, uint32_t StringSize);`***
- 	- 二进制反序列化函数，从字节流恢复 `memUnit` 对象。
-<br>
-
  - ***`void serializeJson(std::string* bc);`***
- 	- JSON序列化函数。
+ - ***`bool deserializeJson(const char* Ptr, uint32_t StringSize);`***
+ 	- JSON序列化/反序列化。
   	- **信息有损：** 其中的 **每个** 指针都会转化成一个子 `memUnit` 对象节点或 `null` ，而无视指针间的指向关系；同时若有循环引用，则节点变为字符串 "Recurring Object"。
    	- 详见：[JSON序列化与反序列化](#json序列化与反序列化)
 <br>
 
- - ***`bool deserializeJson(const char* Ptr, uint32_t StringSize);`***
- 	- JSON反序列化函数。
-<br>
-
 - ***`void GWPP_Any(const char* key, Type var, mem::memPara para)`***
 	- 简单地序列化任意结构体。
- 	- 将结构体的内存直接复制，以进行序列化。Json将保存为base64格式。
+ 	- 将结构体的内存直接复制，以进行序列化。在Json序列化时输出base64格式。
 <br>
 
 - ***`void GWPP(const char* key, Type var, mem::memPara para)`***
-	- 按指定规律，序列化保存。
+	- 按规律序列化。
  	- 无论数组、指针、泛型如何嵌套，都能进行正确的序列化。
   	- 对于不支持的数据类型，SFINAE将不通过。[支持的数据类型](#支持的数据类型)
 
 ## memManager  
 - 一个 `memManager` 类的实例，就相当于一个磁盘上的文件，可以下载（保存）数据到磁盘，上传（加载）数据到内存。
-- `memManager` 类继承了 `memUnit` 类，"memManager is memUnit."。在 `memManager` 上保存的指针，将充当根索引。
-- 沿着根索引查找不到的指针，将视为悬空指针。序列化时将不会保存这些指针。
+- `memManager` 类继承了 `memUnit` 类，"memManager is memUnit."。在 `memManager` 上保存的其它 `memUnit` 的指针，将充当根索引。
+- 沿着根索引触及不到的 `memUnit` 类，将视为悬空类。整体序列化时将不会保存这些类。
+- 虽然悬空类不会被序列化，但是它们仍然被 `memManager` 记录， `memManager` 析构时会析构这些悬空类。
 
 #### 使用方式
 - 继承 `memManager` 类
 - 实现纯虚函数 `void save_fetch(memPara para) override{}`
-- 若纯虚函数不可见，则需添加权限宏 `MEM_PERMISSION`
+- 若纯虚函数不为public，则需添加权限宏 `MEM_PERMISSION`
 
 #### 方法与属性
-- ***`void setUrl(const WCHAR* wcptr);`***
+- ***`std::string url;`***
+	- 文件路径。
+<br>
+
+- ***`void setUrl(const std::string& wcptr);`***
 	- 设置文件路径。
 <br>
 
@@ -193,22 +192,20 @@ mem_testmain();
 	- 获取路径中的文件名。
 <br>
 
-- ***`void serialize(std::vector<uint8_t> bc);`***
- 	- 二进制序列化函数，将 `memManager` 及其下属所有 `memUnit` 对象保存到字节流中。
+- ***`void serialize(std::vector<uint8_t>* bc);`***
+- ***`bool deserialize(uint8_t* Ptr, uint32_t StringSize);`***
+ 	- 二进制序列化/反序列化，整体序列化，序列化整个memManager。
   	- **信息无损：** 能正确处理所有根索引可及的内存单元，能正确指示指针间的指向、嵌套、多态（需要结构设计合理，具体见[impPtr](#impPtr)）。
 <br>
 
-- ***`bool deserialize(uint8_t Ptr, uint32_t StringSize);`***
- 	- 二进制反序列化函数，从字节流恢复 `memManager` 对象及其所有下属 `memUnit`。
-<br>
-
-- ***`upload()`***
-	- 根据 `setUrl` 设置的路径，上传文件到内存
- 	- `upload()` 与 `download()` 使用的文件读写接口见[文件读写接口](#文件读写接口)
-<br>
-
 - ***`download()`***
-	- 根据 `setUrl` 设置的路径，下载文件到硬盘
+- ***`upload()`***
+	- 根据 `setUrl` 设置的路径，进行相应的硬盘操作。
+ 	- `upload()` 与 `download()` 使用fopen系列函数，详见：[文件读写接口](#文件读写接口)
+<br>
+
+- ***`uint32_t statusBadValue;`***
+	- 上一次反序列化时，从字节流中读取到的“坏值”。
 <br>
 
 - ***`memPtr<Subfile> findSubfile(const char* fileName);`***
