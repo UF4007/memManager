@@ -184,7 +184,7 @@ mem_testmain();
 	- 文件路径。
 <br>
 
-- ***`void setUrl(const std::string& wcptr);`***
+- ***`void setUrl(const std::string& str);`***
 	- 设置文件路径。
 <br>
 
@@ -200,7 +200,7 @@ mem_testmain();
 
 - ***`download()`***
 - ***`upload()`***
-	- 根据 `setUrl` 设置的路径，进行相应的硬盘操作。
+	- 根据 `url` 属性指示的路径，进行硬盘操作。
  	- `upload()` 与 `download()` 使用fopen系列函数，详见：[文件读写接口](#文件读写接口)
 <br>
 
