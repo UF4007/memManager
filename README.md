@@ -4,8 +4,7 @@
 ### 统一实现了C++结构体的内存RAII、磁盘存储、跨文件引用、静态反射、二进制序列化、json序列化。 
 
 #### 支持平台
-- Windows64/32
-- ESP32  
+- POSIX标准平台，包括WIN/Linux/ESP32  
 
 #### 如何使用
 这是一个headonly库。把memManager文件夹复制到源目录下，在源代码中`#include "memManager/memManager.h"` 即可
@@ -318,7 +317,8 @@ mem_testmain();
 
 ## 文件读写接口
 
-- 在 `HAL\` 目录下的 `fileHAL.h` 文件中提供了文件读写的接口函数。
+- 在 `HAL\` 目录下 `fileHAL.h` 文件中。
+- 目前使用C标准库fopen系列。可修改此接口，以实现文件IO多路复用，或移植到其他平台。
 
 ## 线程安全
 
