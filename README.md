@@ -204,6 +204,7 @@ mem_testmain();
 
 - ***`upload()`***
 	- 根据 `setUrl` 设置的路径，上传文件到内存
+ 	- `upload()` 与 `download()` 使用的文件读写接口见[文件读写接口](#文件读写接口)
 <br>
 
 - ***`download()`***
@@ -220,8 +221,6 @@ mem_testmain();
 
 - ***`impPtr<Ingress> findIngress(const char* kw, const char* type);`***
 	- 根据关键字和类型名，查找该管理器的“入口”
-
-# (以下的文档还没有写完)
 
 ## 智能指针
 
