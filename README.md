@@ -230,6 +230,7 @@ mem_testmain();
 - 每个 `memUnit` 内部设置了一个指针，用于指回 `dumbPtr` 的控制块。
 - ***方法与属性：***
 	- `operaotr =(T mu)` 指针赋值，将一个 `memUnit` 派生类绑定到此指针下。若此 `memUnit` 未绑定控制块，则分配一个新的控制块；否则赋给此 `memUnit` 绑定的控制块。
+	- `precision_cast(T* mu)`  `precision_cast()` 基类派生类指针的强制类型转换，在不开启RTTI时，根据虚表指针是否相同，来匹配从基类到派生类的转换。前一个重载用于转入，成功返回 `true` ，失败返回 `false` ；后一个重载用于转出，成功返回 `*` 原始指针，失败返回 `nullptr` 。
 	- `isFilled()`  `isEmpty()` 判断其是否为空。
  	- `swap()` 交换两个指针。 
 
@@ -248,7 +249,7 @@ mem_testmain();
 - 在序列化时，只尝试从已经构造了的 `memUnit` 实例中查找，找不到时，不会主动构造一个新内存单元（因为丢失了派生类的类型信息）。
 - 因此，在 `save_fetch` 反序列化时，某个 `memPtr` 必须**先**构造出派生类，基类指针 `impPtr` 之**后**才能指向。
 
-<br>
+---
 
 - 将 `memPtr` 转换为 `impPtr` ， `impPtr` 转换为 `dumpPtr` 是合法的。反之， `dumpPtr` 无法转换为 `impPtr` ， `impPtr` 无法转换为 `memPtr` 。
 - 若要强制转换，可以提取出 `*` 原始指针，再赋值。
