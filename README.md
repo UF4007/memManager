@@ -3,13 +3,10 @@
 [English(pending)](README-en.md)  
 ### 统一实现了C++结构体的内存RAII、磁盘存储、跨文件引用、静态反射、二进制序列化、json序列化。 
 
-#### 支持平台
-- POSIX标准平台，包括WIN/Linux/ESP32  
-
 #### 如何使用
 这是一个headonly库。把memManager文件夹复制到源目录下，在源代码中`#include "memManager/memManager.h"` 即可
 
-C++标准：17或更高
+**C++标准：** 17或更高
 
 #### 示例代码
 
