@@ -231,7 +231,12 @@ mem_testmain();
 	- `operaotr =(T mu)` 指针赋值，将一个 `memUnit` 派生类绑定到此指针下。若此 `memUnit` 未绑定控制块，则分配一个新的控制块；否则赋给此 `memUnit` 绑定的控制块。
 	- `precision_cast(T* mu)`  `precision_cast()` 基类与派生类指针之间的类型转换。派生类转换为基类总是成功；在不开启RTTI时，根据虚表指针是否相同，来匹配从基类到派生类的转换。前一个重载用于转入，成功返回 `true` ，失败返回 `false` ；后一个重载用于转出，成功返回 `*` 原始指针，失败返回 `nullptr` 。
 	- `isFilled()`  `isEmpty()` 判断其是否为空。
- 	- `swap()` 交换两个指针。 
+ 	- `swap()` 交换两个指针。
+  	- `operaotr ==()` 比较两个指针所指向的 `memUnit` 是否为同一个，或者是否都为空。
+  	- `operator*()` `operator->()` 取原始指针，空指针返回 `nullptr` 。
+  	- `release()` 释放指针所指的 `memUnit` ，其他指向此 `memUnit` 的 `memPtr` 则会变为类似空指针的行为逻辑，但是依然指向控制块，且控制块需等到引用计数为0后才能回收。类似于 `weak_ptr` 。
+  	- `moveIn()` `operator<<()` 移入，将入参 `memPtr` 移入此指针，入参 `memPtr` 则变为空指针。
+  	- `supplantIn()` 代换，使用一个新的 `memUnit` 来代替控制块所指向的 `memUnit` ，此时所有指向旧 `memUnit` 的 `memPtr` 系列指针都将指向这个新的 `memUnit` ，旧的 `memUnit` 将被释放。
 
 #### memPtr
 
