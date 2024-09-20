@@ -103,7 +103,6 @@ mem_testmain();
   - [dumbPtr](#dumbPtr)
   - [memPtr](#memptr)
   - [impPtr](#impPtr)
-- [两种二进制序列化](#两种二进制序列化)
 - [序列化原理](#序列化原理)
 - [反序列化构造原理](#反序列化构造原理)
 - [析构原理](#析构原理)
@@ -195,7 +194,7 @@ mem_testmain();
 - ***`void serialize(std::vector<uint8_t>* bc);`***
 - ***`bool deserialize(uint8_t* Ptr, uint32_t StringSize);`***
  	- 二进制序列化/反序列化，整体序列化，序列化整个memManager。
-  	- **信息无损：** 能正确处理所有根索引可及的内存单元，能正确指示指针间的指向、嵌套、多态（需要结构设计合理，具体见[impPtr](#impPtr)）。
+  	- **信息无损：** 能正确处理所有根索引可及的内存单元，能正确指示指针间的指向、嵌套、多态（多态需要结构设计合理，具体见[impPtr](#impPtr)）。
 <br>
 
 - ***`download()`***
@@ -230,7 +229,7 @@ mem_testmain();
 - 每个 `memUnit` 内部设置了一个指针，用于指回 `dumbPtr` 的控制块。
 - ***方法与属性：***
 	- `operaotr =(T mu)` 指针赋值，将一个 `memUnit` 派生类绑定到此指针下。若此 `memUnit` 未绑定控制块，则分配一个新的控制块；否则赋给此 `memUnit` 绑定的控制块。
-	- `precision_cast(T* mu)`  `precision_cast()` 基类派生类指针的强制类型转换，在不开启RTTI时，根据虚表指针是否相同，来匹配从基类到派生类的转换。前一个重载用于转入，成功返回 `true` ，失败返回 `false` ；后一个重载用于转出，成功返回 `*` 原始指针，失败返回 `nullptr` 。
+	- `precision_cast(T* mu)`  `precision_cast()` 基类与派生类指针之间的类型转换。派生类转换为基类总是成功；在不开启RTTI时，根据虚表指针是否相同，来匹配从基类到派生类的转换。前一个重载用于转入，成功返回 `true` ，失败返回 `false` ；后一个重载用于转出，成功返回 `*` 原始指针，失败返回 `nullptr` 。
 	- `isFilled()`  `isEmpty()` 判断其是否为空。
  	- `swap()` 交换两个指针。 
 
@@ -239,6 +238,7 @@ mem_testmain();
 - 序列化指针，**继承了 `dumpPtr` 的所有功能**。可以在 `save_fetch` 中参与序列化。
 - 在序列化时，会尝试在 `memManager` 内查找此指针指向的 `memUnit` 是否已经被构造。若没有，则构造；若有，则指向这个构造了的实例。
 - 因此，序列化能正确处理此指针的多次引用与循环引用。
+- 对于STL容器、 `std::variant` 中的指针，序列化能够正常处理。
 - ***限制：***
 	- `memUnit` 中成员 `memPtr` 的指向，不能够跨越此 `memUnit` 的 `memManager` 。即 `memManager A` 下属的 `memUnit` 中的成员 `memPtr` 无法指向 `memManager B` 下属的 `memUnit` 。
 	- 序列化时检测到跨越行为，断言将失败。若要跨越，使用 `dumpPtr` 或 [跨文件引用：出入口机制](#跨文件引用：出入口机制)
@@ -253,12 +253,6 @@ mem_testmain();
 
 - 将 `memPtr` 转换为 `impPtr` ， `impPtr` 转换为 `dumpPtr` 是合法的。反之， `dumpPtr` 无法转换为 `impPtr` ， `impPtr` 无法转换为 `memPtr` 。
 - 若要强制转换，可以提取出 `*` 原始指针，再赋值。
-
-## 两种二进制序列化
-
-#### memUnit的序列化
-
-#### memManager的序列化
 
 ## 序列化原理
 
