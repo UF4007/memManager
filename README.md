@@ -101,8 +101,8 @@ mem_testmain();
   - [自定义序列化](#自定义序列化)
 - [memPtr系列](#memPtr系列)
   - [dumbPtr](#dumbPtr)
-  - [impPtr](#impPtr)
   - [memPtr](#memptr)
+  - [impPtr](#impPtr)
 - [两种二进制序列化](#两种二进制序列化)
 - [序列化原理](#序列化原理)
 - [反序列化构造原理](#反序列化构造原理)
@@ -146,7 +146,7 @@ mem_testmain();
 
  - ***`void serialize(std::vector<uint8_t> bc);`***
  - ***`bool deserialize(uint8_t* Ptr, uint32_t StringSize);`***
- 	- 二进制序列化/反序列化，单一序列化，仅序列化memUnit。
+ 	- 二进制序列化/反序列化，单一序列化：仅序列化此memUnit。
   	- **信息有损：** 忽视所有指针。
    	- 详见：[两种二进制序列化](#两种二进制序列化)
 <br>
@@ -154,17 +154,17 @@ mem_testmain();
  - ***`void serializeJson(std::string* bc);`***
  - ***`bool deserializeJson(const char* Ptr, uint32_t StringSize);`***
  	- JSON序列化/反序列化。
-  	- **信息有损：** 其中的 **每个** 指针都会转化成一个子 `memUnit` 对象节点或 `null` ，而无视指针间的指向关系；同时若有循环引用，则节点变为字符串 "Recurring Object"。
+  	- **信息有损：** 其中的 **每个** memPtr指针都会转化成一个子 `memUnit` 对象节点或 `null` ，而无视指针重复的指向关系；同时若有循环引用，则节点变为字符串 "Recurring Object"。
    	- 详见：[JSON序列化与反序列化](#json序列化与反序列化)
 <br>
 
 - ***`void GWPP_Any(const char* key, Type var, mem::memPara para)`***
-	- 简单地序列化任意结构体。
+	- 在save_fetch中使用，简单地序列化任意结构体。
  	- 将结构体的内存直接复制，以进行序列化。在Json序列化时输出base64格式。
 <br>
 
 - ***`void GWPP(const char* key, Type var, mem::memPara para)`***
-	- 按规律序列化。
+	- 在save_fetch中使用，按变量类型序列化。
  	- 无论数组、指针、泛型如何嵌套，都能进行正确的序列化。
   	- 对于不支持的数据类型，SFINAE将不通过。[支持的数据类型](#支持的数据类型)
 
@@ -221,16 +221,37 @@ mem_testmain();
 
 ## memPtr系列
 
+- `memPtr` 系列指针，是只能指向 `memUnit` 派生类的智能指针，其控制块使用一个内存池分配。 `memUnit` 派生类与控制块是独立分配的。
+
 #### dumbPtr
+
+- 基本指针，无法写在 `save_fetch` 中进行序列化。
+- 指针只能指向 `memUnit` 派生类。
+- 每个 `memUnit` 内部设置了一个指针，用于指回 `dumbPtr` 的控制块。
+- ***方法与属性：***
+	- `operaotr =(T mu)` 指针赋值，将一个 `memUnit` 派生类绑定到此指针下。若此 `memUnit` 未绑定控制块，则分配一个新的控制块；否则赋给此 `memUnit` 绑定的控制块。
+	- `isFilled()`  `isEmpty()` 判断其是否为空。
+ 	- `swap()` 交换两个指针。 
+
+#### memPtr
+
+- 序列化指针，**继承了 `dumpPtr` 的所有功能**。可以在 `save_fetch` 中参与序列化。
+- 在序列化时，会尝试在 `memManager` 内查找此指针指向的 `memUnit` 是否已经被构造。若没有，则构造；若有，则指向这个构造了的实例。
+- 因此，序列化能正确处理此指针的多次引用与循环引用。
+- ***限制：***
+	- `memUnit` 中成员 `memPtr` 的指向，不能够跨越此 `memUnit` 的 `memManager` 。即 `memManager A` 下属的 `memUnit` 中的成员 `memPtr` 无法指向 `memManager B` 下属的 `memUnit` 。
+	- 序列化时检测到跨越行为，断言将失败。若要跨越，使用 `dumpPtr` 或 [跨文件引用：出入口机制](#跨文件引用：出入口机制)
 
 #### impPtr
 
-#### memPtr
-- 基本内存单元的智能指针，类似于 `shared_ptr`。
-- 此指针只能指向 `memUnit` 派生类。
-- 每个 `memUnit` 内部设置了一个指针，用于指回 `memPtr` 所创建的中间体。
-- 使用 `isFilled()` 和 `isEmpty()` 判断其是否为空。
-- `memUnit` 中成员 `memPtr` 的指向，不能跨越 `memUnit` 的 `memManager`。当序列化时检测到跨越行为，断言将失败。
+- 多态指针，继承了 `dumpPtr` 的所有功能。可以写在 `save_fetch` 中参与序列化。
+- 在序列化时，只尝试从已经构造了的 `memUnit` 实例中查找，找不到时，不会主动构造一个新内存单元（因为丢失了派生类的类型信息）。
+- 因此，在 `save_fetch` 反序列化时，某个 `memPtr` 必须**先**构造出派生类，基类指针 `impPtr` 之**后**才能指向。
+
+<br>
+
+- 将 `memPtr` 转换为 `impPtr` ， `impPtr` 转换为 `dumpPtr` 是合法的。反之， `dumpPtr` 无法转换为 `impPtr` ， `impPtr` 无法转换为 `memPtr` 。
+- 若要强制转换，可以提取出 `*` 原始指针，再赋值。
 
 ## 两种二进制序列化
 
@@ -320,9 +341,10 @@ mem_testmain();
 
 ## 线程安全
 
-- 以 `memManager` 为单位加锁后，能保证此 `memManager` 及其下属 `memUnit` 是线程安全的。
-- `memUnit` 的反射、序列化等操作，需要借助 `memManager` 共享部分数据。因此对同一 `memManager` 的不同 `memUnit` 加锁，不能保证其反射、序列化的线程安全。
+- 以 `memManager` 为单位加锁后，能保证整个 `memManager` 和下属 `memUnit` 在这个线程是安全的。
+- `memUnit` 的构造析构、反射、单一序列化、整体序列化等操作，均需要使用并修改 `memManager` 内部数据。因此对同一 `memManager` 的不同 `memUnit` 加锁，不能保证这些操作的线程安全。
 - 对 `memPtr` 系列指针及其控制块的任何修改操作均是线程不安全的；只读取则是线程安全的。
+- 通过放弃 `memPtr` 与 `memUnit` 的线程安全，换取了其高度的数据操作灵活性。对于热点代码，亦有多种简便方法来保证同一 `memManager` 下的多线程安全。
   
 ### 使用的库：
 * **rapidJson**  ：用于JSON支持
