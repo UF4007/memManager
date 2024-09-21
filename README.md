@@ -201,7 +201,7 @@ mem_testmain();
 <br>
 
 - ***`uint32_t statusBadValue;`***
-	- 上一次反序列化时，从字节流中读取到的“坏值”。
+	- 上一次反序列化时，从字节流中读取到的“坏值”数量，即反序列化失败的变量数量。
 <br>
 
 - ***`memPtr<Subfile> findSubfile(const char* fileName);`***
@@ -217,7 +217,7 @@ mem_testmain();
 
 ## memPtr系列
 
-- `memPtr` 系列指针，是只能指向 `memUnit` 派生类的智能指针，其控制块使用一个内存池分配。 `memUnit` 派生类与控制块是独立分配的。
+- `memPtr` 系列指针，是只能指向 `memUnit` 派生类的智能指针，其控制块使用一个内存池分配。 `memUnit` 派生类与控制块是独立分配的，这虽然略微降低了效率，但换来了数据操作的灵活性。
 
 #### dumbPtr
 
@@ -231,7 +231,7 @@ mem_testmain();
  	- `swap()` 交换两个指针。
   	- `operaotr ==()` 比较两个指针所指向的 `memUnit` 是否为同一个，或者是否都为空。
   	- `operator*()` `operator->()` 取原始指针，空指针返回 `nullptr` 。
-  	- `release()` 释放指针所指的 `memUnit` ，其他指向此 `memUnit` 的 `memPtr` 则会变为类似空指针的行为逻辑，但是依然指向控制块，且控制块需等到引用计数为0后才能回收。类似于 `weak_ptr` 。
+  	- `release()` 主动释放指针所指的 `memUnit` ，其他指向此 `memUnit` 的 `memPtr` 则会变为类似空指针的行为逻辑，但是依然指向控制块，且控制块需等到引用计数为0后才能回收，类似于 `weak_ptr` 。
   	- `moveIn()` `operator<<()` 移入，将入参 `memPtr` 移入此指针，入参 `memPtr` 则变为空指针。
   	- `supplantIn()` 代换，使用一个新的 `memUnit` 来代替控制块所指向的 `memUnit` ，此时所有指向旧 `memUnit` 的 `memPtr` 系列指针都将指向这个新的 `memUnit` ，旧的 `memUnit` 将被释放。
 
