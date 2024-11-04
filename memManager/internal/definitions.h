@@ -575,14 +575,15 @@ inline bool memManager::upload()
 		return 0;
 	}
 
-	uint8_t* bytes = (uint8_t*)calloc(1, fileSize + 10);
+	uint8_t* bytes = (uint8_t*)::operator new(fileSize + 10);
+	memset(bytes, 0, fileSize + 10);
 	bool ret = false;
 	if (fileSize == mem::file::Fread(handle, bytes, fileSize))
 	{
 		ret = this->deserialize(bytes, fileSize);
 	}
 	mem::file::Fclose(handle);
-	free(bytes);
+	::operator delete(bytes);
 	return ret;
 }
 inline memPtr<Subfile> memManager::findSubfile(const char* fileName)
@@ -724,7 +725,7 @@ inline void memUnit::GWPP_Any(const char* key, _any& var, memPara& para) {
 		uint32_t offset = para.sectionVector->size();
 		para.sectionVector->emplace_back(0);	//holder
 		lowlevel::mem_toBytes(var, para.sectionVector, this->mngr->binSeri.bytes);
-		uint8_t* holder = &para.sectionVector[offset];
+		uint8_t* holder = &para.sectionVector->at(offset);
 		uint8_t* data = holder + 1;
 		lowlevel::mem_toSpecialChars<_subSizeMin>(holder, data);
 		para.sectionVector->emplace_back(0);

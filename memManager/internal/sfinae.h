@@ -169,3 +169,4 @@ template<typename T>
 struct atomic_under_type<std::atomic<T>> {
 	using type = T;
 };
+

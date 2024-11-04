@@ -7,6 +7,7 @@
 #include <deque>
 #include <stack>
 #include <queue>
+#include <atomic>
 #include <string>
 #include <variant>
 #include <cassert>

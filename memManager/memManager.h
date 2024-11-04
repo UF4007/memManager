@@ -24,11 +24,11 @@
 #pragma warning(disable: __MEM_MANAGER_DISABLE_WARINIGS)
 #endif
 
-#include "internal\config.h"
-#include "internal\includes.h"
+#include "internal/config.h"
+#include "internal/includes.h"
 
 namespace mem {
-#include "HAL\fileHAL.h"
+#include "HAL/fileHAL.h"
 
 	//global const
 	constexpr size_t maxKey = 50;
@@ -38,10 +38,10 @@ namespace mem {
 	//headonly version distinguish, prevent the linker from mixing differental versions when multi-reference.
 	inline namespace v247a {
 
-#include "internal\dataStructure.h"
-#include "internal\forwardDeclarations.h"
-#include "internal\sfinae.h"
-#include "internal\lowlevel.h"
+#include "internal/dataStructure.h"
+#include "internal/forwardDeclarations.h"
+#include "internal/sfinae.h"
+#include "internal/lowlevel.h"
 
 		// memory meta unit
 		class memUnit {
@@ -464,6 +464,7 @@ namespace mem {
 			bool deserialize(uint8_t* Ptr, uint32_t StringSize);															//binary deserialize the whole memManager
 			void serialize(std::vector<uint8_t>* bc);																		//binary serialize the whole memManager
 			uint32_t statusBadValue = 0;																					//the sum of bad value in the last deserialize call
+			uint32_t maxContainerSize = 0;																					//max size when deserializing a stl container, 0 for no limit.
 		private:
 			[[nodiscard]] memPtr<Egress> makeEgress_IngressPair(const impPtr<Ingress>& target, const char* kw);				//make a pair of Ingress-Egress. This function execute by egress memManager, and it will make an Ingress to point target memUnit in target memManager, and returns an Egress.
 			void thisCons();
@@ -518,8 +519,6 @@ namespace mem {
 		template<typename Ret, typename ...Args, int ID> class pFunction<Ret(Args...), ID> {
 			__MEMMNGR_INTERNAL_HEADER_PERMISSION
 			using funcPtr = Ret(*)(Args...);
-			uint32_t type;
-			constexpr static size_t save_fetch_size = sizeof(type);
 			inline void save_fetch_struct(uint8_t* content, memPara& para) { GWPP_memcpy(content, type, para); }
 			inline static constexpr uint32_t getSizeofFunctions()
 			{
@@ -529,6 +528,8 @@ namespace mem {
 				return ret;
 			}
 		public:
+			uint32_t type;
+			constexpr static size_t save_fetch_size = sizeof(type);
 			static const funcPtr Functions[];
 			inline Ret operator()(Args&&...args)const {
 				assert((type < getSizeofFunctions() / sizeof(funcPtr)) || !("pFunction is empty or invaild"));
@@ -573,7 +574,7 @@ namespace mem {
 		//MACRO: use to initialize variant (Functions) in pFunction 
 #define INITIALIZE_PFUNCTION(___Signature___,___ID___, ...) template<> const mem::pFunction<___Signature___,___ID___>::funcPtr mem::pFunction<___Signature___,___ID___>::Functions[] = { __VA_ARGS__ };
 
-#include "internal\definitions.h"
+#include "internal/definitions.h"
 	}
 }
 #ifdef _MSC_VER

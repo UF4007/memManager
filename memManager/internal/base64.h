@@ -1,6 +1,7 @@
 //referenced from: https://github.com/tkislan/base64
 //              from: https://github.com/adamvr/arduino-base64
 //
+//under MIT Lisence
 //2024.07.24
 
 #pragma once

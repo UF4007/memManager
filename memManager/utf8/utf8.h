@@ -1,5 +1,6 @@
 //referenced from: https://github.com/nemtrif/utfcpp
 //
+//under BSL license
 //2024.07.26
 
 // Copyright 2006 Nemanja Trifunovic

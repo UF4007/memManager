@@ -198,7 +198,8 @@ private:
 inline void mem_testmain()
 {
 	char url[100] = "C:\\Users\\R\\Desktop\\newsave.guma";		//must be a valid path when trying this demo in other machines
-	char url2[100] = "C:\\Users\\R\\Desktop\\oldsave.guma";		//in windows
+	char url2[100] = "C:\\Users\\R\\Desktop\\oldsave.guma";		//on windows
+        //on linux, system will create a file on local directory named "C:\Users\R\Desktop\newsave.guma"    :)
 
 	//char* url = "newsave";									//in esp32
 	//char* url2 = "oldsave";
@@ -330,6 +331,14 @@ inline void mem_testmain()
 		testManagerA->n3 = INT16_MIN;
 		testManagerA->n5 = INT32_MIN;
 		testManagerA->n7 = INT64_MIN;
+
+		//recusive depth test(up to 2000 recursive for MSVC 1MB stack in -O2 optimize)
+		memPtr<testUnit> rdt = testManagerA->anothert1;
+		//for (int i = 0; i < 2000; i++)
+		//{
+		//	rdt->anotherone = new testUnit(*testManagerA);
+		//	rdt = rdt->anotherone;
+		//}
 
 		//benchmark of rw
 		//for (int i = 0; i < 500000; i++)
