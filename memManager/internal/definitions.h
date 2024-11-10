@@ -833,6 +833,12 @@ memUnit::GWPP(const char* key, _T& var, memPara& para) {
 #endif
 	}
 }
+template<typename _memStruct>
+inline std::enable_if_t<mem::has_save_fetch_sub<_memStruct>::value, void>
+memUnit::GWPP(const char* key, _memStruct& varST, memPara& para)
+{
+	varST.save_fetch_sub(this, key, para);
+}
 template<class _subType>
 inline constexpr size_t memUnit::getArrayValueTypeSize() {
 	//assert: the size must be less than 8 bytes

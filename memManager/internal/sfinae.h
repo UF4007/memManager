@@ -39,6 +39,17 @@ struct has_save_fetch_struct {
 	static constexpr bool value = has_save_fetch_struct_helper<T>::value;
 };
 
+template<typename T>
+struct has_save_fetch_sub {
+
+	template <typename V, typename U = void>
+	struct has_save_fetch_sub_helper : std::false_type {};
+	template <typename V>
+	struct has_save_fetch_sub_helper<V, std::void_t<decltype(std::declval<V>().save_fetch_sub(std::declval<memUnit*>(), std::declval<const char*>(), std::declval<memPara&>()))>> : std::true_type {};
+
+	static constexpr bool value = has_save_fetch_sub_helper<T>::value;
+};
+
 //template <typename T>
 //struct has_save_fetch_struct_helper {
 //	template<typename V> using save_fetch_struct_ptr = void(V::*)(uint8_t*, memPara);

@@ -13,6 +13,7 @@
 																									friend class mem::Subfile;\
 																									friend class mem::lowlevel;\
 												template <typename T2>								friend struct mem::has_save_fetch_struct;\
+												template <typename T2>								friend void GWPP_sub(mem::memUnit* mem, const char* key1, const char* key2, T2& var, mem::memPara& para);\
 
 #define MEM_PERMISSION __MEMMNGR_INTERNAL_HEADER_PERMISSION
 

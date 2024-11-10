@@ -12,7 +12,7 @@
  * x  what causes the new/delete issue in memPtrComm?
  * x  flame graph analyse and optimize
  * x  allocator optimize
- * x  provide more safety RPC via ioManager https, remote file via SFTP.
+ * x  all-purpose object like javascript, dynamic reflection.
  * 
  * Licensed under the MIT License.
  * Looking forward to visiting https://github.com/UF4007/memManager to propose issues and making memManager available.
@@ -91,6 +91,9 @@ namespace mem {
 			template<class _T>
 			std::enable_if_t<mem::memUnit::isGWPPValid<_T>, void>
 				GWPP(const char* key, _T& var, memPara& para);
+			template<typename _memStruct>
+			std::enable_if_t<mem::has_save_fetch_sub<_memStruct>::value, void>
+				GWPP(const char* key, _memStruct& varST, memPara& para);			//for any custom struct that fulfilled member function save_fetch_sub()
 		private:
 			inline memUnit() { mngr = nullptr; }							//this constructor is for memManagers. never use it manually.
 			memUnit* operator&() = delete;									//forbidden to get the address of a memUnit, it means prohibit to create a memUnit on stack.
@@ -121,6 +124,7 @@ namespace mem {
 			void GWPP_Base(void* pValue, std::variant<Args...>& var, memPara& para);//read or write variants
 			template<class T1, class T2>
 			void GWPP_Base(void* pValue, std::pair<T1, T2>& var, memPara& para);	//read or write pair
+
 			template<typename _memStruct>
 			std::enable_if_t<mem::has_save_fetch_struct<_memStruct>::value, void>
 				GWPP_Base(void* pValue, _memStruct& varST, memPara& para);			//for any custom struct that fulfilled member function save_fetch_struct() and fixed memory size save_fetch_size
@@ -145,13 +149,13 @@ namespace mem {
 			~dumbPtr();
 			void operator=(const dumbPtr<mu, releaseable>& mp);									//copy
 			template<typename _any, bool _r>
-			dumbPtr(const dumbPtr<_any, _r>& mp);												//polymorphic construct (derived into base)
+			dumbPtr(const dumbPtr<_any, _r>& mp);												//polymorphic construct (derived to base)
 			template<typename _any, bool _r>
 			typename std::enable_if<
 				(!std::is_same_v<mu, _any> &&
 					(std::is_base_of_v<mu, _any> //|| std::is_base_of_v<_any, mu>
 						) && _r == releaseable), void>::type
-				operator=(const dumbPtr<_any, _r>& mp);											//polymorphic copy (derived into base)
+				operator=(const dumbPtr<_any, _r>& mp);											//polymorphic copy (derived to base)
 			void operator=(mu* pmu);															//set a memPtr a raw pointer
 			template<typename _anotherMu>
 			std::enable_if_t<std::is_base_of<memUnit, _anotherMu>::value, bool>
@@ -347,17 +351,27 @@ namespace mem {
 		};
 #endif
 
-		//it copys memory and moves the content pointer to the next
+		// only put two keys together, one is written in memUnit and another is written in sub-struct.
+		template<typename _T>
+		inline static void GWPP_sub(memUnit* mem, const char* key1, const char* key2, _T& var, memPara& para)
+		{
+			char buffer[maxKey];
+			std::strcpy(buffer, key1);
+			std::strcat(buffer, key2);
+			mem->GWPP(buffer, var, para);
+		}
+
+		// it copys binary memory and moves the content pointer to the next
 		template<typename _T>
 		inline static void GWPP_memcpy(uint8_t*& content, _T& var, memPara& para)
 		{
 			if (para.isConstruct())
 			{
-				memcpy(&var, content, sizeof(_T));
+				::memcpy(&var, content, sizeof(_T));
 			}
 			else
 			{
-				memcpy(content, &var, sizeof(_T));
+				::memcpy(content, &var, sizeof(_T));
 			}
 			content += sizeof(_T);
 		}
