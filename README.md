@@ -1,4 +1,4 @@
-<div class="no-wrap">
+<div>
 	<a href="">
 		<img src="https://img.shields.io/badge/C++-%2300599C.svg?logo=c%2B%2B&logoColor=white" alt="cpp">
 	</a>
@@ -8,6 +8,8 @@
 	<a href="https://github.com/UF4007/memManager/blob/main/License.txt">
 		<img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT">
 	</a>
+</div>
+<div>
 	<a href="https://www.microsoft.com/en-us/windows">
 		<img src="https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white" alt="win">
 	</a>
