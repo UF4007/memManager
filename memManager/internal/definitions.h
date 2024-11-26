@@ -47,7 +47,7 @@ inline dumbPtr<mu, releaseable>::dumbPtr(mu* pmu)
 	}
 }
 template<typename mu, bool releaseable>
-inline dumbPtr<mu, releaseable>::dumbPtr(const dumbPtr<mu, releaseable>& mp)
+inline dumbPtr<mu, releaseable>::dumbPtr(const dumbPtr<mu, releaseable>& mp) noexcept
 {
 	if (mp.isEmpty())
 	{
@@ -58,6 +58,35 @@ inline dumbPtr<mu, releaseable>::dumbPtr(const dumbPtr<mu, releaseable>& mp)
 		ptr = mp.ptr;
 		(ptr->count)++;
 	}
+}
+template <class mu, bool releaseable>
+inline void dumbPtr<mu, releaseable>::operator=(const dumbPtr<mu, releaseable> &mp) noexcept
+{
+    // assert(&mp != this || !"Equals self results undefined behavior.");
+    if (&mp == this)
+        return;
+    cdd();
+    if (mp.isEmpty())
+    {
+        ptr = nullptr;
+    }
+    else
+    {
+        ptr = mp.ptr;
+        (ptr->count)++;
+    }
+}
+template <typename mu, bool releaseable>
+inline dumbPtr<mu, releaseable>::dumbPtr(dumbPtr<mu, releaseable> &&mp)  noexcept : ptr(mp.ptr)
+{
+    mp.ptr = nullptr;
+}
+template <class mu, bool releaseable>
+inline void dumbPtr<mu, releaseable>::operator=(dumbPtr<mu, releaseable> &&mp) noexcept
+{
+    cdd();
+    this->ptr = mp.ptr;
+    mp.ptr = nullptr;
 }
 template<typename mu, bool releaseable>
 inline dumbPtr<mu, releaseable>::~dumbPtr() {
@@ -96,23 +125,6 @@ inline void dumbPtr<mu, releaseable>::degeneracy()
 			else
 				(ptr->count)--;
 		}
-}
-template<class mu, bool releaseable>
-inline void dumbPtr<mu, releaseable>::operator=(const dumbPtr<mu, releaseable>& mp)
-{
-	//assert(&mp != this || !"Equals self results undefined behavior.");
-	if (&mp == this)
-		return;
-	cdd();
-	if (mp.isEmpty())
-	{
-		ptr = nullptr;
-	}
-	else
-	{
-		ptr = mp.ptr;
-		(ptr->count)++;
-	}
 }
 template<class mu, bool releaseable>
 template<typename _anotherMu>
@@ -445,7 +457,7 @@ inline memUnit::memUnit(memManager* manager) {
 	this->mngr = manager;
 	if (manager)
 		manager->memUnits.insert(this);
-	//else assert(false || !"a memManager must be designated when creating a new memUnit.");					//technically we allow this behavior
+	//else assert(!"a memManager must be designated when creating a new memUnit.");					//technically we allow this behavior
 	sharedPtr = nullptr;
 }
 inline memUnit::memUnit(const memUnit& munit) {
@@ -767,6 +779,23 @@ inline void memUnit::GWPP_Any(const char* key, _any& var, memPara& para) {
 #endif
 	}
 };
+template<typename _T>
+inline void GWPP_sub(memUnit* mem, const char* key1, const char* key2, _T& var, memPara& para)
+{
+	char buffer[maxKey];
+	std::strcpy(buffer, key1);
+	std::strcat(buffer, key2);
+#if MEM_RJSON_ON
+	if (para.order == memPara::rjson_seriazlize)
+	{
+		char* s = static_cast<char*>(mem->mngr->rjson.allocator->Malloc(strlen(buffer) + 1));
+		strcpy(s, buffer);
+		mem->GWPP(s, var, para);
+		return;
+	}
+#endif
+	mem->GWPP(buffer, var, para);
+}
 template<class _T>
 inline std::enable_if_t<mem::memUnit::isGWPPValid<_T>, void>
 memUnit::GWPP(const char* key, _T& var, memPara& para) {
@@ -829,16 +858,206 @@ memUnit::GWPP(const char* key, _T& var, memPara& para) {
 		{
 			this->mngr->statusBadValue++;
 		}
-		break;
+        break;
+#if MEM_MYSQL_ON
+    case memPara::mysql_metadata:
+        if constexpr (mem::memUnit::isMySQLValid<_T>)
+            para.mysql_metadata_v->push_back({key, false});
+        break;
+    case memPara::mysql_bind:
+    case memPara::mysql_bind_w:
+        if constexpr (mem::memUnit::isMySQLValid<_T>)
+            GWPP_Base(nullptr, var, para);
+        break;
+    case memPara::mysql_checksize:
+        if constexpr (mem::memUnit::isMySQLValid<_T>)
+            GWPP_Base(nullptr, var, para);
+        break;
 #endif
-	}
+#endif
+    default:
+        assert(!"unhandled memPara.order");
+        break;
+    }
 }
-template<typename _memStruct>
-inline std::enable_if_t<mem::has_save_fetch_sub<_memStruct>::value, void>
-memUnit::GWPP(const char* key, _memStruct& varST, memPara& para)
+template<typename _memSub>
+inline std::enable_if_t<mem::has_save_fetch_sub<_memSub>::value, void>
+memUnit::GWPP(const char* key, _memSub& varST, memPara& para)
 {
 	varST.save_fetch_sub(this, key, para);
 }
+#if MEM_MYSQL_ON
+inline void memUnit::SQL_bind(std::vector<memUnit::mysql_meta> &metadata, MYSQL_BIND *read_bind_out, MYSQL_BIND *write_bind_out, size_t *psize)
+{
+    mem::memPara para;
+    para.order = memPara::mysql_bind;
+    para.mysql.bind = read_bind_out;
+    this->save_fetch(para);
+    for (int k = 0; k < metadata.size(); k++)
+    {
+        if (read_bind_out[k].length != nullptr)
+        {
+            psize[k] = (size_t)read_bind_out[k].length;
+            read_bind_out[k].length = &psize[k];
+        }
+    }
+    int i = 0;
+    int ii = 0;
+    for (auto &meta : metadata)
+    {
+        if (meta.readonly == false)
+        {
+            write_bind_out[ii] = read_bind_out[i];
+            ii++;
+        }
+        i++;
+    }
+}
+inline void memUnit::SQL_bind(std::vector<memUnit::mysql_meta> &metadata, MYSQL_BIND *read_bind_out, size_t *psize)
+{
+    mem::memPara para;
+    para.order = memPara::mysql_bind;
+    para.mysql.bind = read_bind_out;
+    this->save_fetch(para);
+    for (int k = 0; k < metadata.size(); k++)
+    {
+        if (read_bind_out[k].length != nullptr)
+        {
+            psize[k] = (size_t)read_bind_out[k].length;
+            read_bind_out[k].length = &psize[k];
+        }
+    }
+}
+inline void memUnit::SQL_bind(MYSQL_BIND *read_bind_out)
+{
+    mem::memPara para;
+    para.order = memPara::mysql_bind_w;
+    para.mysql.bind = read_bind_out;
+    this->save_fetch(para);
+}
+inline size_t memUnit::SQL_checkstr(MYSQL_BIND *bind_in)
+{
+    if (bind_in == nullptr)
+    {
+        throw std::invalid_argument("bind_in parameter cannot be null");
+    }
+    size_t ret = 0;
+    mem::memPara para;
+    para.order = memPara::mysql_checksize;
+    para.mysql.bind = bind_in;
+    para.mysql.resized = &ret;
+    this->save_fetch(para);
+    return ret;
+}
+template <class _T>
+inline std::enable_if_t<mem::memUnit::isMySQLValid<_T> || mem::has_save_fetch_sub<_T>::value, void>
+memUnit::GWPP_SQL_READ(const char *key, _T &var, memPara &para)
+{
+    if constexpr (mem::memUnit::isMySQLValid<_T> == false)
+    {
+        size_t size = para.mysql_metadata_v->size();
+        var.save_fetch_sub(this, key, para);
+        while (size != para.mysql_metadata_v->size())
+        {
+            para.mysql_metadata_v->operator[](size).readonly = true;
+            size++;
+        }
+        return;
+    }
+    switch (para.order)
+    {
+    case memPara::mysql_metadata:
+        para.mysql_metadata_v->push_back({key, true});
+        break;
+    default:
+        GWPP(key, var, para);
+        break;
+    }
+}
+inline void memUnit::GWPP_SQL_TIME_READ(const char *key, MYSQL_TIME &var, memPara &para)
+{
+    switch (para.order)
+    {
+    case memPara::mysql_metadata:
+        para.mysql_metadata_v->push_back({key, true});
+        break;
+    default:
+        GWPP_SQL_TIME(key, var, para);
+        break;
+    }
+}
+inline void memUnit::GWPP_SQL_TIME(const char* key, MYSQL_TIME& var, memPara& para)
+{
+	switch (para.order)
+    {
+    case memPara::mysql_bind:
+    case memPara::mysql_bind_w:
+    {
+        para.mysql.bind->buffer = &var;
+        para.mysql.bind->buffer_type = MYSQL_TYPE_DATETIME;
+        para.mysql.bind->buffer_length = sizeof(var);
+        para.mysql.bind++;
+    }
+        break;
+    case memPara::mysql_metadata:
+        para.mysql_metadata_v->push_back({key, false});
+        break;
+    case memPara::mysql_checksize:
+        para.mysql.bind++;
+        break;
+    default:
+        return;
+    }
+}
+template <typename T>
+inline std::enable_if_t<std::is_base_of<memUnit, T>::value, std::vector<memUnit::mysql_meta>>
+memUnit::get_SQL_metadata()
+{
+    T temp = T(nullptr);
+    mem::memPara para;
+    para.order = memPara::mysql_metadata;
+    std::vector<mysql_meta> metadata;
+    para.mysql_metadata_v = &metadata;
+    temp.save_fetch(para);
+    return metadata;
+}
+inline std::chrono::system_clock::time_point memUnit::SQL_TIME_to_tp(MYSQL_TIME time)
+{
+    std::tm tm = {};
+    tm.tm_year = time.year - 1900;
+    tm.tm_mon = time.month - 1;
+    tm.tm_mday = time.day;
+    tm.tm_hour = time.hour;
+    tm.tm_min = time.minute;
+    tm.tm_sec = time.second;
+
+    std::time_t timeSinceEpoch = lowlevel::mktime(&tm);
+
+    auto timePoint = std::chrono::system_clock::from_time_t(timeSinceEpoch);
+    timePoint += std::chrono::microseconds(time.second_part);
+
+    return timePoint;
+}
+inline MYSQL_TIME memUnit::tp_to_SQL_TIME(std::chrono::system_clock::time_point tp)
+{
+    auto micros = std::chrono::duration_cast<std::chrono::microseconds>(tp.time_since_epoch()).count() % 1'000'000;
+    std::time_t tt = std::chrono::system_clock::to_time_t(tp);
+    std::tm tm;
+    lowlevel::gmtime(&tt, tm);
+    std::tm tm_time = {};
+
+    MYSQL_TIME ret{};
+    ret.year = tm.tm_year + 1900;
+    ret.month = tm.tm_mon + 1;
+    ret.day = tm.tm_mday;
+    ret.hour = tm.tm_hour;
+    ret.minute = tm.tm_min;
+    ret.second = tm.tm_sec;
+    ret.second_part = static_cast<unsigned long>(micros);
+
+    return ret;
+}
+#endif
 template<class _subType>
 inline constexpr size_t memUnit::getArrayValueTypeSize() {
 	//assert: the size must be less than 8 bytes
@@ -869,6 +1088,11 @@ inline constexpr size_t memUnit::getArrayValueTypeSize() {
 	else if constexpr (mem::is_atomic<_subType>::value)
 	{
 		using underType = typename mem::atomic_under_type<_subType>::type;
+		return getArrayValueTypeSize<underType>();
+	}
+	else if constexpr (mem::is_chrono<_subType>::value)
+	{
+		using underType = typename mem::chrono_under_type<_subType>::type;
 		return getArrayValueTypeSize<underType>();
 	}
 	else
@@ -992,6 +1216,57 @@ memUnit::GWPP_Base(void* pValue, _arit& var, memPara& para) {
 	}
 	break;
 #endif
+#if MEM_MYSQL_ON
+    case memPara::mysql_checksize:
+        para.mysql.bind++;
+        break;
+    case memPara::mysql_bind:
+    case memPara::mysql_bind_w:
+        para.mysql.bind->buffer = &var;
+        if constexpr (std::is_same_v<_arit, bool>)
+        {
+            para.mysql.bind->buffer_type = MYSQL_TYPE_TINY;
+        }
+        else if constexpr (std::is_same_v<_arit, float>)
+        {
+            para.mysql.bind->buffer_type = MYSQL_TYPE_FLOAT;
+        }
+        else if constexpr (std::is_same_v<_arit, double>)
+        {
+            para.mysql.bind->buffer_type = MYSQL_TYPE_DOUBLE;
+        }
+        else
+        { // ints
+            constexpr size_t size = sizeof(var);
+            if constexpr(size == 1)
+            {
+                para.mysql.bind->buffer_type = MYSQL_TYPE_TINY;
+            }
+            else if constexpr (size == 2)
+            {
+                para.mysql.bind->buffer_type = MYSQL_TYPE_SHORT;
+            }
+            else if constexpr (size == 4)
+            {
+                para.mysql.bind->buffer_type = MYSQL_TYPE_LONG;
+            }
+            else if constexpr (size == 8)
+            {
+                para.mysql.bind->buffer_type = MYSQL_TYPE_LONGLONG;
+            }
+            if constexpr (std::is_signed_v<_arit>)
+            {
+                para.mysql.bind->is_unsigned = false;
+            }
+            else
+            {
+                para.mysql.bind->is_unsigned = true;
+            }
+        }
+        para.mysql.bind->buffer_length = sizeof(var);
+        para.mysql.bind++;
+        break;
+#endif
 	}
 }
 template<class _array>
@@ -1075,6 +1350,22 @@ memUnit::GWPP_Base(void* pValue, _array& var, memPara& para) {
 		}
 	}
 		break;
+#endif
+#if MEM_MYSQL_ON
+    case memPara::mysql_bind:
+    case memPara::mysql_bind_w:
+        if constexpr (std::is_same_v<_subType, char>)
+        {
+            para.mysql.bind->buffer = var;
+            para.mysql.bind->buffer_type = MYSQL_TYPE_STRING;
+            para.mysql.bind->buffer_length = _arrLength;
+            para.mysql.bind++;
+        }
+        break;
+    case memPara::mysql_checksize:
+        if constexpr (std::is_same_v<_subType, char>)
+            para.mysql.bind++;
+        break;
 #endif
 	}
 }
@@ -1301,6 +1592,245 @@ memUnit::GWPP_Base(void* pValue, _atom& var, memPara& para) {
 #endif
 	}
 }
+template<class _chrono>
+inline std::enable_if_t<mem::is_chrono<_chrono>::value, void>
+memUnit::GWPP_Base(void* pValue, _chrono& var, memPara& para)
+{
+	using underType = typename mem::chrono_under_type<_chrono>::type;
+	using isSpecial = typename mem::is_system_clock_time_point<_chrono>;	//system clock timepoint has a special json expression than common chrono
+	using isDuration = typename mem::is_chrono_duration<_chrono>;
+	using isTimepoint = typename mem::is_chrono_timepoint<_chrono>;
+	static_assert(!std::is_void<underType>::value, "TYPE ERROR: std::chrono<> template unexpected void.");
+	switch (para.order)
+	{
+	case memPara::binary_serialize_memUnit:
+	case memPara::binary_serialize_memManager:
+#if MEM_RJSON_ON
+	case memPara::rjson_seriazlize:
+#endif
+	{
+#if MEM_RJSON_ON
+		if constexpr (isSpecial::value)
+		{
+			if (para.order == memPara::rjson_seriazlize)
+			{
+				rapidjson::Value* vlValue = (rapidjson::Value*)pValue;
+				switch (json_time_mode)
+				{
+				case json_time_mode_t::object_second:
+				{
+					vlValue->SetObject();
+					std::time_t tt = std::chrono::system_clock::to_time_t(var);
+					//std::mktime std::gmtime are not thread safe. do not use.
+
+					std::tm tm;
+					lowlevel::gmtime(&tt, tm);
+					vlValue->AddMember(json_year, rapidjson::Value().SetInt(tm.tm_year + 1900), *this->mngr->rjson.allocator);
+					vlValue->AddMember(json_month, rapidjson::Value().SetInt(tm.tm_mon + 1), *this->mngr->rjson.allocator);
+					vlValue->AddMember(json_day, rapidjson::Value().SetInt(tm.tm_mday), *this->mngr->rjson.allocator);
+					vlValue->AddMember(json_date, rapidjson::Value().SetInt(tm.tm_wday), *this->mngr->rjson.allocator);
+					vlValue->AddMember(json_hour, rapidjson::Value().SetInt(tm.tm_hour), *this->mngr->rjson.allocator);
+					vlValue->AddMember(json_minute, rapidjson::Value().SetInt(tm.tm_min), *this->mngr->rjson.allocator);
+					vlValue->AddMember(json_secondT, rapidjson::Value().SetInt(tm.tm_sec), *this->mngr->rjson.allocator);
+				}
+					break;
+				case json_time_mode_t::object_day:
+				{
+					vlValue->SetObject();
+					std::time_t tt = std::chrono::system_clock::to_time_t(var);
+					std::tm tm;
+					lowlevel::gmtime(&tt, tm);
+					vlValue->AddMember(json_year, rapidjson::Value().SetInt(tm.tm_year + 1900), *this->mngr->rjson.allocator);
+					vlValue->AddMember(json_month, rapidjson::Value().SetInt(tm.tm_mon + 1), *this->mngr->rjson.allocator);
+					vlValue->AddMember(json_day, rapidjson::Value().SetInt(tm.tm_mday), *this->mngr->rjson.allocator);
+					vlValue->AddMember(json_date, rapidjson::Value().SetInt(tm.tm_wday), *this->mngr->rjson.allocator);
+				}
+					break;
+				case json_time_mode_t::unix_s:
+				{
+					uint64_t s = std::chrono::duration_cast<std::chrono::seconds>(var.time_since_epoch()).count();
+					vlValue->SetUint64(s);
+				}
+					break;
+				case json_time_mode_t::unix_ms:
+				{
+					uint64_t ms = std::chrono::duration_cast<std::chrono::milliseconds>(var.time_since_epoch()).count();
+					vlValue->SetUint64(ms);
+				}
+					break;
+				case json_time_mode_t::built_in_value:
+				{
+					underType count = var.time_since_epoch().count();
+					vlValue->SetUint64(count);
+				}
+					break;
+				case json_time_mode_t::string_Y_M_D:
+				{
+					std::time_t tt = std::chrono::system_clock::to_time_t(var);
+					std::tm tm;
+					lowlevel::gmtime(&tt, tm);
+					std::ostringstream oss;
+					oss << std::put_time(&tm, "%Y-%m-%d");
+					vlValue->SetString(oss.str().c_str(), *this->mngr->rjson.allocator);
+				}
+					break;
+				}
+				break;
+			}
+		}
+#endif
+		underType buffer;
+		if constexpr (isDuration::value)
+		{
+			buffer = var.count();
+		}
+		else if constexpr (isTimepoint::value)
+		{
+			buffer = var.time_since_epoch().count();
+		}
+		GWPP_Base(pValue, buffer, para);
+	}
+	break;
+	case memPara::binary_deserialize_memUnit:
+	case memPara::binary_deserialize_memManager:
+#if MEM_RJSON_ON
+	case memPara::rjson_deseriazlize:
+#endif
+	{
+#if MEM_RJSON_ON
+		if constexpr (isSpecial::value)
+		{
+			if (para.order == memPara::rjson_deseriazlize)
+			{
+				rapidjson::Value* vlValue = (rapidjson::Value*)pValue;
+				switch (json_time_mode)
+				{
+				case json_time_mode_t::object_second:
+				{
+					if (vlValue->IsObject())
+					{
+
+						std::tm tm = {};
+						tm.tm_year = (vlValue->HasMember(json_year) && vlValue->FindMember(json_year)->value.IsInt())
+							? vlValue->FindMember(json_year)->value.GetInt() - 1900
+							: 0;
+						tm.tm_mon = (vlValue->HasMember(json_month) && vlValue->FindMember(json_month)->value.IsInt())
+							? std::clamp(vlValue->FindMember(json_month)->value.GetInt() - 1, 0, 11)
+							: 0;
+						tm.tm_mday = (vlValue->HasMember(json_day) && vlValue->FindMember(json_day)->value.IsInt())
+							? std::clamp(vlValue->FindMember(json_day)->value.GetInt(), 1, 31)
+							: 1;
+						tm.tm_hour = (vlValue->HasMember(json_hour) && vlValue->FindMember(json_hour)->value.IsInt())
+							? std::clamp(vlValue->FindMember(json_hour)->value.GetInt(), 0, 23)
+							: 0;
+						tm.tm_min = (vlValue->HasMember(json_minute) && vlValue->FindMember(json_minute)->value.IsInt())
+							? std::clamp(vlValue->FindMember(json_minute)->value.GetInt(), 0, 59)
+							: 0;
+						tm.tm_sec = (vlValue->HasMember(json_secondT) && vlValue->FindMember(json_secondT)->value.IsInt())
+							? std::clamp(vlValue->FindMember(json_secondT)->value.GetInt(), 0, 59)
+							: 0;
+
+						//std::mktime std::gmtime are not thread safe. never use.
+						time_t time = lowlevel::mktime(&tm);
+						if (time == (time_t)-1)
+							this->mngr->statusBadValue++;
+						else
+							var = std::chrono::system_clock::from_time_t(time);
+					}
+				}
+				break;
+				case json_time_mode_t::object_day:
+				{
+					if (vlValue->IsObject())
+					{
+						std::tm tm = {};
+						tm.tm_year = (vlValue->HasMember(json_year) && vlValue->FindMember(json_year)->value.IsInt())
+							? vlValue->FindMember(json_year)->value.GetInt() - 1900
+							: 0;
+						tm.tm_mon = (vlValue->HasMember(json_month) && vlValue->FindMember(json_month)->value.IsInt())
+							? std::clamp(vlValue->FindMember(json_month)->value.GetInt() - 1, 0, 11)
+							: 0;
+						tm.tm_mday = (vlValue->HasMember(json_day) && vlValue->FindMember(json_day)->value.IsInt())
+							? std::clamp(vlValue->FindMember(json_day)->value.GetInt(), 1, 31)
+							: 1;
+
+						time_t time = lowlevel::mktime(&tm);
+						if (time == (time_t)-1)
+							this->mngr->statusBadValue++;
+						else
+							var = std::chrono::system_clock::from_time_t(time);
+					}
+				}
+				break;
+				case json_time_mode_t::unix_s:
+				{
+					if (vlValue->IsUint64())
+					{
+						var = std::chrono::system_clock::time_point(std::chrono::seconds(vlValue->GetUint64()));
+					}
+				}
+				break;
+				case json_time_mode_t::unix_ms:
+				{
+					if (vlValue->IsUint64())
+					{
+						var = std::chrono::system_clock::time_point(std::chrono::milliseconds(vlValue->GetUint64()));
+					}
+				}
+				break;
+				case json_time_mode_t::built_in_value:
+				{
+					if (vlValue->IsUint64())
+					{
+						var = std::chrono::time_point<typename isTimepoint::clock>(
+							typename std::chrono::time_point<typename isTimepoint::clock>::duration(vlValue->GetUint64())
+						);
+					}
+				}
+				break;
+				case json_time_mode_t::string_Y_M_D:
+				{
+					if (vlValue->IsString())
+					{
+						std::istringstream iss(vlValue->GetString());
+						std::tm tm = {};
+						iss >> std::get_time(&tm, "%Y-%m-%d");
+						if (!iss.fail())
+							var = std::chrono::system_clock::from_time_t(lowlevel::mktime(&tm));
+						else
+							this->mngr->statusBadValue++;
+					}
+				}
+				break;
+			}
+			break;
+			}
+		}
+#endif
+		underType buffer;
+		GWPP_Base(pValue, buffer, para);
+		if constexpr (isDuration::value)
+		{
+			var = std::chrono::duration<underType>(buffer);
+		}
+		else if constexpr (isTimepoint::value)
+		{
+			var = std::chrono::time_point<typename isTimepoint::clock>(
+				typename std::chrono::time_point<typename isTimepoint::clock>::duration(buffer)
+			);
+		}
+	}
+	break;
+#if MEM_REFLECTION_ON
+	case memPara::reflection_read:
+		//para.reflection->context.emplace_back(key, var);
+		break;
+	case memPara::reflection_write:
+		//para.reflection_single->WriteMU(key, var, size);
+		break;
+#endif
+	}
+}
 template<class _string>
 inline std::enable_if_t<mem::is_string<_string>::value, void>
 memUnit::GWPP_Base(void* pValue, _string& var, memPara& para) {
@@ -1395,7 +1925,30 @@ memUnit::GWPP_Base(void* pValue, _string& var, memPara& para) {
 	}
 	break;
 #endif
-	}
+#if MEM_MYSQL_ON
+    case memPara::mysql_bind:
+    case memPara::mysql_bind_w:
+        if (var.size() == 0)
+            var.resize(1);
+        para.mysql.bind->buffer = (void *)var.c_str();
+        para.mysql.bind->buffer_type = MYSQL_TYPE_MEDIUM_BLOB;
+        para.mysql.bind->buffer_length = (var.size() * sizeof(_subType));
+        if (para.order == memPara::mysql_bind)
+            para.mysql.bind->length = (size_t *)(var.size() * sizeof(_subType));
+        para.mysql.bind++;
+        break;
+    case memPara::mysql_checksize:
+        if ((*para.mysql.bind->length) / sizeof(_subType) > var.size())
+        {
+            para.mysql.bind->buffer_length = *para.mysql.bind->length;
+            var.resize((*para.mysql.bind->length) / sizeof(_subType));
+            para.mysql.bind->buffer = (void *)var.c_str();
+            (*para.mysql.resized)++;
+        }
+        para.mysql.bind++;
+        break;
+#endif
+    }
 }
 template<class _enum>
 inline std::enable_if_t<std::is_enum<_enum>::value, void>

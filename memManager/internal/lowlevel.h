@@ -274,6 +274,86 @@ class lowlevel {
 		}
 		inline void setOffset(uint32_t a)  noexcept { sectionStartOffset = a; }
 	};
+
+	//time function
+	static constexpr int days_in_month[] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+	static constexpr uint64_t hour_s = 60 * 60;
+	static constexpr uint64_t day_s = 24 * hour_s;
+	static constexpr uint64_t common_year_s = 365 * day_s;
+
+public:
+	//thread safe time funcion. cannot legalize an illegal struct tm.
+	inline static time_t mktime(std::tm* timeptr) {
+		static constexpr int leap_sum_before = 1969 / 4 - 1969 / 100 + 1969 / 400;	// leap years before 1970
+		int leap_year_sum = (timeptr->tm_year + 1899) / 4 - (timeptr->tm_year + 1899) / 100 + (timeptr->tm_year + 1899) / 400;
+		leap_year_sum -= leap_sum_before;
+
+		time_t result = timeptr->tm_sec;
+		result += timeptr->tm_min * 60;
+		result += timeptr->tm_hour * hour_s;
+		result += (timeptr->tm_mday - 1) * day_s;
+		result += (timeptr->tm_year - 70) * common_year_s;
+
+		//leap years since 1970
+		result += day_s * leap_year_sum;
+
+		for (int i = 0; i < timeptr->tm_mon; ++i) {
+			result += days_in_month[i] * day_s;
+			//leap years of this year
+			if (i == 1 && (timeptr->tm_year % 4 == 0 && (timeptr->tm_year % 100 != 0 || timeptr->tm_year % 400 == 0))) {
+				result += day_s;
+			}
+		}
+		return result;
+	}
+	inline static void gmtime(const time_t* timestamp, std::tm& tmbuf) {
+		time_t timep = *timestamp;
+
+		int year = 1970;
+		while (timep >= common_year_s) {
+			timep -= common_year_s;
+			year++;
+			//leap years
+			if (timep >= common_year_s && (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0))) {
+				timep -= day_s;
+			}
+		}
+
+		tmbuf.tm_year = year - 1900;
+
+		auto& month = tmbuf.tm_mon = 0;
+		bool inLeapDay = false;
+		while (timep >= days_in_month[month] * day_s) {
+			timep -= days_in_month[month] * day_s;
+			//leap years
+			if (month == 1 && (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0))) {
+				if (timep >= day_s) {
+					timep -= day_s;
+				}
+				else
+				{
+					tmbuf.tm_mday = 29;
+					inLeapDay = true;	//still February
+					break;
+				}
+			}
+			month++;
+		}
+
+		if (inLeapDay == false)
+		{
+			tmbuf.tm_mday = timep / day_s + 1;
+		}
+		timep %= day_s;
+
+		tmbuf.tm_hour = timep / hour_s;
+		timep %= hour_s;
+		tmbuf.tm_min = timep / 60;
+		tmbuf.tm_sec = timep % 60;
+
+		//no need to use Zeller's Congruence
+		tmbuf.tm_wday = (4 + * timestamp / day_s) % 7;
+	}
 };
 inline std::deque<mem::lowlevel::memPtrComm> mem::lowlevel::memPtrComm::memPool = {}; 
 inline std::stack<mem::lowlevel::memPtrComm*> mem::lowlevel::memPtrComm::memFreed = {}; 

@@ -59,6 +59,7 @@ namespace mem {
 				mem::is_variant<_T>::value ||
 				mem::is_pair<_T>::value ||
 				mem::has_save_fetch_struct<_T>::value ||
+				mem::is_chrono<_T>::value ||
 				mem::is_impPtr<_T>::value || mem::is_memPtr<_T>::value;
 			template<typename T> struct get_vtable_ptr;
 			void operator=(const memUnit& munit) = delete;		//use smart pointers to do with RAII please.
@@ -79,8 +80,44 @@ namespace mem {
 			inline static const char json_recurring[] = "Recurring Object";
 			inline static const char json_first[] = "First";
 			inline static const char json_second[] = "Second";
+			inline static const char json_year[] = "Year";
+			inline static const char json_month[] = "Month";
+			inline static const char json_day[] = "Day";
+			inline static const char json_date[] = "Date";
+			inline static const char json_hour[] = "Hour";
+			inline static const char json_minute[] = "Minute";
+			inline static const char json_secondT[] = "Second";
+			enum class json_time_mode_t
+			{
+				object_second, // precise to second
+				object_day, // precise to day
+				unix_s,
+				unix_ms,
+				built_in_value,
+				string_Y_M_D
+			};
+			inline static json_time_mode_t json_time_mode = json_time_mode_t::object_second;
 #endif
-		protected:
+#if MEM_MYSQL_ON
+            template <typename _T>
+            static constexpr bool isMySQLValid = std::is_arithmetic<_T>::value ||
+                                                 (std::is_array<_T>::value && std::is_same<typename std::remove_extent<_T>::type, char>::value) ||
+                                                 std::is_same<MYSQL_TIME, _T>::value ||
+                                                 mem::is_string<_T>::value;
+            struct mysql_meta{
+                const char* key;
+                bool readonly;
+            };
+            template <typename T>
+            static std::enable_if_t<std::is_base_of<memUnit, T>::value, std::vector<mysql_meta>> get_SQL_metadata(); // create a temporary object of T, save_fetch then
+            static std::chrono::system_clock::time_point SQL_TIME_to_tp(MYSQL_TIME time);
+            static MYSQL_TIME tp_to_SQL_TIME(std::chrono::system_clock::time_point tp);
+            void SQL_bind(std::vector<mysql_meta> &metadata, MYSQL_BIND *read_bind_out, MYSQL_BIND *write_bind_out, size_t *psize);
+            void SQL_bind(std::vector<mysql_meta> &metadata, MYSQL_BIND *read_bind_out, size_t *psize);
+            void SQL_bind(MYSQL_BIND *read_bind_out);
+            size_t SQL_checkstr(MYSQL_BIND* bind_in);
+#endif
+        protected:
 			memUnit(memManager* manager);
 			memUnit(const memUnit& munit);
 			memUnit(memUnit&& munit) noexcept;
@@ -91,9 +128,16 @@ namespace mem {
 			template<class _T>
 			std::enable_if_t<mem::memUnit::isGWPPValid<_T>, void>
 				GWPP(const char* key, _T& var, memPara& para);
-			template<typename _memStruct>
-			std::enable_if_t<mem::has_save_fetch_sub<_memStruct>::value, void>
-				GWPP(const char* key, _memStruct& varST, memPara& para);			//for any custom struct that fulfilled member function save_fetch_sub()
+			template<typename _memSub>
+			std::enable_if_t<mem::has_save_fetch_sub<_memSub>::value, void>
+				GWPP(const char* key, _memSub& varST, memPara& para);		//for any custom struct that fulfilled member function save_fetch_sub()
+#if MEM_MYSQL_ON
+            template <class _T>
+            std::enable_if_t<mem::memUnit::isMySQLValid<_T> || mem::has_save_fetch_sub<_T>::value, void>
+            GWPP_SQL_READ(const char *key, _T &var, memPara &para);                 // designate this key as read-only, never archive.
+            void GWPP_SQL_TIME_READ(const char *key, MYSQL_TIME &var, memPara &para);
+            void GWPP_SQL_TIME(const char *key, MYSQL_TIME &var, memPara &para); // MYSQL_TIME cannot be serialized/deserialized in non-MySQL format e.g. json.
+#endif
 		private:
 			inline memUnit() { mngr = nullptr; }							//this constructor is for memManagers. never use it manually.
 			memUnit* operator&() = delete;									//forbidden to get the address of a memUnit, it means prohibit to create a memUnit on stack.
@@ -112,6 +156,9 @@ namespace mem {
 			template<class _atom>
 			std::enable_if_t<mem::is_atomic<_atom>::value, void>
 				GWPP_Base(void* pValue, _atom& var, memPara& para);					//read or write atomic
+			template<class _chrono>
+			std::enable_if_t<mem::is_chrono<_chrono>::value, void>
+				GWPP_Base(void* pValue, _chrono& var, memPara& para);				//read or write chrono, system clock timepoint has a special json expression than common chrono
 			template<class _string>
 			std::enable_if_t<mem::is_string<_string>::value, void>
 				GWPP_Base(void* pValue, _string& var, memPara& para);				//read or write string, always memcpy no matter what the content saved by container
@@ -145,9 +192,11 @@ namespace mem {
 		public:
 			dumbPtr();
 			dumbPtr(mu* pmu);
-			dumbPtr(const dumbPtr<mu, releaseable>& mp);
 			~dumbPtr();
-			void operator=(const dumbPtr<mu, releaseable>& mp);									//copy
+            dumbPtr(const dumbPtr<mu, releaseable> &mp) noexcept;
+            void operator=(const dumbPtr<mu, releaseable>& mp) noexcept;						//copy
+			dumbPtr(dumbPtr<mu, releaseable>&& mp) noexcept;
+			void operator=(dumbPtr<mu, releaseable>&& mp) noexcept;								//move
 			template<typename _any, bool _r>
 			dumbPtr(const dumbPtr<_any, _r>& mp);												//polymorphic construct (derived to base)
 			template<typename _any, bool _r>
@@ -228,18 +277,30 @@ namespace mem {
 #if MEM_RJSON_ON
 				rapidjson::Value* rapidJson_section;		//r w
 #endif
+#if MEM_MYSQL_ON
+                struct {
+                    MYSQL_BIND *bind;                       //bind
+                    size_t *resized;                        // resized string count
+                } mysql;
+                std::vector<memUnit::mysql_meta> *mysql_metadata_v; //get metadata
+#endif
 			};
-			enum : uint8_t {
-				binary_serialize_memManager,					//serialize whole memManager
-				binary_deserialize_memManager,					//deserialize whole memManager
-				reflection_read,								//read variable using reflection
-				reflection_write,								//write variable using reflection (once for single variable)
-				binary_serialize_memUnit,						//serialize single memUnit, ignore pointers
-				binary_deserialize_memUnit,						//deserialize single memUnit, ignore pointers
-				rjson_seriazlize,								//rapid json stringify
-				rjson_deseriazlize								//rapid json parse
-			} order;
-			inline bool isConstruct()
+            enum : uint8_t
+            {
+                binary_serialize_memManager,   // serialize whole memManager
+                binary_deserialize_memManager, // deserialize whole memManager
+                reflection_read,               // read variable using reflection
+                reflection_write,              // write variable using reflection (once for single variable)
+                binary_serialize_memUnit,      // serialize single memUnit, ignore pointers
+                binary_deserialize_memUnit,    // deserialize single memUnit, ignore pointers
+                rjson_seriazlize,              // rapid json stringify
+                rjson_deseriazlize,            // rapid json parse
+                mysql_bind,                    // bind variables within MYSQL_BIND, forced to use STMT.
+                mysql_checksize,               // Check if the string length <= MYSQL_BIND[].length (the size of the data is), and resize which is short.
+                mysql_metadata,                // get metadata, only valid on mysql supported data type
+                mysql_bind_w,                  // bind MySQL without string length.
+            } order;
+            inline bool isConstruct()
 			{
 				switch (order)
 				{
@@ -250,8 +311,20 @@ namespace mem {
 					return true;
 				}
 				return false;
-			}
-		};
+            }
+            inline bool isArchive()
+            {
+                switch (order)
+                {
+                case binary_serialize_memManager:
+                case reflection_read:
+                case binary_serialize_memUnit:
+                case rjson_seriazlize:
+                    return true;
+                }
+                return false;
+            }
+        };
 
 #if MEM_REFLECTION_ON
 		// key-value result in a memUnit class of the static reflection
@@ -352,16 +425,10 @@ namespace mem {
 #endif
 
 		// only put two keys together, one is written in memUnit and another is written in sub-struct.
-		template<typename _T>
-		inline static void GWPP_sub(memUnit* mem, const char* key1, const char* key2, _T& var, memPara& para)
-		{
-			char buffer[maxKey];
-			std::strcpy(buffer, key1);
-			std::strcat(buffer, key2);
-			mem->GWPP(buffer, var, para);
-		}
+        template <typename _T>
+        static void GWPP_sub(memUnit *mem, const char *key1, const char *key2, _T &var, memPara &para);
 
-		// it copys binary memory and moves the content pointer to the next
+        // it copys binary memory and moves the content pointer to the next
 		template<typename _T>
 		inline static void GWPP_memcpy(uint8_t*& content, _T& var, memPara& para)
 		{

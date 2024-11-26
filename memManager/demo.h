@@ -22,6 +22,13 @@ class testUnit2;
 class testIngr;
 class testStlContainer;
 
+struct testSub {
+	int a = 555;
+	void save_fetch_sub(memUnit* mu, const char* key, memPara& para)
+	{
+		GWPP_sub(mu, key, "a", a, para);
+	}
+};
 class testUnit :public memUnit {
 	//declare variables with MACRO
 public:
@@ -53,9 +60,15 @@ class testUnit2 :public testUnit {
 		GWPP("funcTest", funcTest, para);
 		GWPP("ptrback", ptrback, para);
 		GWPP("curiousTest", curiousTest, para);
+		GWPP("sub", sub, para);
+		GWPP("nowtp", nowtp, para);
+		GWPP("chrono", chrono, para);
 	}
 public:
 	testUnit2(memManager* manager) :testUnit(manager) {};
+	std::chrono::system_clock::time_point nowtp;
+	std::chrono::seconds chrono = std::chrono::seconds(0);
+	testSub sub;
 	pEgress<testIngr> egressTest;
 	std::variant<memPtr<testUnit>, memPtr<testUnit2>, int, std::string> genetest;
 	pVariant<testUnit, testUnit2> pvtest;		//aka std::variant<memPtr<>, memPtr<>>
@@ -235,6 +248,10 @@ inline void mem_testmain()
 		testManagerA->tu2 = new testUnit2(*testManagerA);
 		testManagerA->tu2->ptrback = testManagerA;
 		memPtr<testUnit2> testUnitC = testManagerA->tu2;
+
+		//chrono
+		testManagerA->tu2->nowtp = std::chrono::system_clock::now();
+		testManagerA->tu2->chrono = std::chrono::seconds(9527);
 
 		//all stl container adaptive
 		if (true)
@@ -463,6 +480,8 @@ inline void mem_testmain()
 		// rapid Json test
 #if MEM_RJSON_ON
 		//rapid Json serialize
+		//testManagerA->tu2->nowtp = std::chrono::system_clock::time_point(std::chrono::seconds(1709198575)); //2024 2 29 test, 9:22:55
+		memUnit::json_time_mode = memUnit::json_time_mode_t::string_Y_M_D;
 		std::string serializeDumpJson;
 		testManagerA->tu2->genetest = std::string("variant string");
 		testManagerA->serializeJson(&serializeDumpJson);		//rapid json: i5-9300HF costs 1315ms for 500k meta units serialize, 1266ms for deserialize. No wonder.

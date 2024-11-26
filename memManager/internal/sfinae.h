@@ -181,3 +181,57 @@ struct atomic_under_type<std::atomic<T>> {
 	using type = T;
 };
 
+template<typename T>
+struct is_chrono : std::false_type {};
+
+template<typename Rep, typename Period>
+struct is_chrono<std::chrono::duration<Rep, Period>> {
+	static constexpr bool value = true;
+};
+
+template<typename Clock, typename Duration>
+struct is_chrono<std::chrono::time_point<Clock, Duration>> {
+	static constexpr bool value = true;
+};
+
+template<typename T>
+struct chrono_under_type {
+	using type = void;
+};
+
+template<typename Rep, typename Period>
+struct chrono_under_type<std::chrono::duration<Rep, Period>> {
+	using type = Rep;
+};
+
+template<typename Clock, typename Duration>
+struct chrono_under_type<std::chrono::time_point<Clock, Duration>> {
+	using type = typename chrono_under_type<Duration>::type;
+};
+
+template <typename T>
+using is_system_clock_time_point = std::is_same<T, std::chrono::system_clock::time_point>;
+
+template<typename T>
+struct is_chrono_duration : std::false_type {};
+
+template<typename Rep, typename Period>
+struct is_chrono_duration<std::chrono::duration<Rep, Period>> {
+	static constexpr bool value = true;
+};
+
+template<typename T>
+struct is_chrono_timepoint : std::false_type {
+	using clock = void;
+};
+
+template<typename Clock, typename Duration>
+struct is_chrono_timepoint<std::chrono::time_point<Clock, Duration>> {
+	static constexpr bool value = true;
+	using clock = Clock;
+};
+
+#if MEM_MYSQL_ON
+template <typename T>
+using is_mysql_time = std::is_same<T, MYSQL_TIME>;
+#endif

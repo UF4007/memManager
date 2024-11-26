@@ -15,6 +15,7 @@
 #include <mutex>
 #include <locale>
 //#include <codecvt>	//deprecated.
+#include <iomanip>
 #include <algorithm>
 #include <type_traits>
 #include "memUnitMacro.h"
