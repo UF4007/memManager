@@ -1930,7 +1930,7 @@ memUnit::GWPP_Base(void* pValue, _string& var, memPara& para) {
     case memPara::mysql_bind_w:
         if (var.size() == 0)
             var.resize(1);
-        para.mysql.bind->buffer = (void *)var.c_str();
+        para.mysql.bind->buffer = (void *)var.data();
         para.mysql.bind->buffer_type = MYSQL_TYPE_MEDIUM_BLOB;
         para.mysql.bind->buffer_length = (var.size() * sizeof(_subType));
         if (para.order == memPara::mysql_bind)
@@ -1942,7 +1942,7 @@ memUnit::GWPP_Base(void* pValue, _string& var, memPara& para) {
         {
             para.mysql.bind->buffer_length = *para.mysql.bind->length;
             var.resize((*para.mysql.bind->length) / sizeof(_subType));
-            para.mysql.bind->buffer = (void *)var.c_str();
+            para.mysql.bind->buffer = (void *)var.data();
             (*para.mysql.resized)++;
         }
         para.mysql.bind++;
