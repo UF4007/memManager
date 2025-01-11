@@ -11,6 +11,7 @@
 #include <string>
 #include <variant>
 #include <cassert>
+#include <optional>
 #include <sstream>
 #include <mutex>
 #include <locale>
