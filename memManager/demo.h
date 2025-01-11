@@ -57,6 +57,7 @@ class testUnit2 :public testUnit {
 	void save_fetch(memPara para) override {
 		GWPP("egressTest", egressTest, para);
 		GWPP("genetest", genetest, para);
+		GWPP("optionaltest", optionalTest, para);
 		GWPP("funcTest", funcTest, para);
 		GWPP("ptrback", ptrback, para);
 		GWPP("curiousTest", curiousTest, para);
@@ -70,6 +71,7 @@ public:
 	std::chrono::seconds chrono = std::chrono::seconds(0);
 	testSub sub;
 	pEgress<testIngr> egressTest;
+	std::optional<float> optionalTest;
 	std::variant<memPtr<testUnit>, memPtr<testUnit2>, int, std::string> genetest;
 	pVariant<testUnit, testUnit2> pvtest;		//aka std::variant<memPtr<>, memPtr<>>
 	pFunction<int(int, int), 75342> funcTest;
@@ -311,6 +313,9 @@ inline void mem_testmain()
 			testUnitC->curiousTest[2].push_back(container);
 			testUnitC->curiousTest[5].push_back(container);
 		}
+
+		//optional test
+		testManagerA->tu2->optionalTest = 42.0;
 
 		//variant test
 		testManagerA->tu2->genetest = testUnitA;

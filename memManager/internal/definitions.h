@@ -1077,6 +1077,10 @@ inline constexpr size_t memUnit::getArrayValueTypeSize() {
 	{
 		return sizeof(pairOfFile);
 	}
+	else if constexpr (mem::is_optional<_subType>::value)
+	{
+		return sizeof(optionalOfFile);
+	}
 	else if constexpr (mem::has_save_fetch_struct<_subType>::value)
 	{
 		return _subType::save_fetch_size > 8 ? sizeof(uint32_t) : _subType::save_fetch_size; //min
@@ -1972,6 +1976,91 @@ memUnit::GWPP_Base(void* pValue, _enum& var, memPara& para) {
 	case memPara::reflection_write:
 		//para.reflection_single->WriteMU(key, var, size);
 		break;
+#endif
+	}
+}
+template<class T>
+inline void memUnit::GWPP_Base(void* pValue, std::optional<T>& var, memPara& para) {
+	switch (para.order)
+	{
+	case memPara::binary_deserialize_memUnit:
+	case memPara::binary_deserialize_memManager:
+	{
+		optionalOfFile* dataPointer = (optionalOfFile*)pValue;
+		if (dataPointer->offset != 0)
+		{
+			uint8_t* valuePos;
+			uint32_t length;
+			if (lowlevel::BytesTo_mem(valuePos, length, (uint8_t*)&dataPointer->offset, this->mngr->binSeri.start, this->mngr->binSeri.end) == true)
+			{
+				var.emplace();
+				this->GWPP_Base(valuePos, var.value(), para);
+			}
+			else
+				this->mngr->statusBadValue++;
+		}
+		else
+		{
+			var.reset();
+		}
+	}
+	break;
+	case memPara::binary_serialize_memUnit:
+	case memPara::binary_serialize_memManager:
+	{
+		std::vector<uint8_t>* dataVector = (std::vector<uint8_t>*)pValue;
+		if (var.has_value())
+		{
+			std::vector<uint8_t> vecData;
+			this->GWPP_Base(&vecData, var.value(), para);
+			uint32_t offset;
+			lowlevel::mem_toBytes(offset, vecData.size(), dataVector, this->mngr->binSeri.bytes);
+			memcpy(&this->mngr->binSeri.bytes->at(offset), vecData.data(), vecData.size());
+		}
+		else
+		{
+			lowlevel::mem_toBytes<uint32_t>(0, dataVector, nullptr);
+		}
+	}
+	break;
+#if MEM_REFLECTION_ON
+	case memPara::reflection_read:
+		//para.reflection->context.emplace_back(key, var);
+		break;
+	case memPara::reflection_write:
+		//para.reflection_single->WriteMU(key, var, size);
+		break;
+#endif
+#if MEM_RJSON_ON
+	case memPara::rjson_seriazlize:
+	{
+		rapidjson::Value* vlValue = (rapidjson::Value*)pValue;
+		if (var.has_value())
+		{
+			this->GWPP_Base(vlValue, var.value(), para);
+		}
+		else
+		{
+			vlValue->SetNull();
+		}
+	}
+	break;
+	case memPara::rjson_deseriazlize:
+	{
+		rapidjson::Value* vlValue = (rapidjson::Value*)pValue;
+		if (vlValue->IsNull() == false)
+		{
+			var.emplace();
+			this->GWPP_Base(vlValue, var.value(), para);
+			break;
+		}
+		else
+		{
+			var.reset();
+		}
+		this->mngr->statusBadValue++;
+	}
+	break;
 #endif
 	}
 }

@@ -58,6 +58,7 @@ namespace mem {
 				(std::is_enum<_T>::value && std::is_arithmetic<typename mem::enum_type<_T>::type>::value) ||
 				mem::is_variant<_T>::value ||
 				mem::is_pair<_T>::value ||
+				mem::is_optional<_T>::value ||
 				mem::has_save_fetch_struct<_T>::value ||
 				mem::is_chrono<_T>::value ||
 				mem::is_impPtr<_T>::value || mem::is_memPtr<_T>::value;
@@ -171,6 +172,8 @@ namespace mem {
 			void GWPP_Base(void* pValue, std::variant<Args...>& var, memPara& para);//read or write variants
 			template<class T1, class T2>
 			void GWPP_Base(void* pValue, std::pair<T1, T2>& var, memPara& para);	//read or write pair
+			template<class T>
+			void GWPP_Base(void* pValue, std::optional<T>& var, memPara& para);		//read or write optional
 
 			template<typename _memStruct>
 			std::enable_if_t<mem::has_save_fetch_struct<_memStruct>::value, void>

@@ -146,6 +146,16 @@ struct is_pair : std::false_type {};
 template <typename first, typename second>
 struct is_pair<std::pair<first, second>> : std::true_type {};
 
+template <typename T>
+struct is_optional : std::false_type {
+	using type = int;
+};
+
+template <typename T>
+struct is_optional<std::optional<T>> : std::true_type {
+	using type = typename T;
+};
+
 template <typename, typename = void>
 struct has_emplace_back : std::false_type {};
 
