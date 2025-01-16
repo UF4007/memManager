@@ -2072,14 +2072,13 @@ inline void memUnit::GWPP_Base(void* pValue, std::variant<Args...>& var, memPara
 	case memPara::binary_deserialize_memManager:
 	{
 		variantOfFile* dataPointer = (variantOfFile*)pValue;
-		uint32_t& index = dataPointer->type;
 		uint8_t* valuePos;
 		uint32_t length;
 		if (lowlevel::BytesTo_mem(valuePos, length, (uint8_t*)&dataPointer->offset, this->mngr->binSeri.start, this->mngr->binSeri.end) == true)
 		{
 			lowlevel::pushVariantHelper<Args...> helper;
-			if (helper.push(index, var, this, valuePos, para) == true)
-				break;
+            if (helper.push(dataPointer->type, var, this, valuePos, para) == true)
+                break;
 		}
 		this->mngr->statusBadValue++;
 	}
@@ -2155,7 +2154,7 @@ inline void memUnit::GWPP_Base(void* pValue, std::pair<T1, T2>& var, memPara& pa
 	case memPara::binary_deserialize_memManager:
 	{
 		pairOfFile* dataPointer = (pairOfFile*)pValue;
-		uint32_t& index = dataPointer->sizeOfFirst;
+		//uint32_t& index = dataPointer->sizeOfFirst;
 		uint8_t* valuePos;
 		uint32_t length;
 		if (lowlevel::BytesTo_mem(valuePos, length, (uint8_t*)&dataPointer->offset, this->mngr->binSeri.start, this->mngr->binSeri.end) == true)
