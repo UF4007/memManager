@@ -102,8 +102,8 @@ eb_testmain();
 
 ### 文档目录
 
-- [memUnit](#memUnit)
-- [memManager](#memManager)
+- [eb::base](#eb::base)
+- [eb::manager](#eb::manager)
 - [支持的数据类型](#支持的数据类型)
   - [算术类型与枚举](#算术类型与枚举)
   - [原生数组](#原生数组)
