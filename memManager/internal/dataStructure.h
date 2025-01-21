@@ -54,3 +54,28 @@ inline bool is_big_endian() {
 	return (u.c[0] == 0);
 }
 //judge the endian of the intend machine
+
+namespace json_const {
+	inline static const char json_type[] = "Variant Type";
+	inline static const char json_value[] = "Value";
+	inline static const char json_recurring[] = "Recurring Object";
+	inline static const char json_first[] = "First";
+	inline static const char json_second[] = "Second";
+	inline static const char json_year[] = "Year";
+	inline static const char json_month[] = "Month";
+	inline static const char json_day[] = "Day";
+	inline static const char json_date[] = "Date";
+	inline static const char json_hour[] = "Hour";
+	inline static const char json_minute[] = "Minute";
+	inline static const char json_secondT[] = "Second";
+	enum class json_time_mode_t
+	{
+		object_second, // precise to second
+		object_day, // precise to day
+		unix_s,
+		unix_ms,
+		built_in_value,
+		string_Y_M_D
+	};
+	inline static json_time_mode_t json_time_mode = json_time_mode_t::object_second;
+};

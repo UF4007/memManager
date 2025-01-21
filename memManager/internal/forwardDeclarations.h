@@ -1,30 +1,30 @@
-#define __MEMMNGR_INTERNAL_HEADER_PERMISSION														friend class mem::memUnit;\
-																									friend class mem::memManager;\
-												template<typename mu2, bool releaseable2>			friend class mem::memPtr;\
-												template<typename mu2, bool releaseable2>			friend class mem::impPtr;\
-												template<typename mu2, bool releaseable2>			friend class mem::dumbPtr;\
-																									friend struct mem::memPara;\
-																									friend class mem::ReflectResultKeyValue;\
-																									friend struct mem::ReflectResult;\
-																									friend class mem::Ingress;\
-																									friend class mem::refIngress;\
-																									friend class mem::Egress;\
-												template<class cast2>								friend struct mem::pEgress;\
-																									friend class mem::Subfile;\
-																									friend class mem::lowlevel;\
-												template <typename T2>								friend struct mem::has_save_fetch_struct;\
-												template <typename T2>								friend void GWPP_sub(mem::memUnit* mem, const char* key1, const char* key2, T2& var, mem::memPara& para);\
+#define __MEMMNGR_INTERNAL_HEADER_PERMISSION														friend class eb::base;\
+																									friend class eb::manager;\
+												template<typename mu2, bool releaseable2>			friend class eb::memPtr;\
+												template<typename mu2, bool releaseable2>			friend class eb::impPtr;\
+												template<typename mu2, bool releaseable2>			friend class eb::dumbPtr;\
+																									friend struct eb::para;\
+																									friend class eb::ReflectResultKeyValue;\
+																									friend struct eb::ReflectResult;\
+																									friend class eb::Ingress;\
+																									friend class eb::refIngress;\
+																									friend class eb::Egress;\
+												template<class cast2>								friend struct eb::pEgress;\
+																									friend class eb::Subfile;\
+																									friend class eb::lowlevel;\
+												template <typename T2>								friend struct eb::has_save_fetch_struct;\
+												template <typename T2>								friend void GWPP_sub(eb::base* mem, const char* key1, const char* key2, T2& var, eb::para& param);\
 
 #define MEM_PERMISSION __MEMMNGR_INTERNAL_HEADER_PERMISSION
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-class memUnit;
-class memManager;
+class base;
+class manager;
 template<typename mu, bool releaseable = true> class dumbPtr;
 template<typename mu, bool releaseable = true> class impPtr;
 template<typename mu, bool releaseable = true> class memPtr;
-struct memPara;
+struct para;
 class ReflectResultKeyValue;
 struct ReflectResult;
 class Ingress;

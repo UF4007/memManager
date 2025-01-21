@@ -30,26 +30,26 @@
 
 #define DECLARE_VAR2(type, name) type name; \
     __MEMMNGR_INTERNAL_HEADER_PERMISSION \
-    private:void save_fetch(mem::memPara para) override { \
-        GWPP(#name, name, para); \
+    private:void save_fetch(eb::para param) override { \
+        GWPP(#name, name, param); \
     }
 
 #define DECLARE_VAR4(type, name, type2, name2) type name; \
     type2 name2; \
     __MEMMNGR_INTERNAL_HEADER_PERMISSION \
-    private:void save_fetch(mem::memPara para) override { \
-        GWPP(#name, name, para); \
-        GWPP(#name2, name2, para); \
+    private:void save_fetch(eb::para param) override { \
+        GWPP(#name, name, param); \
+        GWPP(#name2, name2, param); \
     }
 
 #define DECLARE_VAR6(type, name, type2, name2, type3, name3) type name; \
     type2 name2; \
     type3 name3; \
     __MEMMNGR_INTERNAL_HEADER_PERMISSION \
-    private:void save_fetch(mem::memPara para) override { \
-        GWPP(#name, name, para); \
-        GWPP(#name2, name2, para); \
-        GWPP(#name3, name3, para); \
+    private:void save_fetch(eb::para param) override { \
+        GWPP(#name, name, param); \
+        GWPP(#name2, name2, param); \
+        GWPP(#name3, name3, param); \
     }
 
 #define DECLARE_VAR8(type, name, type2, name2, type3, name3, type4, name4) type name; \
@@ -57,11 +57,11 @@
     type3 name3; \
     type4 name4; \
     __MEMMNGR_INTERNAL_HEADER_PERMISSION \
-    private:void save_fetch(mem::memPara para) override { \
-        GWPP(#name, name, para); \
-        GWPP(#name2, name2, para); \
-        GWPP(#name3, name3, para); \
-        GWPP(#name4, name4, para); \
+    private:void save_fetch(eb::para param) override { \
+        GWPP(#name, name, param); \
+        GWPP(#name2, name2, param); \
+        GWPP(#name3, name3, param); \
+        GWPP(#name4, name4, param); \
     }
 
 #define DECLARE_VAR10(type, name, type2, name2, type3, name3, type4, name4, type5, name5) type name; \
@@ -70,12 +70,12 @@
     type4 name4; \
     type5 name5; \
     __MEMMNGR_INTERNAL_HEADER_PERMISSION \
-    private:void save_fetch(mem::memPara para) override { \
-        GWPP(#name, name, para); \
-        GWPP(#name2, name2, para); \
-        GWPP(#name3, name3, para); \
-        GWPP(#name4, name4, para); \
-        GWPP(#name5, name5, para); \
+    private:void save_fetch(eb::para param) override { \
+        GWPP(#name, name, param); \
+        GWPP(#name2, name2, param); \
+        GWPP(#name3, name3, param); \
+        GWPP(#name4, name4, param); \
+        GWPP(#name5, name5, param); \
     }
 
 #define DECLARE_VAR12(type, name, type2, name2, type3, name3, type4, name4, type5, name5, type6, name6) type name; \
@@ -85,13 +85,13 @@
     type5 name5; \
     type6 name6; \
     __MEMMNGR_INTERNAL_HEADER_PERMISSION \
-    private:void save_fetch(mem::memPara para) override { \
-        GWPP(#name, name, para); \
-        GWPP(#name2, name2, para); \
-        GWPP(#name3, name3, para); \
-        GWPP(#name4, name4, para); \
-        GWPP(#name5, name5, para); \
-        GWPP(#name6, name6, para); \
+    private:void save_fetch(eb::para param) override { \
+        GWPP(#name, name, param); \
+        GWPP(#name2, name2, param); \
+        GWPP(#name3, name3, param); \
+        GWPP(#name4, name4, param); \
+        GWPP(#name5, name5, param); \
+        GWPP(#name6, name6, param); \
     }
 
 #define DECLARE_VAR14(type, name, type2, name2, type3, name3, type4, name4, type5, name5, type6, name6, type7, name7) type name; \
@@ -102,14 +102,14 @@
     type6 name6; \
     type7 name7; \
     __MEMMNGR_INTERNAL_HEADER_PERMISSION \
-    private:void save_fetch(mem::memPara para) override { \
-        GWPP(#name, name, para); \
-        GWPP(#name2, name2, para); \
-        GWPP(#name3, name3, para); \
-        GWPP(#name4, name4, para); \
-        GWPP(#name5, name5, para); \
-        GWPP(#name6, name6, para); \
-        GWPP(#name7, name7, para); \
+    private:void save_fetch(eb::para param) override { \
+        GWPP(#name, name, param); \
+        GWPP(#name2, name2, param); \
+        GWPP(#name3, name3, param); \
+        GWPP(#name4, name4, param); \
+        GWPP(#name5, name5, param); \
+        GWPP(#name6, name6, param); \
+        GWPP(#name7, name7, param); \
     }
 
 #define DECLARE_VAR16(type, name, type2, name2, type3, name3, type4, name4, type5, name5, type6, name6, type7, name7, type8, name8) type name; \
@@ -121,15 +121,15 @@
     type7 name7; \
     type8 name8; \
     __MEMMNGR_INTERNAL_HEADER_PERMISSION \
-    private:void save_fetch(mem::memPara para) override { \
-        GWPP(#name, name, para); \
-        GWPP(#name2, name2, para); \
-        GWPP(#name3, name3, para); \
-        GWPP(#name4, name4, para); \
-        GWPP(#name5, name5, para); \
-        GWPP(#name6, name6, para); \
-        GWPP(#name7, name7, para); \
-        GWPP(#name8, name8, para); \
+    private:void save_fetch(eb::para param) override { \
+        GWPP(#name, name, param); \
+        GWPP(#name2, name2, param); \
+        GWPP(#name3, name3, param); \
+        GWPP(#name4, name4, param); \
+        GWPP(#name5, name5, param); \
+        GWPP(#name6, name6, param); \
+        GWPP(#name7, name7, param); \
+        GWPP(#name8, name8, param); \
     }
 
 #define DECLARE_VAR18(type, name, type2, name2, type3, name3, type4, name4, type5, name5, type6, name6, type7, name7, type8, name8, type9, name9) type name; \
@@ -142,16 +142,16 @@
     type8 name8; \
     type9 name9; \
     __MEMMNGR_INTERNAL_HEADER_PERMISSION \
-    private:void save_fetch(mem::memPara para) override { \
-        GWPP(#name, name, para); \
-        GWPP(#name2, name2, para); \
-        GWPP(#name3, name3, para); \
-        GWPP(#name4, name4, para); \
-        GWPP(#name5, name5, para); \
-        GWPP(#name6, name6, para); \
-        GWPP(#name7, name7, para); \
-        GWPP(#name8, name8, para); \
-        GWPP(#name9, name9, para); \
+    private:void save_fetch(eb::para param) override { \
+        GWPP(#name, name, param); \
+        GWPP(#name2, name2, param); \
+        GWPP(#name3, name3, param); \
+        GWPP(#name4, name4, param); \
+        GWPP(#name5, name5, param); \
+        GWPP(#name6, name6, param); \
+        GWPP(#name7, name7, param); \
+        GWPP(#name8, name8, param); \
+        GWPP(#name9, name9, param); \
     }
 
 #define DECLARE_VAR20(type, name, type2, name2, type3, name3, type4, name4, type5, name5, type6, name6, type7, name7, type8, name8, type9, name9, type10, name10) type name; \
@@ -165,17 +165,17 @@
     type9 name9; \
     type10 name10; \
     __MEMMNGR_INTERNAL_HEADER_PERMISSION \
-    private:void save_fetch(mem::memPara para) override { \
-        GWPP(#name, name, para); \
-        GWPP(#name2, name2, para); \
-        GWPP(#name3, name3, para); \
-        GWPP(#name4, name4, para); \
-        GWPP(#name5, name5, para); \
-        GWPP(#name6, name6, para); \
-        GWPP(#name7, name7, para); \
-        GWPP(#name8, name8, para); \
-        GWPP(#name9, name9, para); \
-        GWPP(#name10, name10, para); \
+    private:void save_fetch(eb::para param) override { \
+        GWPP(#name, name, param); \
+        GWPP(#name2, name2, param); \
+        GWPP(#name3, name3, param); \
+        GWPP(#name4, name4, param); \
+        GWPP(#name5, name5, param); \
+        GWPP(#name6, name6, param); \
+        GWPP(#name7, name7, param); \
+        GWPP(#name8, name8, param); \
+        GWPP(#name9, name9, param); \
+        GWPP(#name10, name10, param); \
     }
 
 #define DECLARE_VAR22(type, name, type2, name2, type3, name3, type4, name4, type5, name5, type6, name6, type7, name7, type8, name8, type9, name9, type10, name10, type11, name11) type name; \
@@ -190,18 +190,18 @@
     type10 name10; \
     type11 name11; \
     __MEMMNGR_INTERNAL_HEADER_PERMISSION \
-    private:void save_fetch(mem::memPara para) override { \
-        GWPP(#name, name, para); \
-        GWPP(#name2, name2, para); \
-        GWPP(#name3, name3, para); \
-        GWPP(#name4, name4, para); \
-        GWPP(#name5, name5, para); \
-        GWPP(#name6, name6, para); \
-        GWPP(#name7, name7, para); \
-        GWPP(#name8, name8, para); \
-        GWPP(#name9, name9, para); \
-        GWPP(#name10, name10, para); \
-        GWPP(#name11, name11, para); \
+    private:void save_fetch(eb::para param) override { \
+        GWPP(#name, name, param); \
+        GWPP(#name2, name2, param); \
+        GWPP(#name3, name3, param); \
+        GWPP(#name4, name4, param); \
+        GWPP(#name5, name5, param); \
+        GWPP(#name6, name6, param); \
+        GWPP(#name7, name7, param); \
+        GWPP(#name8, name8, param); \
+        GWPP(#name9, name9, param); \
+        GWPP(#name10, name10, param); \
+        GWPP(#name11, name11, param); \
     }
 
 #define DECLARE_VAR24(type, name, type2, name2, type3, name3, type4, name4, type5, name5, type6, name6, type7, name7, type8, name8, type9, name9, type10, name10, type11, name11, type12, name12) type name; \
@@ -217,19 +217,19 @@
     type11 name11; \
     type12 name12; \
     __MEMMNGR_INTERNAL_HEADER_PERMISSION \
-    private:void save_fetch(mem::memPara para) override { \
-        GWPP(#name, name, para); \
-        GWPP(#name2, name2, para); \
-        GWPP(#name3, name3, para); \
-        GWPP(#name4, name4, para); \
-        GWPP(#name5, name5, para); \
-        GWPP(#name6, name6, para); \
-        GWPP(#name7, name7, para); \
-        GWPP(#name8, name8, para); \
-        GWPP(#name9, name9, para); \
-        GWPP(#name10, name10, para); \
-        GWPP(#name11, name11, para); \
-        GWPP(#name12, name12, para); \
+    private:void save_fetch(eb::para param) override { \
+        GWPP(#name, name, param); \
+        GWPP(#name2, name2, param); \
+        GWPP(#name3, name3, param); \
+        GWPP(#name4, name4, param); \
+        GWPP(#name5, name5, param); \
+        GWPP(#name6, name6, param); \
+        GWPP(#name7, name7, param); \
+        GWPP(#name8, name8, param); \
+        GWPP(#name9, name9, param); \
+        GWPP(#name10, name10, param); \
+        GWPP(#name11, name11, param); \
+        GWPP(#name12, name12, param); \
     }
 
 #define DECLARE_VAR26(type, name, type2, name2, type3, name3, type4, name4, type5, name5, type6, name6, type7, name7, type8, name8, type9, name9, type10, name10, type11, name11, type12, name12, type13, name13) type name; \
@@ -246,20 +246,20 @@
     type12 name12; \
     type13 name13; \
     __MEMMNGR_INTERNAL_HEADER_PERMISSION \
-    private:void save_fetch(mem::memPara para) override { \
-        GWPP(#name, name, para); \
-        GWPP(#name2, name2, para); \
-        GWPP(#name3, name3, para); \
-        GWPP(#name4, name4, para); \
-        GWPP(#name5, name5, para); \
-        GWPP(#name6, name6, para); \
-        GWPP(#name7, name7, para); \
-        GWPP(#name8, name8, para); \
-        GWPP(#name9, name9, para); \
-        GWPP(#name10, name10, para); \
-        GWPP(#name11, name11, para); \
-        GWPP(#name12, name12, para); \
-        GWPP(#name13, name13, para); \
+    private:void save_fetch(eb::para param) override { \
+        GWPP(#name, name, param); \
+        GWPP(#name2, name2, param); \
+        GWPP(#name3, name3, param); \
+        GWPP(#name4, name4, param); \
+        GWPP(#name5, name5, param); \
+        GWPP(#name6, name6, param); \
+        GWPP(#name7, name7, param); \
+        GWPP(#name8, name8, param); \
+        GWPP(#name9, name9, param); \
+        GWPP(#name10, name10, param); \
+        GWPP(#name11, name11, param); \
+        GWPP(#name12, name12, param); \
+        GWPP(#name13, name13, param); \
     }
 
 #define DECLARE_VAR28(type, name, type2, name2, type3, name3, type4, name4, type5, name5, type6, name6, type7, name7, type8, name8, type9, name9, type10, name10, type11, name11, type12, name12, type13, name13 \
@@ -278,21 +278,21 @@
     type13 name13; \
     type14 name14; \
     __MEMMNGR_INTERNAL_HEADER_PERMISSION \
-    private:void save_fetch(mem::memPara para) override { \
-        GWPP(#name, name, para); \
-        GWPP(#name2, name2, para); \
-        GWPP(#name3, name3, para); \
-        GWPP(#name4, name4, para); \
-        GWPP(#name5, name5, para); \
-        GWPP(#name6, name6, para); \
-        GWPP(#name7, name7, para); \
-        GWPP(#name8, name8, para); \
-        GWPP(#name9, name9, para); \
-        GWPP(#name10, name10, para); \
-        GWPP(#name11, name11, para); \
-        GWPP(#name12, name12, para); \
-        GWPP(#name13, name13, para); \
-        GWPP(#name14, name14, para); \
+    private:void save_fetch(eb::para param) override { \
+        GWPP(#name, name, param); \
+        GWPP(#name2, name2, param); \
+        GWPP(#name3, name3, param); \
+        GWPP(#name4, name4, param); \
+        GWPP(#name5, name5, param); \
+        GWPP(#name6, name6, param); \
+        GWPP(#name7, name7, param); \
+        GWPP(#name8, name8, param); \
+        GWPP(#name9, name9, param); \
+        GWPP(#name10, name10, param); \
+        GWPP(#name11, name11, param); \
+        GWPP(#name12, name12, param); \
+        GWPP(#name13, name13, param); \
+        GWPP(#name14, name14, param); \
     }
 
 #define DECLARE_VAR30(type, name, type2, name2, type3, name3, type4, name4, type5, name5, type6, name6, type7, name7, type8, name8, type9, name9, type10, name10, type11, name11, type12, name12, type13, name13 \
@@ -312,22 +312,22 @@
     type14 name14; \
     type15 name15; \
     __MEMMNGR_INTERNAL_HEADER_PERMISSION \
-    private:void save_fetch(mem::memPara para) override { \
-        GWPP(#name, name, para); \
-        GWPP(#name2, name2, para); \
-        GWPP(#name3, name3, para); \
-        GWPP(#name4, name4, para); \
-        GWPP(#name5, name5, para); \
-        GWPP(#name6, name6, para); \
-        GWPP(#name7, name7, para); \
-        GWPP(#name8, name8, para); \
-        GWPP(#name9, name9, para); \
-        GWPP(#name10, name10, para); \
-        GWPP(#name11, name11, para); \
-        GWPP(#name12, name12, para); \
-        GWPP(#name13, name13, para); \
-        GWPP(#name14, name14, para); \
-        GWPP(#name15, name15, para); \
+    private:void save_fetch(eb::para param) override { \
+        GWPP(#name, name, param); \
+        GWPP(#name2, name2, param); \
+        GWPP(#name3, name3, param); \
+        GWPP(#name4, name4, param); \
+        GWPP(#name5, name5, param); \
+        GWPP(#name6, name6, param); \
+        GWPP(#name7, name7, param); \
+        GWPP(#name8, name8, param); \
+        GWPP(#name9, name9, param); \
+        GWPP(#name10, name10, param); \
+        GWPP(#name11, name11, param); \
+        GWPP(#name12, name12, param); \
+        GWPP(#name13, name13, param); \
+        GWPP(#name14, name14, param); \
+        GWPP(#name15, name15, param); \
     }
 
 #define DECLARE_VAR32(type, name, type2, name2, type3, name3, type4, name4, type5, name5, type6, name6, type7, name7, type8, name8, type9, name9, type10, name10, type11, name11, type12, name12, type13, name13 \
@@ -348,23 +348,23 @@
     type15 name15; \
     type16 name16; \
     __MEMMNGR_INTERNAL_HEADER_PERMISSION \
-    private:private:void save_fetch(mem::memPara para) override { \
-        GWPP(#name, name, para); \
-        GWPP(#name2, name2, para); \
-        GWPP(#name3, name3, para); \
-        GWPP(#name4, name4, para); \
-        GWPP(#name5, name5, para); \
-        GWPP(#name6, name6, para); \
-        GWPP(#name7, name7, para); \
-        GWPP(#name8, name8, para); \
-        GWPP(#name9, name9, para); \
-        GWPP(#name10, name10, para); \
-        GWPP(#name11, name11, para); \
-        GWPP(#name12, name12, para); \
-        GWPP(#name13, name13, para); \
-        GWPP(#name14, name14, para); \
-        GWPP(#name15, name15, para); \
-        GWPP(#name16, name16, para); \
+    private:private:void save_fetch(eb::para param) override { \
+        GWPP(#name, name, param); \
+        GWPP(#name2, name2, param); \
+        GWPP(#name3, name3, param); \
+        GWPP(#name4, name4, param); \
+        GWPP(#name5, name5, param); \
+        GWPP(#name6, name6, param); \
+        GWPP(#name7, name7, param); \
+        GWPP(#name8, name8, param); \
+        GWPP(#name9, name9, param); \
+        GWPP(#name10, name10, param); \
+        GWPP(#name11, name11, param); \
+        GWPP(#name12, name12, param); \
+        GWPP(#name13, name13, param); \
+        GWPP(#name14, name14, param); \
+        GWPP(#name15, name15, param); \
+        GWPP(#name16, name16, param); \
     }
 #define DECLARE_VAR34(type, name, type2, name2, type3, name3, type4, name4, type5, name5, type6, name6, type7, name7, type8, name8, type9, name9, type10, name10, type11, name11, type12, name12, type13, name13 \
     , type14, name14, type15, name15, type16, name16, type17, name17) type name; \
@@ -385,24 +385,24 @@
     type16 name16; \
     type17 name17; \
     __MEMMNGR_INTERNAL_HEADER_PERMISSION \
-    private:private:void save_fetch(mem::memPara para) override { \
-        GWPP(#name, name, para); \
-        GWPP(#name2, name2, para); \
-        GWPP(#name3, name3, para); \
-        GWPP(#name4, name4, para); \
-        GWPP(#name5, name5, para); \
-        GWPP(#name6, name6, para); \
-        GWPP(#name7, name7, para); \
-        GWPP(#name8, name8, para); \
-        GWPP(#name9, name9, para); \
-        GWPP(#name10, name10, para); \
-        GWPP(#name11, name11, para); \
-        GWPP(#name12, name12, para); \
-        GWPP(#name13, name13, para); \
-        GWPP(#name14, name14, para); \
-        GWPP(#name15, name15, para); \
-        GWPP(#name16, name16, para); \
-        GWPP(#name17, name17, para); \
+    private:private:void save_fetch(eb::para param) override { \
+        GWPP(#name, name, param); \
+        GWPP(#name2, name2, param); \
+        GWPP(#name3, name3, param); \
+        GWPP(#name4, name4, param); \
+        GWPP(#name5, name5, param); \
+        GWPP(#name6, name6, param); \
+        GWPP(#name7, name7, param); \
+        GWPP(#name8, name8, param); \
+        GWPP(#name9, name9, param); \
+        GWPP(#name10, name10, param); \
+        GWPP(#name11, name11, param); \
+        GWPP(#name12, name12, param); \
+        GWPP(#name13, name13, param); \
+        GWPP(#name14, name14, param); \
+        GWPP(#name15, name15, param); \
+        GWPP(#name16, name16, param); \
+        GWPP(#name17, name17, param); \
     }
 #define DECLARE_VAR36(type, name, type2, name2, type3, name3, type4, name4, type5, name5, type6, name6, type7, name7, type8, name8, type9, name9, type10, name10, type11, name11, type12, name12, type13, name13 \
     , type14, name14, type15, name15, type16, name16, type17, name17, type18, name18) type name; \
@@ -424,25 +424,25 @@
     type17 name17; \
     type18 name18; \
     __MEMMNGR_INTERNAL_HEADER_PERMISSION \
-    private:private:void save_fetch(mem::memPara para) override { \
-        GWPP(#name, name, para); \
-        GWPP(#name2, name2, para); \
-        GWPP(#name3, name3, para); \
-        GWPP(#name4, name4, para); \
-        GWPP(#name5, name5, para); \
-        GWPP(#name6, name6, para); \
-        GWPP(#name7, name7, para); \
-        GWPP(#name8, name8, para); \
-        GWPP(#name9, name9, para); \
-        GWPP(#name10, name10, para); \
-        GWPP(#name11, name11, para); \
-        GWPP(#name12, name12, para); \
-        GWPP(#name13, name13, para); \
-        GWPP(#name14, name14, para); \
-        GWPP(#name15, name15, para); \
-        GWPP(#name16, name16, para); \
-        GWPP(#name17, name17, para); \
-        GWPP(#name18, name18, para); \
+    private:private:void save_fetch(eb::para param) override { \
+        GWPP(#name, name, param); \
+        GWPP(#name2, name2, param); \
+        GWPP(#name3, name3, param); \
+        GWPP(#name4, name4, param); \
+        GWPP(#name5, name5, param); \
+        GWPP(#name6, name6, param); \
+        GWPP(#name7, name7, param); \
+        GWPP(#name8, name8, param); \
+        GWPP(#name9, name9, param); \
+        GWPP(#name10, name10, param); \
+        GWPP(#name11, name11, param); \
+        GWPP(#name12, name12, param); \
+        GWPP(#name13, name13, param); \
+        GWPP(#name14, name14, param); \
+        GWPP(#name15, name15, param); \
+        GWPP(#name16, name16, param); \
+        GWPP(#name17, name17, param); \
+        GWPP(#name18, name18, param); \
     }
 #define DECLARE_VAR38(type, name, type2, name2, type3, name3, type4, name4, type5, name5, type6, name6, type7, name7, type8, name8, type9, name9, type10, name10, type11, name11, type12, name12, type13, name13 \
     , type14, name14, type15, name15, type16, name16, type17, name17, type18, name18, type19, name19) type name; \
@@ -465,26 +465,26 @@
     type18 name18; \
     type19 name19; \
     __MEMMNGR_INTERNAL_HEADER_PERMISSION \
-    private:private:void save_fetch(mem::memPara para) override { \
-        GWPP(#name, name, para); \
-        GWPP(#name2, name2, para); \
-        GWPP(#name3, name3, para); \
-        GWPP(#name4, name4, para); \
-        GWPP(#name5, name5, para); \
-        GWPP(#name6, name6, para); \
-        GWPP(#name7, name7, para); \
-        GWPP(#name8, name8, para); \
-        GWPP(#name9, name9, para); \
-        GWPP(#name10, name10, para); \
-        GWPP(#name11, name11, para); \
-        GWPP(#name12, name12, para); \
-        GWPP(#name13, name13, para); \
-        GWPP(#name14, name14, para); \
-        GWPP(#name15, name15, para); \
-        GWPP(#name16, name16, para); \
-        GWPP(#name17, name17, para); \
-        GWPP(#name18, name18, para); \
-        GWPP(#name19, name19, para); \
+    private:private:void save_fetch(eb::para param) override { \
+        GWPP(#name, name, param); \
+        GWPP(#name2, name2, param); \
+        GWPP(#name3, name3, param); \
+        GWPP(#name4, name4, param); \
+        GWPP(#name5, name5, param); \
+        GWPP(#name6, name6, param); \
+        GWPP(#name7, name7, param); \
+        GWPP(#name8, name8, param); \
+        GWPP(#name9, name9, param); \
+        GWPP(#name10, name10, param); \
+        GWPP(#name11, name11, param); \
+        GWPP(#name12, name12, param); \
+        GWPP(#name13, name13, param); \
+        GWPP(#name14, name14, param); \
+        GWPP(#name15, name15, param); \
+        GWPP(#name16, name16, param); \
+        GWPP(#name17, name17, param); \
+        GWPP(#name18, name18, param); \
+        GWPP(#name19, name19, param); \
     }
 #define DECLARE_VAR40(type, name, type2, name2, type3, name3, type4, name4, type5, name5, type6, name6, type7, name7, type8, name8, type9, name9, type10, name10, type11, name11, type12, name12, type13, name13 \
     , type14, name14, type15, name15, type16, name16, type17, name17, type18, name18, type19, name19, type20, name20) type name; \
@@ -508,27 +508,27 @@
     type19 name19; \
     type20 name20; \
     __MEMMNGR_INTERNAL_HEADER_PERMISSION \
-    private:private:void save_fetch(mem::memPara para) override { \
-        GWPP(#name, name, para); \
-        GWPP(#name2, name2, para); \
-        GWPP(#name3, name3, para); \
-        GWPP(#name4, name4, para); \
-        GWPP(#name5, name5, para); \
-        GWPP(#name6, name6, para); \
-        GWPP(#name7, name7, para); \
-        GWPP(#name8, name8, para); \
-        GWPP(#name9, name9, para); \
-        GWPP(#name10, name10, para); \
-        GWPP(#name11, name11, para); \
-        GWPP(#name12, name12, para); \
-        GWPP(#name13, name13, para); \
-        GWPP(#name14, name14, para); \
-        GWPP(#name15, name15, para); \
-        GWPP(#name16, name16, para); \
-        GWPP(#name17, name17, para); \
-        GWPP(#name18, name18, para); \
-        GWPP(#name19, name19, para); \
-        GWPP(#name20, name20, para); \
+    private:private:void save_fetch(eb::para param) override { \
+        GWPP(#name, name, param); \
+        GWPP(#name2, name2, param); \
+        GWPP(#name3, name3, param); \
+        GWPP(#name4, name4, param); \
+        GWPP(#name5, name5, param); \
+        GWPP(#name6, name6, param); \
+        GWPP(#name7, name7, param); \
+        GWPP(#name8, name8, param); \
+        GWPP(#name9, name9, param); \
+        GWPP(#name10, name10, param); \
+        GWPP(#name11, name11, param); \
+        GWPP(#name12, name12, param); \
+        GWPP(#name13, name13, param); \
+        GWPP(#name14, name14, param); \
+        GWPP(#name15, name15, param); \
+        GWPP(#name16, name16, param); \
+        GWPP(#name17, name17, param); \
+        GWPP(#name18, name18, param); \
+        GWPP(#name19, name19, param); \
+        GWPP(#name20, name20, param); \
     }
 #define DECLARE_VAR42(type, name, type2, name2, type3, name3, type4, name4, type5, name5, type6, name6, type7, name7, type8, name8, type9, name9, type10, name10, type11, name11, type12, name12, type13, name13 \
     , type14, name14, type15, name15, type16, name16, type17, name17, type18, name18, type19, name19, type20, name20, type21, name21) type name; \
@@ -553,28 +553,28 @@
     type20 name20; \
     type21 name21; \
     __MEMMNGR_INTERNAL_HEADER_PERMISSION \
-    private:private:void save_fetch(mem::memPara para) override { \
-        GWPP(#name, name, para); \
-        GWPP(#name2, name2, para); \
-        GWPP(#name3, name3, para); \
-        GWPP(#name4, name4, para); \
-        GWPP(#name5, name5, para); \
-        GWPP(#name6, name6, para); \
-        GWPP(#name7, name7, para); \
-        GWPP(#name8, name8, para); \
-        GWPP(#name9, name9, para); \
-        GWPP(#name10, name10, para); \
-        GWPP(#name11, name11, para); \
-        GWPP(#name12, name12, para); \
-        GWPP(#name13, name13, para); \
-        GWPP(#name14, name14, para); \
-        GWPP(#name15, name15, para); \
-        GWPP(#name16, name16, para); \
-        GWPP(#name17, name17, para); \
-        GWPP(#name18, name18, para); \
-        GWPP(#name19, name19, para); \
-        GWPP(#name20, name20, para); \
-        GWPP(#name21, name21, para); \
+    private:private:void save_fetch(eb::para param) override { \
+        GWPP(#name, name, param); \
+        GWPP(#name2, name2, param); \
+        GWPP(#name3, name3, param); \
+        GWPP(#name4, name4, param); \
+        GWPP(#name5, name5, param); \
+        GWPP(#name6, name6, param); \
+        GWPP(#name7, name7, param); \
+        GWPP(#name8, name8, param); \
+        GWPP(#name9, name9, param); \
+        GWPP(#name10, name10, param); \
+        GWPP(#name11, name11, param); \
+        GWPP(#name12, name12, param); \
+        GWPP(#name13, name13, param); \
+        GWPP(#name14, name14, param); \
+        GWPP(#name15, name15, param); \
+        GWPP(#name16, name16, param); \
+        GWPP(#name17, name17, param); \
+        GWPP(#name18, name18, param); \
+        GWPP(#name19, name19, param); \
+        GWPP(#name20, name20, param); \
+        GWPP(#name21, name21, param); \
     }
 #define DECLARE_VAR44(type, name, type2, name2, type3, name3, type4, name4, type5, name5, type6, name6, type7, name7, type8, name8, type9, name9, type10, name10, type11, name11, type12, name12, type13, name13 \
     , type14, name14, type15, name15, type16, name16, type17, name17, type18, name18, type19, name19, type20, name20, type21, name21, type22, name22) type name; \
@@ -600,29 +600,29 @@
     type21 name21; \
     type22 name22; \
     __MEMMNGR_INTERNAL_HEADER_PERMISSION \
-    private:private:void save_fetch(mem::memPara para) override { \
-        GWPP(#name, name, para); \
-        GWPP(#name2, name2, para); \
-        GWPP(#name3, name3, para); \
-        GWPP(#name4, name4, para); \
-        GWPP(#name5, name5, para); \
-        GWPP(#name6, name6, para); \
-        GWPP(#name7, name7, para); \
-        GWPP(#name8, name8, para); \
-        GWPP(#name9, name9, para); \
-        GWPP(#name10, name10, para); \
-        GWPP(#name11, name11, para); \
-        GWPP(#name12, name12, para); \
-        GWPP(#name13, name13, para); \
-        GWPP(#name14, name14, para); \
-        GWPP(#name15, name15, para); \
-        GWPP(#name16, name16, para); \
-        GWPP(#name17, name17, para); \
-        GWPP(#name18, name18, para); \
-        GWPP(#name19, name19, para); \
-        GWPP(#name20, name20, para); \
-        GWPP(#name21, name21, para); \
-        GWPP(#name22, name22, para); \
+    private:private:void save_fetch(eb::para param) override { \
+        GWPP(#name, name, param); \
+        GWPP(#name2, name2, param); \
+        GWPP(#name3, name3, param); \
+        GWPP(#name4, name4, param); \
+        GWPP(#name5, name5, param); \
+        GWPP(#name6, name6, param); \
+        GWPP(#name7, name7, param); \
+        GWPP(#name8, name8, param); \
+        GWPP(#name9, name9, param); \
+        GWPP(#name10, name10, param); \
+        GWPP(#name11, name11, param); \
+        GWPP(#name12, name12, param); \
+        GWPP(#name13, name13, param); \
+        GWPP(#name14, name14, param); \
+        GWPP(#name15, name15, param); \
+        GWPP(#name16, name16, param); \
+        GWPP(#name17, name17, param); \
+        GWPP(#name18, name18, param); \
+        GWPP(#name19, name19, param); \
+        GWPP(#name20, name20, param); \
+        GWPP(#name21, name21, param); \
+        GWPP(#name22, name22, param); \
     }
     #define DECLARE_VAR46(type, name, type2, name2, type3, name3, type4, name4, type5, name5, type6, name6, type7, name7, type8, name8, type9, name9, type10, name10, type11, name11, type12, name12, type13, name13 \
     , type14, name14, type15, name15, type16, name16, type17, name17, type18, name18, type19, name19, type20, name20, type21, name21, type22, name22, type23, name23) \
@@ -650,30 +650,30 @@
     type22 name22; \
     type23 name23; \
     __MEMMNGR_INTERNAL_HEADER_PERMISSION \
-    private:private:void save_fetch(mem::memPara para) override { \
-        GWPP(#name, name, para); \
-        GWPP(#name2, name2, para); \
-        GWPP(#name3, name3, para); \
-        GWPP(#name4, name4, para); \
-        GWPP(#name5, name5, para); \
-        GWPP(#name6, name6, para); \
-        GWPP(#name7, name7, para); \
-        GWPP(#name8, name8, para); \
-        GWPP(#name9, name9, para); \
-        GWPP(#name10, name10, para); \
-        GWPP(#name11, name11, para); \
-        GWPP(#name12, name12, para); \
-        GWPP(#name13, name13, para); \
-        GWPP(#name14, name14, para); \
-        GWPP(#name15, name15, para); \
-        GWPP(#name16, name16, para); \
-        GWPP(#name17, name17, para); \
-        GWPP(#name18, name18, para); \
-        GWPP(#name19, name19, para); \
-        GWPP(#name20, name20, para); \
-        GWPP(#name21, name21, para); \
-        GWPP(#name22, name22, para); \
-        GWPP(#name23, name23, para); \
+    private:private:void save_fetch(eb::para param) override { \
+        GWPP(#name, name, param); \
+        GWPP(#name2, name2, param); \
+        GWPP(#name3, name3, param); \
+        GWPP(#name4, name4, param); \
+        GWPP(#name5, name5, param); \
+        GWPP(#name6, name6, param); \
+        GWPP(#name7, name7, param); \
+        GWPP(#name8, name8, param); \
+        GWPP(#name9, name9, param); \
+        GWPP(#name10, name10, param); \
+        GWPP(#name11, name11, param); \
+        GWPP(#name12, name12, param); \
+        GWPP(#name13, name13, param); \
+        GWPP(#name14, name14, param); \
+        GWPP(#name15, name15, param); \
+        GWPP(#name16, name16, param); \
+        GWPP(#name17, name17, param); \
+        GWPP(#name18, name18, param); \
+        GWPP(#name19, name19, param); \
+        GWPP(#name20, name20, param); \
+        GWPP(#name21, name21, param); \
+        GWPP(#name22, name22, param); \
+        GWPP(#name23, name23, param); \
     }
     #define DECLARE_VAR48(type, name, type2, name2, type3, name3, type4, name4, type5, name5, type6, name6, type7, name7, type8, name8, type9, name9, type10, name10, type11, name11, type12, name12, type13, name13 \
     , type14, name14, type15, name15, type16, name16, type17, name17, type18, name18, type19, name19, type20, name20, type21, name21, type22, name22, type23, name23, type24, name24) \
@@ -702,31 +702,31 @@
     type23 name23; \
     type24 name24; \
     __MEMMNGR_INTERNAL_HEADER_PERMISSION \
-    private:private:void save_fetch(mem::memPara para) override { \
-        GWPP(#name, name, para); \
-        GWPP(#name2, name2, para); \
-        GWPP(#name3, name3, para); \
-        GWPP(#name4, name4, para); \
-        GWPP(#name5, name5, para); \
-        GWPP(#name6, name6, para); \
-        GWPP(#name7, name7, para); \
-        GWPP(#name8, name8, para); \
-        GWPP(#name9, name9, para); \
-        GWPP(#name10, name10, para); \
-        GWPP(#name11, name11, para); \
-        GWPP(#name12, name12, para); \
-        GWPP(#name13, name13, para); \
-        GWPP(#name14, name14, para); \
-        GWPP(#name15, name15, para); \
-        GWPP(#name16, name16, para); \
-        GWPP(#name17, name17, para); \
-        GWPP(#name18, name18, para); \
-        GWPP(#name19, name19, para); \
-        GWPP(#name20, name20, para); \
-        GWPP(#name21, name21, para); \
-        GWPP(#name22, name22, para); \
-        GWPP(#name23, name23, para); \
-        GWPP(#name24, name24, para); \
+    private:private:void save_fetch(eb::para param) override { \
+        GWPP(#name, name, param); \
+        GWPP(#name2, name2, param); \
+        GWPP(#name3, name3, param); \
+        GWPP(#name4, name4, param); \
+        GWPP(#name5, name5, param); \
+        GWPP(#name6, name6, param); \
+        GWPP(#name7, name7, param); \
+        GWPP(#name8, name8, param); \
+        GWPP(#name9, name9, param); \
+        GWPP(#name10, name10, param); \
+        GWPP(#name11, name11, param); \
+        GWPP(#name12, name12, param); \
+        GWPP(#name13, name13, param); \
+        GWPP(#name14, name14, param); \
+        GWPP(#name15, name15, param); \
+        GWPP(#name16, name16, param); \
+        GWPP(#name17, name17, param); \
+        GWPP(#name18, name18, param); \
+        GWPP(#name19, name19, param); \
+        GWPP(#name20, name20, param); \
+        GWPP(#name21, name21, param); \
+        GWPP(#name22, name22, param); \
+        GWPP(#name23, name23, param); \
+        GWPP(#name24, name24, param); \
     }
     #define DECLARE_VAR50(type, name, type2, name2, type3, name3, type4, name4, type5, name5, type6, name6, type7, name7, type8, name8, type9, name9, type10, name10, type11, name11, type12, name12, type13, name13 \
     , type14, name14, type15, name15, type16, name16, type17, name17, type18, name18, type19, name19, type20, name20, type21, name21, type22, name22, type23, name23, type24, name24, type25, name25 \
@@ -757,32 +757,32 @@
     type24 name24; \
     type25 name25; \
     __MEMMNGR_INTERNAL_HEADER_PERMISSION \
-    private:private:void save_fetch(mem::memPara para) override { \
-        GWPP(#name, name, para); \
-        GWPP(#name2, name2, para); \
-        GWPP(#name3, name3, para); \
-        GWPP(#name4, name4, para); \
-        GWPP(#name5, name5, para); \
-        GWPP(#name6, name6, para); \
-        GWPP(#name7, name7, para); \
-        GWPP(#name8, name8, para); \
-        GWPP(#name9, name9, para); \
-        GWPP(#name10, name10, para); \
-        GWPP(#name11, name11, para); \
-        GWPP(#name12, name12, para); \
-        GWPP(#name13, name13, para); \
-        GWPP(#name14, name14, para); \
-        GWPP(#name15, name15, para); \
-        GWPP(#name16, name16, para); \
-        GWPP(#name17, name17, para); \
-        GWPP(#name18, name18, para); \
-        GWPP(#name19, name19, para); \
-        GWPP(#name20, name20, para); \
-        GWPP(#name21, name21, para); \
-        GWPP(#name22, name22, para); \
-        GWPP(#name23, name23, para); \
-        GWPP(#name24, name24, para); \
-        GWPP(#name25, name25, para); \
+    private:private:void save_fetch(eb::para param) override { \
+        GWPP(#name, name, param); \
+        GWPP(#name2, name2, param); \
+        GWPP(#name3, name3, param); \
+        GWPP(#name4, name4, param); \
+        GWPP(#name5, name5, param); \
+        GWPP(#name6, name6, param); \
+        GWPP(#name7, name7, param); \
+        GWPP(#name8, name8, param); \
+        GWPP(#name9, name9, param); \
+        GWPP(#name10, name10, param); \
+        GWPP(#name11, name11, param); \
+        GWPP(#name12, name12, param); \
+        GWPP(#name13, name13, param); \
+        GWPP(#name14, name14, param); \
+        GWPP(#name15, name15, param); \
+        GWPP(#name16, name16, param); \
+        GWPP(#name17, name17, param); \
+        GWPP(#name18, name18, param); \
+        GWPP(#name19, name19, param); \
+        GWPP(#name20, name20, param); \
+        GWPP(#name21, name21, param); \
+        GWPP(#name22, name22, param); \
+        GWPP(#name23, name23, param); \
+        GWPP(#name24, name24, param); \
+        GWPP(#name25, name25, param); \
     }
     #define DECLARE_VAR52(type, name, type2, name2, type3, name3, type4, name4, type5, name5, type6, name6, type7, name7, type8, name8, type9, name9, type10, name10, type11, name11, type12, name12, type13, name13 \
     , type14, name14, type15, name15, type16, name16, type17, name17, type18, name18, type19, name19, type20, name20, type21, name21, type22, name22, type23, name23, type24, name24, type25, name25 \
@@ -814,33 +814,33 @@
     type25 name25; \
     type26 name26; \
     __MEMMNGR_INTERNAL_HEADER_PERMISSION \
-    private:private:void save_fetch(mem::memPara para) override { \
-        GWPP(#name, name, para); \
-        GWPP(#name2, name2, para); \
-        GWPP(#name3, name3, para); \
-        GWPP(#name4, name4, para); \
-        GWPP(#name5, name5, para); \
-        GWPP(#name6, name6, para); \
-        GWPP(#name7, name7, para); \
-        GWPP(#name8, name8, para); \
-        GWPP(#name9, name9, para); \
-        GWPP(#name10, name10, para); \
-        GWPP(#name11, name11, para); \
-        GWPP(#name12, name12, para); \
-        GWPP(#name13, name13, para); \
-        GWPP(#name14, name14, para); \
-        GWPP(#name15, name15, para); \
-        GWPP(#name16, name16, para); \
-        GWPP(#name17, name17, para); \
-        GWPP(#name18, name18, para); \
-        GWPP(#name19, name19, para); \
-        GWPP(#name20, name20, para); \
-        GWPP(#name21, name21, para); \
-        GWPP(#name22, name22, para); \
-        GWPP(#name23, name23, para); \
-        GWPP(#name24, name24, para); \
-        GWPP(#name25, name25, para); \
-        GWPP(#name26, name26, para); \
+    private:private:void save_fetch(eb::para param) override { \
+        GWPP(#name, name, param); \
+        GWPP(#name2, name2, param); \
+        GWPP(#name3, name3, param); \
+        GWPP(#name4, name4, param); \
+        GWPP(#name5, name5, param); \
+        GWPP(#name6, name6, param); \
+        GWPP(#name7, name7, param); \
+        GWPP(#name8, name8, param); \
+        GWPP(#name9, name9, param); \
+        GWPP(#name10, name10, param); \
+        GWPP(#name11, name11, param); \
+        GWPP(#name12, name12, param); \
+        GWPP(#name13, name13, param); \
+        GWPP(#name14, name14, param); \
+        GWPP(#name15, name15, param); \
+        GWPP(#name16, name16, param); \
+        GWPP(#name17, name17, param); \
+        GWPP(#name18, name18, param); \
+        GWPP(#name19, name19, param); \
+        GWPP(#name20, name20, param); \
+        GWPP(#name21, name21, param); \
+        GWPP(#name22, name22, param); \
+        GWPP(#name23, name23, param); \
+        GWPP(#name24, name24, param); \
+        GWPP(#name25, name25, param); \
+        GWPP(#name26, name26, param); \
     }
     #define DECLARE_VAR54(type, name, type2, name2, type3, name3, type4, name4, type5, name5, type6, name6, type7, name7, type8, name8, type9, name9, type10, name10, type11, name11, type12, name12, type13, name13 \
     , type14, name14, type15, name15, type16, name16, type17, name17, type18, name18, type19, name19, type20, name20, type21, name21, type22, name22, type23, name23, type24, name24, type25, name25 \
@@ -873,34 +873,34 @@
     type26 name26; \
     type27 name27; \
     __MEMMNGR_INTERNAL_HEADER_PERMISSION \
-    private:private:void save_fetch(mem::memPara para) override { \
-        GWPP(#name, name, para); \
-        GWPP(#name2, name2, para); \
-        GWPP(#name3, name3, para); \
-        GWPP(#name4, name4, para); \
-        GWPP(#name5, name5, para); \
-        GWPP(#name6, name6, para); \
-        GWPP(#name7, name7, para); \
-        GWPP(#name8, name8, para); \
-        GWPP(#name9, name9, para); \
-        GWPP(#name10, name10, para); \
-        GWPP(#name11, name11, para); \
-        GWPP(#name12, name12, para); \
-        GWPP(#name13, name13, para); \
-        GWPP(#name14, name14, para); \
-        GWPP(#name15, name15, para); \
-        GWPP(#name16, name16, para); \
-        GWPP(#name17, name17, para); \
-        GWPP(#name18, name18, para); \
-        GWPP(#name19, name19, para); \
-        GWPP(#name20, name20, para); \
-        GWPP(#name21, name21, para); \
-        GWPP(#name22, name22, para); \
-        GWPP(#name23, name23, para); \
-        GWPP(#name24, name24, para); \
-        GWPP(#name25, name25, para); \
-        GWPP(#name26, name26, para); \
-        GWPP(#name27, name27, para); \
+    private:private:void save_fetch(eb::para param) override { \
+        GWPP(#name, name, param); \
+        GWPP(#name2, name2, param); \
+        GWPP(#name3, name3, param); \
+        GWPP(#name4, name4, param); \
+        GWPP(#name5, name5, param); \
+        GWPP(#name6, name6, param); \
+        GWPP(#name7, name7, param); \
+        GWPP(#name8, name8, param); \
+        GWPP(#name9, name9, param); \
+        GWPP(#name10, name10, param); \
+        GWPP(#name11, name11, param); \
+        GWPP(#name12, name12, param); \
+        GWPP(#name13, name13, param); \
+        GWPP(#name14, name14, param); \
+        GWPP(#name15, name15, param); \
+        GWPP(#name16, name16, param); \
+        GWPP(#name17, name17, param); \
+        GWPP(#name18, name18, param); \
+        GWPP(#name19, name19, param); \
+        GWPP(#name20, name20, param); \
+        GWPP(#name21, name21, param); \
+        GWPP(#name22, name22, param); \
+        GWPP(#name23, name23, param); \
+        GWPP(#name24, name24, param); \
+        GWPP(#name25, name25, param); \
+        GWPP(#name26, name26, param); \
+        GWPP(#name27, name27, param); \
     }
     #define DECLARE_VAR56(type, name, type2, name2, type3, name3, type4, name4, type5, name5, type6, name6, type7, name7, type8, name8, type9, name9, type10, name10, type11, name11, type12, name12, type13, name13 \
     , type14, name14, type15, name15, type16, name16, type17, name17, type18, name18, type19, name19, type20, name20, type21, name21, type22, name22, type23, name23, type24, name24, type25, name25 \
@@ -934,35 +934,35 @@
     type27 name27; \
     type28 name28; \
     __MEMMNGR_INTERNAL_HEADER_PERMISSION \
-    private:private:void save_fetch(mem::memPara para) override { \
-        GWPP(#name, name, para); \
-        GWPP(#name2, name2, para); \
-        GWPP(#name3, name3, para); \
-        GWPP(#name4, name4, para); \
-        GWPP(#name5, name5, para); \
-        GWPP(#name6, name6, para); \
-        GWPP(#name7, name7, para); \
-        GWPP(#name8, name8, para); \
-        GWPP(#name9, name9, para); \
-        GWPP(#name10, name10, para); \
-        GWPP(#name11, name11, para); \
-        GWPP(#name12, name12, para); \
-        GWPP(#name13, name13, para); \
-        GWPP(#name14, name14, para); \
-        GWPP(#name15, name15, para); \
-        GWPP(#name16, name16, para); \
-        GWPP(#name17, name17, para); \
-        GWPP(#name18, name18, para); \
-        GWPP(#name19, name19, para); \
-        GWPP(#name20, name20, para); \
-        GWPP(#name21, name21, para); \
-        GWPP(#name22, name22, para); \
-        GWPP(#name23, name23, para); \
-        GWPP(#name24, name24, para); \
-        GWPP(#name25, name25, para); \
-        GWPP(#name26, name26, para); \
-        GWPP(#name27, name27, para); \
-        GWPP(#name28, name28, para); \
+    private:private:void save_fetch(eb::para param) override { \
+        GWPP(#name, name, param); \
+        GWPP(#name2, name2, param); \
+        GWPP(#name3, name3, param); \
+        GWPP(#name4, name4, param); \
+        GWPP(#name5, name5, param); \
+        GWPP(#name6, name6, param); \
+        GWPP(#name7, name7, param); \
+        GWPP(#name8, name8, param); \
+        GWPP(#name9, name9, param); \
+        GWPP(#name10, name10, param); \
+        GWPP(#name11, name11, param); \
+        GWPP(#name12, name12, param); \
+        GWPP(#name13, name13, param); \
+        GWPP(#name14, name14, param); \
+        GWPP(#name15, name15, param); \
+        GWPP(#name16, name16, param); \
+        GWPP(#name17, name17, param); \
+        GWPP(#name18, name18, param); \
+        GWPP(#name19, name19, param); \
+        GWPP(#name20, name20, param); \
+        GWPP(#name21, name21, param); \
+        GWPP(#name22, name22, param); \
+        GWPP(#name23, name23, param); \
+        GWPP(#name24, name24, param); \
+        GWPP(#name25, name25, param); \
+        GWPP(#name26, name26, param); \
+        GWPP(#name27, name27, param); \
+        GWPP(#name28, name28, param); \
     }
     #define DECLARE_VAR58(type, name, type2, name2, type3, name3, type4, name4, type5, name5, type6, name6, type7, name7, type8, name8, type9, name9, type10, name10, type11, name11, type12, name12, type13, name13 \
     , type14, name14, type15, name15, type16, name16, type17, name17, type18, name18, type19, name19, type20, name20, type21, name21, type22, name22, type23, name23, type24, name24, type25, name25 \
@@ -997,36 +997,36 @@
     type28 name28; \
     type29 name29; \
     __MEMMNGR_INTERNAL_HEADER_PERMISSION \
-    private:private:void save_fetch(mem::memPara para) override { \
-        GWPP(#name, name, para); \
-        GWPP(#name2, name2, para); \
-        GWPP(#name3, name3, para); \
-        GWPP(#name4, name4, para); \
-        GWPP(#name5, name5, para); \
-        GWPP(#name6, name6, para); \
-        GWPP(#name7, name7, para); \
-        GWPP(#name8, name8, para); \
-        GWPP(#name9, name9, para); \
-        GWPP(#name10, name10, para); \
-        GWPP(#name11, name11, para); \
-        GWPP(#name12, name12, para); \
-        GWPP(#name13, name13, para); \
-        GWPP(#name14, name14, para); \
-        GWPP(#name15, name15, para); \
-        GWPP(#name16, name16, para); \
-        GWPP(#name17, name17, para); \
-        GWPP(#name18, name18, para); \
-        GWPP(#name19, name19, para); \
-        GWPP(#name20, name20, para); \
-        GWPP(#name21, name21, para); \
-        GWPP(#name22, name22, para); \
-        GWPP(#name23, name23, para); \
-        GWPP(#name24, name24, para); \
-        GWPP(#name25, name25, para); \
-        GWPP(#name26, name26, para); \
-        GWPP(#name27, name27, para); \
-        GWPP(#name28, name28, para); \
-        GWPP(#name29, name29, para); \
+    private:private:void save_fetch(eb::para param) override { \
+        GWPP(#name, name, param); \
+        GWPP(#name2, name2, param); \
+        GWPP(#name3, name3, param); \
+        GWPP(#name4, name4, param); \
+        GWPP(#name5, name5, param); \
+        GWPP(#name6, name6, param); \
+        GWPP(#name7, name7, param); \
+        GWPP(#name8, name8, param); \
+        GWPP(#name9, name9, param); \
+        GWPP(#name10, name10, param); \
+        GWPP(#name11, name11, param); \
+        GWPP(#name12, name12, param); \
+        GWPP(#name13, name13, param); \
+        GWPP(#name14, name14, param); \
+        GWPP(#name15, name15, param); \
+        GWPP(#name16, name16, param); \
+        GWPP(#name17, name17, param); \
+        GWPP(#name18, name18, param); \
+        GWPP(#name19, name19, param); \
+        GWPP(#name20, name20, param); \
+        GWPP(#name21, name21, param); \
+        GWPP(#name22, name22, param); \
+        GWPP(#name23, name23, param); \
+        GWPP(#name24, name24, param); \
+        GWPP(#name25, name25, param); \
+        GWPP(#name26, name26, param); \
+        GWPP(#name27, name27, param); \
+        GWPP(#name28, name28, param); \
+        GWPP(#name29, name29, param); \
     }
     #define DECLARE_VAR60(type, name, type2, name2, type3, name3, type4, name4, type5, name5, type6, name6, type7, name7, type8, name8, type9, name9, type10, name10, type11, name11, type12, name12, type13, name13 \
     , type14, name14, type15, name15, type16, name16, type17, name17, type18, name18, type19, name19, type20, name20, type21, name21, type22, name22, type23, name23, type24, name24, type25, name25 \
@@ -1062,37 +1062,37 @@
     type29 name29; \
     type30 name30; \
     __MEMMNGR_INTERNAL_HEADER_PERMISSION \
-    private:private:void save_fetch(mem::memPara para) override { \
-        GWPP(#name, name, para); \
-        GWPP(#name2, name2, para); \
-        GWPP(#name3, name3, para); \
-        GWPP(#name4, name4, para); \
-        GWPP(#name5, name5, para); \
-        GWPP(#name6, name6, para); \
-        GWPP(#name7, name7, para); \
-        GWPP(#name8, name8, para); \
-        GWPP(#name9, name9, para); \
-        GWPP(#name10, name10, para); \
-        GWPP(#name11, name11, para); \
-        GWPP(#name12, name12, para); \
-        GWPP(#name13, name13, para); \
-        GWPP(#name14, name14, para); \
-        GWPP(#name15, name15, para); \
-        GWPP(#name16, name16, para); \
-        GWPP(#name17, name17, para); \
-        GWPP(#name18, name18, para); \
-        GWPP(#name19, name19, para); \
-        GWPP(#name20, name20, para); \
-        GWPP(#name21, name21, para); \
-        GWPP(#name22, name22, para); \
-        GWPP(#name23, name23, para); \
-        GWPP(#name24, name24, para); \
-        GWPP(#name25, name25, para); \
-        GWPP(#name26, name26, para); \
-        GWPP(#name27, name27, para); \
-        GWPP(#name28, name28, para); \
-        GWPP(#name29, name29, para); \
-        GWPP(#name30, name30, para); \
+    private:private:void save_fetch(eb::para param) override { \
+        GWPP(#name, name, param); \
+        GWPP(#name2, name2, param); \
+        GWPP(#name3, name3, param); \
+        GWPP(#name4, name4, param); \
+        GWPP(#name5, name5, param); \
+        GWPP(#name6, name6, param); \
+        GWPP(#name7, name7, param); \
+        GWPP(#name8, name8, param); \
+        GWPP(#name9, name9, param); \
+        GWPP(#name10, name10, param); \
+        GWPP(#name11, name11, param); \
+        GWPP(#name12, name12, param); \
+        GWPP(#name13, name13, param); \
+        GWPP(#name14, name14, param); \
+        GWPP(#name15, name15, param); \
+        GWPP(#name16, name16, param); \
+        GWPP(#name17, name17, param); \
+        GWPP(#name18, name18, param); \
+        GWPP(#name19, name19, param); \
+        GWPP(#name20, name20, param); \
+        GWPP(#name21, name21, param); \
+        GWPP(#name22, name22, param); \
+        GWPP(#name23, name23, param); \
+        GWPP(#name24, name24, param); \
+        GWPP(#name25, name25, param); \
+        GWPP(#name26, name26, param); \
+        GWPP(#name27, name27, param); \
+        GWPP(#name28, name28, param); \
+        GWPP(#name29, name29, param); \
+        GWPP(#name30, name30, param); \
     }
     #define DECLARE_VAR62(type, name, type2, name2, type3, name3, type4, name4, type5, name5, type6, name6, type7, name7, type8, name8, type9, name9, type10, name10, type11, name11, type12, name12, type13, name13 \
     , type14, name14, type15, name15, type16, name16, type17, name17, type18, name18, type19, name19, type20, name20, type21, name21, type22, name22, type23, name23, type24, name24, type25, name25 \
@@ -1129,38 +1129,38 @@
     type30 name30; \
     type31 name31; \
     __MEMMNGR_INTERNAL_HEADER_PERMISSION \
-    private:private:void save_fetch(mem::memPara para) override { \
-        GWPP(#name, name, para); \
-        GWPP(#name2, name2, para); \
-        GWPP(#name3, name3, para); \
-        GWPP(#name4, name4, para); \
-        GWPP(#name5, name5, para); \
-        GWPP(#name6, name6, para); \
-        GWPP(#name7, name7, para); \
-        GWPP(#name8, name8, para); \
-        GWPP(#name9, name9, para); \
-        GWPP(#name10, name10, para); \
-        GWPP(#name11, name11, para); \
-        GWPP(#name12, name12, para); \
-        GWPP(#name13, name13, para); \
-        GWPP(#name14, name14, para); \
-        GWPP(#name15, name15, para); \
-        GWPP(#name16, name16, para); \
-        GWPP(#name17, name17, para); \
-        GWPP(#name18, name18, para); \
-        GWPP(#name19, name19, para); \
-        GWPP(#name20, name20, para); \
-        GWPP(#name21, name21, para); \
-        GWPP(#name22, name22, para); \
-        GWPP(#name23, name23, para); \
-        GWPP(#name24, name24, para); \
-        GWPP(#name25, name25, para); \
-        GWPP(#name26, name26, para); \
-        GWPP(#name27, name27, para); \
-        GWPP(#name28, name28, para); \
-        GWPP(#name29, name29, para); \
-        GWPP(#name30, name30, para); \
-        GWPP(#name31, name31, para); \
+    private:private:void save_fetch(eb::para param) override { \
+        GWPP(#name, name, param); \
+        GWPP(#name2, name2, param); \
+        GWPP(#name3, name3, param); \
+        GWPP(#name4, name4, param); \
+        GWPP(#name5, name5, param); \
+        GWPP(#name6, name6, param); \
+        GWPP(#name7, name7, param); \
+        GWPP(#name8, name8, param); \
+        GWPP(#name9, name9, param); \
+        GWPP(#name10, name10, param); \
+        GWPP(#name11, name11, param); \
+        GWPP(#name12, name12, param); \
+        GWPP(#name13, name13, param); \
+        GWPP(#name14, name14, param); \
+        GWPP(#name15, name15, param); \
+        GWPP(#name16, name16, param); \
+        GWPP(#name17, name17, param); \
+        GWPP(#name18, name18, param); \
+        GWPP(#name19, name19, param); \
+        GWPP(#name20, name20, param); \
+        GWPP(#name21, name21, param); \
+        GWPP(#name22, name22, param); \
+        GWPP(#name23, name23, param); \
+        GWPP(#name24, name24, param); \
+        GWPP(#name25, name25, param); \
+        GWPP(#name26, name26, param); \
+        GWPP(#name27, name27, param); \
+        GWPP(#name28, name28, param); \
+        GWPP(#name29, name29, param); \
+        GWPP(#name30, name30, param); \
+        GWPP(#name31, name31, param); \
     }
     #define DECLARE_VAR64(type, name, type2, name2, type3, name3, type4, name4, type5, name5, type6, name6, type7, name7, type8, name8, type9, name9, type10, name10, type11, name11, type12, name12, type13, name13 \
     , type14, name14, type15, name15, type16, name16, type17, name17, type18, name18, type19, name19, type20, name20, type21, name21, type22, name22, type23, name23, type24, name24, type25, name25 \
@@ -1198,39 +1198,39 @@
     type31 name31; \
     type32 name32; \
     __MEMMNGR_INTERNAL_HEADER_PERMISSION \
-    private:private:void save_fetch(mem::memPara para) override { \
-        GWPP(#name, name, para); \
-        GWPP(#name2, name2, para); \
-        GWPP(#name3, name3, para); \
-        GWPP(#name4, name4, para); \
-        GWPP(#name5, name5, para); \
-        GWPP(#name6, name6, para); \
-        GWPP(#name7, name7, para); \
-        GWPP(#name8, name8, para); \
-        GWPP(#name9, name9, para); \
-        GWPP(#name10, name10, para); \
-        GWPP(#name11, name11, para); \
-        GWPP(#name12, name12, para); \
-        GWPP(#name13, name13, para); \
-        GWPP(#name14, name14, para); \
-        GWPP(#name15, name15, para); \
-        GWPP(#name16, name16, para); \
-        GWPP(#name17, name17, para); \
-        GWPP(#name18, name18, para); \
-        GWPP(#name19, name19, para); \
-        GWPP(#name20, name20, para); \
-        GWPP(#name21, name21, para); \
-        GWPP(#name22, name22, para); \
-        GWPP(#name23, name23, para); \
-        GWPP(#name24, name24, para); \
-        GWPP(#name25, name25, para); \
-        GWPP(#name26, name26, para); \
-        GWPP(#name27, name27, para); \
-        GWPP(#name28, name28, para); \
-        GWPP(#name29, name29, para); \
-        GWPP(#name30, name30, para); \
-        GWPP(#name31, name31, para); \
-        GWPP(#name32, name32, para); \
+    private:private:void save_fetch(eb::para param) override { \
+        GWPP(#name, name, param); \
+        GWPP(#name2, name2, param); \
+        GWPP(#name3, name3, param); \
+        GWPP(#name4, name4, param); \
+        GWPP(#name5, name5, param); \
+        GWPP(#name6, name6, param); \
+        GWPP(#name7, name7, param); \
+        GWPP(#name8, name8, param); \
+        GWPP(#name9, name9, param); \
+        GWPP(#name10, name10, param); \
+        GWPP(#name11, name11, param); \
+        GWPP(#name12, name12, param); \
+        GWPP(#name13, name13, param); \
+        GWPP(#name14, name14, param); \
+        GWPP(#name15, name15, param); \
+        GWPP(#name16, name16, param); \
+        GWPP(#name17, name17, param); \
+        GWPP(#name18, name18, param); \
+        GWPP(#name19, name19, param); \
+        GWPP(#name20, name20, param); \
+        GWPP(#name21, name21, param); \
+        GWPP(#name22, name22, param); \
+        GWPP(#name23, name23, param); \
+        GWPP(#name24, name24, param); \
+        GWPP(#name25, name25, param); \
+        GWPP(#name26, name26, param); \
+        GWPP(#name27, name27, param); \
+        GWPP(#name28, name28, param); \
+        GWPP(#name29, name29, param); \
+        GWPP(#name30, name30, param); \
+        GWPP(#name31, name31, param); \
+        GWPP(#name32, name32, param); \
     }
     #define DECLARE_VAR66(type, name, type2, name2, type3, name3, type4, name4, type5, name5, type6, name6, type7, name7, type8, name8, type9, name9, type10, name10, type11, name11, type12, name12, type13, name13 \
     , type14, name14, type15, name15, type16, name16, type17, name17, type18, name18, type19, name19, type20, name20, type21, name21, type22, name22, type23, name23, type24, name24, type25, name25 \
@@ -1269,40 +1269,40 @@
     type32 name32; \
     type33 name33; \
     __MEMMNGR_INTERNAL_HEADER_PERMISSION \
-    private:private:void save_fetch(mem::memPara para) override { \
-        GWPP(#name, name, para); \
-        GWPP(#name2, name2, para); \
-        GWPP(#name3, name3, para); \
-        GWPP(#name4, name4, para); \
-        GWPP(#name5, name5, para); \
-        GWPP(#name6, name6, para); \
-        GWPP(#name7, name7, para); \
-        GWPP(#name8, name8, para); \
-        GWPP(#name9, name9, para); \
-        GWPP(#name10, name10, para); \
-        GWPP(#name11, name11, para); \
-        GWPP(#name12, name12, para); \
-        GWPP(#name13, name13, para); \
-        GWPP(#name14, name14, para); \
-        GWPP(#name15, name15, para); \
-        GWPP(#name16, name16, para); \
-        GWPP(#name17, name17, para); \
-        GWPP(#name18, name18, para); \
-        GWPP(#name19, name19, para); \
-        GWPP(#name20, name20, para); \
-        GWPP(#name21, name21, para); \
-        GWPP(#name22, name22, para); \
-        GWPP(#name23, name23, para); \
-        GWPP(#name24, name24, para); \
-        GWPP(#name25, name25, para); \
-        GWPP(#name26, name26, para); \
-        GWPP(#name27, name27, para); \
-        GWPP(#name28, name28, para); \
-        GWPP(#name29, name29, para); \
-        GWPP(#name30, name30, para); \
-        GWPP(#name31, name31, para); \
-        GWPP(#name32, name32, para); \
-        GWPP(#name33, name33, para); \
+    private:private:void save_fetch(eb::para param) override { \
+        GWPP(#name, name, param); \
+        GWPP(#name2, name2, param); \
+        GWPP(#name3, name3, param); \
+        GWPP(#name4, name4, param); \
+        GWPP(#name5, name5, param); \
+        GWPP(#name6, name6, param); \
+        GWPP(#name7, name7, param); \
+        GWPP(#name8, name8, param); \
+        GWPP(#name9, name9, param); \
+        GWPP(#name10, name10, param); \
+        GWPP(#name11, name11, param); \
+        GWPP(#name12, name12, param); \
+        GWPP(#name13, name13, param); \
+        GWPP(#name14, name14, param); \
+        GWPP(#name15, name15, param); \
+        GWPP(#name16, name16, param); \
+        GWPP(#name17, name17, param); \
+        GWPP(#name18, name18, param); \
+        GWPP(#name19, name19, param); \
+        GWPP(#name20, name20, param); \
+        GWPP(#name21, name21, param); \
+        GWPP(#name22, name22, param); \
+        GWPP(#name23, name23, param); \
+        GWPP(#name24, name24, param); \
+        GWPP(#name25, name25, param); \
+        GWPP(#name26, name26, param); \
+        GWPP(#name27, name27, param); \
+        GWPP(#name28, name28, param); \
+        GWPP(#name29, name29, param); \
+        GWPP(#name30, name30, param); \
+        GWPP(#name31, name31, param); \
+        GWPP(#name32, name32, param); \
+        GWPP(#name33, name33, param); \
     }
     #define DECLARE_VAR68(type, name, type2, name2, type3, name3, type4, name4, type5, name5, type6, name6, type7, name7, type8, name8, type9, name9, type10, name10, type11, name11, type12, name12, type13, name13 \
     , type14, name14, type15, name15, type16, name16, type17, name17, type18, name18, type19, name19, type20, name20, type21, name21, type22, name22, type23, name23, type24, name24, type25, name25 \
@@ -1342,41 +1342,41 @@
     type33 name33; \
     type34 name34; \
     __MEMMNGR_INTERNAL_HEADER_PERMISSION \
-    private:private:void save_fetch(mem::memPara para) override { \
-        GWPP(#name, name, para); \
-        GWPP(#name2, name2, para); \
-        GWPP(#name3, name3, para); \
-        GWPP(#name4, name4, para); \
-        GWPP(#name5, name5, para); \
-        GWPP(#name6, name6, para); \
-        GWPP(#name7, name7, para); \
-        GWPP(#name8, name8, para); \
-        GWPP(#name9, name9, para); \
-        GWPP(#name10, name10, para); \
-        GWPP(#name11, name11, para); \
-        GWPP(#name12, name12, para); \
-        GWPP(#name13, name13, para); \
-        GWPP(#name14, name14, para); \
-        GWPP(#name15, name15, para); \
-        GWPP(#name16, name16, para); \
-        GWPP(#name17, name17, para); \
-        GWPP(#name18, name18, para); \
-        GWPP(#name19, name19, para); \
-        GWPP(#name20, name20, para); \
-        GWPP(#name21, name21, para); \
-        GWPP(#name22, name22, para); \
-        GWPP(#name23, name23, para); \
-        GWPP(#name24, name24, para); \
-        GWPP(#name25, name25, para); \
-        GWPP(#name26, name26, para); \
-        GWPP(#name27, name27, para); \
-        GWPP(#name28, name28, para); \
-        GWPP(#name29, name29, para); \
-        GWPP(#name30, name30, para); \
-        GWPP(#name31, name31, para); \
-        GWPP(#name32, name32, para); \
-        GWPP(#name33, name33, para); \
-        GWPP(#name34, name34, para); \
+    private:private:void save_fetch(eb::para param) override { \
+        GWPP(#name, name, param); \
+        GWPP(#name2, name2, param); \
+        GWPP(#name3, name3, param); \
+        GWPP(#name4, name4, param); \
+        GWPP(#name5, name5, param); \
+        GWPP(#name6, name6, param); \
+        GWPP(#name7, name7, param); \
+        GWPP(#name8, name8, param); \
+        GWPP(#name9, name9, param); \
+        GWPP(#name10, name10, param); \
+        GWPP(#name11, name11, param); \
+        GWPP(#name12, name12, param); \
+        GWPP(#name13, name13, param); \
+        GWPP(#name14, name14, param); \
+        GWPP(#name15, name15, param); \
+        GWPP(#name16, name16, param); \
+        GWPP(#name17, name17, param); \
+        GWPP(#name18, name18, param); \
+        GWPP(#name19, name19, param); \
+        GWPP(#name20, name20, param); \
+        GWPP(#name21, name21, param); \
+        GWPP(#name22, name22, param); \
+        GWPP(#name23, name23, param); \
+        GWPP(#name24, name24, param); \
+        GWPP(#name25, name25, param); \
+        GWPP(#name26, name26, param); \
+        GWPP(#name27, name27, param); \
+        GWPP(#name28, name28, param); \
+        GWPP(#name29, name29, param); \
+        GWPP(#name30, name30, param); \
+        GWPP(#name31, name31, param); \
+        GWPP(#name32, name32, param); \
+        GWPP(#name33, name33, param); \
+        GWPP(#name34, name34, param); \
     }
     #define DECLARE_VAR70(type, name, type2, name2, type3, name3, type4, name4, type5, name5, type6, name6, type7, name7, type8, name8, type9, name9, type10, name10, type11, name11, type12, name12, type13, name13 \
     , type14, name14, type15, name15, type16, name16, type17, name17, type18, name18, type19, name19, type20, name20, type21, name21, type22, name22, type23, name23, type24, name24, type25, name25 \
@@ -1417,42 +1417,42 @@
     type34 name34; \
     type35 name35; \
     __MEMMNGR_INTERNAL_HEADER_PERMISSION \
-    private:private:void save_fetch(mem::memPara para) override { \
-        GWPP(#name, name, para); \
-        GWPP(#name2, name2, para); \
-        GWPP(#name3, name3, para); \
-        GWPP(#name4, name4, para); \
-        GWPP(#name5, name5, para); \
-        GWPP(#name6, name6, para); \
-        GWPP(#name7, name7, para); \
-        GWPP(#name8, name8, para); \
-        GWPP(#name9, name9, para); \
-        GWPP(#name10, name10, para); \
-        GWPP(#name11, name11, para); \
-        GWPP(#name12, name12, para); \
-        GWPP(#name13, name13, para); \
-        GWPP(#name14, name14, para); \
-        GWPP(#name15, name15, para); \
-        GWPP(#name16, name16, para); \
-        GWPP(#name17, name17, para); \
-        GWPP(#name18, name18, para); \
-        GWPP(#name19, name19, para); \
-        GWPP(#name20, name20, para); \
-        GWPP(#name21, name21, para); \
-        GWPP(#name22, name22, para); \
-        GWPP(#name23, name23, para); \
-        GWPP(#name24, name24, para); \
-        GWPP(#name25, name25, para); \
-        GWPP(#name26, name26, para); \
-        GWPP(#name27, name27, para); \
-        GWPP(#name28, name28, para); \
-        GWPP(#name29, name29, para); \
-        GWPP(#name30, name30, para); \
-        GWPP(#name31, name31, para); \
-        GWPP(#name32, name32, para); \
-        GWPP(#name33, name33, para); \
-        GWPP(#name34, name34, para); \
-        GWPP(#name35, name35, para); \
+    private:private:void save_fetch(eb::para param) override { \
+        GWPP(#name, name, param); \
+        GWPP(#name2, name2, param); \
+        GWPP(#name3, name3, param); \
+        GWPP(#name4, name4, param); \
+        GWPP(#name5, name5, param); \
+        GWPP(#name6, name6, param); \
+        GWPP(#name7, name7, param); \
+        GWPP(#name8, name8, param); \
+        GWPP(#name9, name9, param); \
+        GWPP(#name10, name10, param); \
+        GWPP(#name11, name11, param); \
+        GWPP(#name12, name12, param); \
+        GWPP(#name13, name13, param); \
+        GWPP(#name14, name14, param); \
+        GWPP(#name15, name15, param); \
+        GWPP(#name16, name16, param); \
+        GWPP(#name17, name17, param); \
+        GWPP(#name18, name18, param); \
+        GWPP(#name19, name19, param); \
+        GWPP(#name20, name20, param); \
+        GWPP(#name21, name21, param); \
+        GWPP(#name22, name22, param); \
+        GWPP(#name23, name23, param); \
+        GWPP(#name24, name24, param); \
+        GWPP(#name25, name25, param); \
+        GWPP(#name26, name26, param); \
+        GWPP(#name27, name27, param); \
+        GWPP(#name28, name28, param); \
+        GWPP(#name29, name29, param); \
+        GWPP(#name30, name30, param); \
+        GWPP(#name31, name31, param); \
+        GWPP(#name32, name32, param); \
+        GWPP(#name33, name33, param); \
+        GWPP(#name34, name34, param); \
+        GWPP(#name35, name35, param); \
     }
     #define DECLARE_VAR72(type, name, type2, name2, type3, name3, type4, name4, type5, name5, type6, name6, type7, name7, type8, name8, type9, name9, type10, name10, type11, name11, type12, name12, type13, name13 \
     , type14, name14, type15, name15, type16, name16, type17, name17, type18, name18, type19, name19, type20, name20, type21, name21, type22, name22, type23, name23, type24, name24, type25, name25 \
@@ -1494,43 +1494,43 @@
     type35 name35; \
     type36 name36; \
     __MEMMNGR_INTERNAL_HEADER_PERMISSION \
-    private:private:void save_fetch(mem::memPara para) override { \
-        GWPP(#name, name, para); \
-        GWPP(#name2, name2, para); \
-        GWPP(#name3, name3, para); \
-        GWPP(#name4, name4, para); \
-        GWPP(#name5, name5, para); \
-        GWPP(#name6, name6, para); \
-        GWPP(#name7, name7, para); \
-        GWPP(#name8, name8, para); \
-        GWPP(#name9, name9, para); \
-        GWPP(#name10, name10, para); \
-        GWPP(#name11, name11, para); \
-        GWPP(#name12, name12, para); \
-        GWPP(#name13, name13, para); \
-        GWPP(#name14, name14, para); \
-        GWPP(#name15, name15, para); \
-        GWPP(#name16, name16, para); \
-        GWPP(#name17, name17, para); \
-        GWPP(#name18, name18, para); \
-        GWPP(#name19, name19, para); \
-        GWPP(#name20, name20, para); \
-        GWPP(#name21, name21, para); \
-        GWPP(#name22, name22, para); \
-        GWPP(#name23, name23, para); \
-        GWPP(#name24, name24, para); \
-        GWPP(#name25, name25, para); \
-        GWPP(#name26, name26, para); \
-        GWPP(#name27, name27, para); \
-        GWPP(#name28, name28, para); \
-        GWPP(#name29, name29, para); \
-        GWPP(#name30, name30, para); \
-        GWPP(#name31, name31, para); \
-        GWPP(#name32, name32, para); \
-        GWPP(#name33, name33, para); \
-        GWPP(#name34, name34, para); \
-        GWPP(#name35, name35, para); \
-        GWPP(#name36, name36, para); \
+    private:private:void save_fetch(eb::para param) override { \
+        GWPP(#name, name, param); \
+        GWPP(#name2, name2, param); \
+        GWPP(#name3, name3, param); \
+        GWPP(#name4, name4, param); \
+        GWPP(#name5, name5, param); \
+        GWPP(#name6, name6, param); \
+        GWPP(#name7, name7, param); \
+        GWPP(#name8, name8, param); \
+        GWPP(#name9, name9, param); \
+        GWPP(#name10, name10, param); \
+        GWPP(#name11, name11, param); \
+        GWPP(#name12, name12, param); \
+        GWPP(#name13, name13, param); \
+        GWPP(#name14, name14, param); \
+        GWPP(#name15, name15, param); \
+        GWPP(#name16, name16, param); \
+        GWPP(#name17, name17, param); \
+        GWPP(#name18, name18, param); \
+        GWPP(#name19, name19, param); \
+        GWPP(#name20, name20, param); \
+        GWPP(#name21, name21, param); \
+        GWPP(#name22, name22, param); \
+        GWPP(#name23, name23, param); \
+        GWPP(#name24, name24, param); \
+        GWPP(#name25, name25, param); \
+        GWPP(#name26, name26, param); \
+        GWPP(#name27, name27, param); \
+        GWPP(#name28, name28, param); \
+        GWPP(#name29, name29, param); \
+        GWPP(#name30, name30, param); \
+        GWPP(#name31, name31, param); \
+        GWPP(#name32, name32, param); \
+        GWPP(#name33, name33, param); \
+        GWPP(#name34, name34, param); \
+        GWPP(#name35, name35, param); \
+        GWPP(#name36, name36, param); \
     }
     #define DECLARE_VAR74(type, name, type2, name2, type3, name3, type4, name4, type5, name5, type6, name6, type7, name7, type8, name8, type9, name9, type10, name10, type11, name11, type12, name12, type13, name13 \
     , type14, name14, type15, name15, type16, name16, type17, name17, type18, name18, type19, name19, type20, name20, type21, name21, type22, name22, type23, name23, type24, name24, type25, name25 \
@@ -1574,44 +1574,44 @@
     type36 name36; \
     type37 name37; \
     __MEMMNGR_INTERNAL_HEADER_PERMISSION \
-    private:private:void save_fetch(mem::memPara para) override { \
-        GWPP(#name, name, para); \
-        GWPP(#name2, name2, para); \
-        GWPP(#name3, name3, para); \
-        GWPP(#name4, name4, para); \
-        GWPP(#name5, name5, para); \
-        GWPP(#name6, name6, para); \
-        GWPP(#name7, name7, para); \
-        GWPP(#name8, name8, para); \
-        GWPP(#name9, name9, para); \
-        GWPP(#name10, name10, para); \
-        GWPP(#name11, name11, para); \
-        GWPP(#name12, name12, para); \
-        GWPP(#name13, name13, para); \
-        GWPP(#name14, name14, para); \
-        GWPP(#name15, name15, para); \
-        GWPP(#name16, name16, para); \
-        GWPP(#name17, name17, para); \
-        GWPP(#name18, name18, para); \
-        GWPP(#name19, name19, para); \
-        GWPP(#name20, name20, para); \
-        GWPP(#name21, name21, para); \
-        GWPP(#name22, name22, para); \
-        GWPP(#name23, name23, para); \
-        GWPP(#name24, name24, para); \
-        GWPP(#name25, name25, para); \
-        GWPP(#name26, name26, para); \
-        GWPP(#name27, name27, para); \
-        GWPP(#name28, name28, para); \
-        GWPP(#name29, name29, para); \
-        GWPP(#name30, name30, para); \
-        GWPP(#name31, name31, para); \
-        GWPP(#name32, name32, para); \
-        GWPP(#name33, name33, para); \
-        GWPP(#name34, name34, para); \
-        GWPP(#name35, name35, para); \
-        GWPP(#name36, name36, para); \
-        GWPP(#name37, name37, para); \
+    private:private:void save_fetch(eb::para param) override { \
+        GWPP(#name, name, param); \
+        GWPP(#name2, name2, param); \
+        GWPP(#name3, name3, param); \
+        GWPP(#name4, name4, param); \
+        GWPP(#name5, name5, param); \
+        GWPP(#name6, name6, param); \
+        GWPP(#name7, name7, param); \
+        GWPP(#name8, name8, param); \
+        GWPP(#name9, name9, param); \
+        GWPP(#name10, name10, param); \
+        GWPP(#name11, name11, param); \
+        GWPP(#name12, name12, param); \
+        GWPP(#name13, name13, param); \
+        GWPP(#name14, name14, param); \
+        GWPP(#name15, name15, param); \
+        GWPP(#name16, name16, param); \
+        GWPP(#name17, name17, param); \
+        GWPP(#name18, name18, param); \
+        GWPP(#name19, name19, param); \
+        GWPP(#name20, name20, param); \
+        GWPP(#name21, name21, param); \
+        GWPP(#name22, name22, param); \
+        GWPP(#name23, name23, param); \
+        GWPP(#name24, name24, param); \
+        GWPP(#name25, name25, param); \
+        GWPP(#name26, name26, param); \
+        GWPP(#name27, name27, param); \
+        GWPP(#name28, name28, param); \
+        GWPP(#name29, name29, param); \
+        GWPP(#name30, name30, param); \
+        GWPP(#name31, name31, param); \
+        GWPP(#name32, name32, param); \
+        GWPP(#name33, name33, param); \
+        GWPP(#name34, name34, param); \
+        GWPP(#name35, name35, param); \
+        GWPP(#name36, name36, param); \
+        GWPP(#name37, name37, param); \
     }
     #define DECLARE_VAR76(type, name, type2, name2, type3, name3, type4, name4, type5, name5, type6, name6, type7, name7, type8, name8, type9, name9, type10, name10, type11, name11, type12, name12, type13, name13 \
     , type14, name14, type15, name15, type16, name16, type17, name17, type18, name18, type19, name19, type20, name20, type21, name21, type22, name22, type23, name23, type24, name24, type25, name25 \
@@ -1656,45 +1656,45 @@
     type37 name37; \
     type38 name38; \
     __MEMMNGR_INTERNAL_HEADER_PERMISSION \
-    private:private:void save_fetch(mem::memPara para) override { \
-        GWPP(#name, name, para); \
-        GWPP(#name2, name2, para); \
-        GWPP(#name3, name3, para); \
-        GWPP(#name4, name4, para); \
-        GWPP(#name5, name5, para); \
-        GWPP(#name6, name6, para); \
-        GWPP(#name7, name7, para); \
-        GWPP(#name8, name8, para); \
-        GWPP(#name9, name9, para); \
-        GWPP(#name10, name10, para); \
-        GWPP(#name11, name11, para); \
-        GWPP(#name12, name12, para); \
-        GWPP(#name13, name13, para); \
-        GWPP(#name14, name14, para); \
-        GWPP(#name15, name15, para); \
-        GWPP(#name16, name16, para); \
-        GWPP(#name17, name17, para); \
-        GWPP(#name18, name18, para); \
-        GWPP(#name19, name19, para); \
-        GWPP(#name20, name20, para); \
-        GWPP(#name21, name21, para); \
-        GWPP(#name22, name22, para); \
-        GWPP(#name23, name23, para); \
-        GWPP(#name24, name24, para); \
-        GWPP(#name25, name25, para); \
-        GWPP(#name26, name26, para); \
-        GWPP(#name27, name27, para); \
-        GWPP(#name28, name28, para); \
-        GWPP(#name29, name29, para); \
-        GWPP(#name30, name30, para); \
-        GWPP(#name31, name31, para); \
-        GWPP(#name32, name32, para); \
-        GWPP(#name33, name33, para); \
-        GWPP(#name34, name34, para); \
-        GWPP(#name35, name35, para); \
-        GWPP(#name36, name36, para); \
-        GWPP(#name37, name37, para); \
-        GWPP(#name38, name38, para); \
+    private:private:void save_fetch(eb::para param) override { \
+        GWPP(#name, name, param); \
+        GWPP(#name2, name2, param); \
+        GWPP(#name3, name3, param); \
+        GWPP(#name4, name4, param); \
+        GWPP(#name5, name5, param); \
+        GWPP(#name6, name6, param); \
+        GWPP(#name7, name7, param); \
+        GWPP(#name8, name8, param); \
+        GWPP(#name9, name9, param); \
+        GWPP(#name10, name10, param); \
+        GWPP(#name11, name11, param); \
+        GWPP(#name12, name12, param); \
+        GWPP(#name13, name13, param); \
+        GWPP(#name14, name14, param); \
+        GWPP(#name15, name15, param); \
+        GWPP(#name16, name16, param); \
+        GWPP(#name17, name17, param); \
+        GWPP(#name18, name18, param); \
+        GWPP(#name19, name19, param); \
+        GWPP(#name20, name20, param); \
+        GWPP(#name21, name21, param); \
+        GWPP(#name22, name22, param); \
+        GWPP(#name23, name23, param); \
+        GWPP(#name24, name24, param); \
+        GWPP(#name25, name25, param); \
+        GWPP(#name26, name26, param); \
+        GWPP(#name27, name27, param); \
+        GWPP(#name28, name28, param); \
+        GWPP(#name29, name29, param); \
+        GWPP(#name30, name30, param); \
+        GWPP(#name31, name31, param); \
+        GWPP(#name32, name32, param); \
+        GWPP(#name33, name33, param); \
+        GWPP(#name34, name34, param); \
+        GWPP(#name35, name35, param); \
+        GWPP(#name36, name36, param); \
+        GWPP(#name37, name37, param); \
+        GWPP(#name38, name38, param); \
     }
     #define DECLARE_VAR78(type, name, type2, name2, type3, name3, type4, name4, type5, name5, type6, name6, type7, name7, type8, name8, type9, name9, type10, name10, type11, name11, type12, name12, type13, name13 \
     , type14, name14, type15, name15, type16, name16, type17, name17, type18, name18, type19, name19, type20, name20, type21, name21, type22, name22, type23, name23, type24, name24, type25, name25 \
@@ -1740,46 +1740,46 @@
     type38 name38; \
     type39 name39; \
     __MEMMNGR_INTERNAL_HEADER_PERMISSION \
-    private:private:void save_fetch(mem::memPara para) override { \
-        GWPP(#name, name, para); \
-        GWPP(#name2, name2, para); \
-        GWPP(#name3, name3, para); \
-        GWPP(#name4, name4, para); \
-        GWPP(#name5, name5, para); \
-        GWPP(#name6, name6, para); \
-        GWPP(#name7, name7, para); \
-        GWPP(#name8, name8, para); \
-        GWPP(#name9, name9, para); \
-        GWPP(#name10, name10, para); \
-        GWPP(#name11, name11, para); \
-        GWPP(#name12, name12, para); \
-        GWPP(#name13, name13, para); \
-        GWPP(#name14, name14, para); \
-        GWPP(#name15, name15, para); \
-        GWPP(#name16, name16, para); \
-        GWPP(#name17, name17, para); \
-        GWPP(#name18, name18, para); \
-        GWPP(#name19, name19, para); \
-        GWPP(#name20, name20, para); \
-        GWPP(#name21, name21, para); \
-        GWPP(#name22, name22, para); \
-        GWPP(#name23, name23, para); \
-        GWPP(#name24, name24, para); \
-        GWPP(#name25, name25, para); \
-        GWPP(#name26, name26, para); \
-        GWPP(#name27, name27, para); \
-        GWPP(#name28, name28, para); \
-        GWPP(#name29, name29, para); \
-        GWPP(#name30, name30, para); \
-        GWPP(#name31, name31, para); \
-        GWPP(#name32, name32, para); \
-        GWPP(#name33, name33, para); \
-        GWPP(#name34, name34, para); \
-        GWPP(#name35, name35, para); \
-        GWPP(#name36, name36, para); \
-        GWPP(#name37, name37, para); \
-        GWPP(#name38, name38, para); \
-        GWPP(#name39, name39, para); \
+    private:private:void save_fetch(eb::para param) override { \
+        GWPP(#name, name, param); \
+        GWPP(#name2, name2, param); \
+        GWPP(#name3, name3, param); \
+        GWPP(#name4, name4, param); \
+        GWPP(#name5, name5, param); \
+        GWPP(#name6, name6, param); \
+        GWPP(#name7, name7, param); \
+        GWPP(#name8, name8, param); \
+        GWPP(#name9, name9, param); \
+        GWPP(#name10, name10, param); \
+        GWPP(#name11, name11, param); \
+        GWPP(#name12, name12, param); \
+        GWPP(#name13, name13, param); \
+        GWPP(#name14, name14, param); \
+        GWPP(#name15, name15, param); \
+        GWPP(#name16, name16, param); \
+        GWPP(#name17, name17, param); \
+        GWPP(#name18, name18, param); \
+        GWPP(#name19, name19, param); \
+        GWPP(#name20, name20, param); \
+        GWPP(#name21, name21, param); \
+        GWPP(#name22, name22, param); \
+        GWPP(#name23, name23, param); \
+        GWPP(#name24, name24, param); \
+        GWPP(#name25, name25, param); \
+        GWPP(#name26, name26, param); \
+        GWPP(#name27, name27, param); \
+        GWPP(#name28, name28, param); \
+        GWPP(#name29, name29, param); \
+        GWPP(#name30, name30, param); \
+        GWPP(#name31, name31, param); \
+        GWPP(#name32, name32, param); \
+        GWPP(#name33, name33, param); \
+        GWPP(#name34, name34, param); \
+        GWPP(#name35, name35, param); \
+        GWPP(#name36, name36, param); \
+        GWPP(#name37, name37, param); \
+        GWPP(#name38, name38, param); \
+        GWPP(#name39, name39, param); \
     }
     #define DECLARE_VAR80(type, name, type2, name2, type3, name3, type4, name4, type5, name5, type6, name6, type7, name7, type8, name8, type9, name9, type10, name10, type11, name11, type12, name12, type13, name13 \
     , type14, name14, type15, name15, type16, name16, type17, name17, type18, name18, type19, name19, type20, name20, type21, name21, type22, name22, type23, name23, type24, name24, type25, name25 \
@@ -1826,47 +1826,47 @@
     type39 name39; \
     type40 name40; \
     __MEMMNGR_INTERNAL_HEADER_PERMISSION \
-    private:private:void save_fetch(mem::memPara para) override { \
-        GWPP(#name, name, para); \
-        GWPP(#name2, name2, para); \
-        GWPP(#name3, name3, para); \
-        GWPP(#name4, name4, para); \
-        GWPP(#name5, name5, para); \
-        GWPP(#name6, name6, para); \
-        GWPP(#name7, name7, para); \
-        GWPP(#name8, name8, para); \
-        GWPP(#name9, name9, para); \
-        GWPP(#name10, name10, para); \
-        GWPP(#name11, name11, para); \
-        GWPP(#name12, name12, para); \
-        GWPP(#name13, name13, para); \
-        GWPP(#name14, name14, para); \
-        GWPP(#name15, name15, para); \
-        GWPP(#name16, name16, para); \
-        GWPP(#name17, name17, para); \
-        GWPP(#name18, name18, para); \
-        GWPP(#name19, name19, para); \
-        GWPP(#name20, name20, para); \
-        GWPP(#name21, name21, para); \
-        GWPP(#name22, name22, para); \
-        GWPP(#name23, name23, para); \
-        GWPP(#name24, name24, para); \
-        GWPP(#name25, name25, para); \
-        GWPP(#name26, name26, para); \
-        GWPP(#name27, name27, para); \
-        GWPP(#name28, name28, para); \
-        GWPP(#name29, name29, para); \
-        GWPP(#name30, name30, para); \
-        GWPP(#name31, name31, para); \
-        GWPP(#name32, name32, para); \
-        GWPP(#name33, name33, para); \
-        GWPP(#name34, name34, para); \
-        GWPP(#name35, name35, para); \
-        GWPP(#name36, name36, para); \
-        GWPP(#name37, name37, para); \
-        GWPP(#name38, name38, para); \
-        GWPP(#name39, name39, para); \
-        GWPP(#name40, name40, para); \
+    private:private:void save_fetch(eb::para param) override { \
+        GWPP(#name, name, param); \
+        GWPP(#name2, name2, param); \
+        GWPP(#name3, name3, param); \
+        GWPP(#name4, name4, param); \
+        GWPP(#name5, name5, param); \
+        GWPP(#name6, name6, param); \
+        GWPP(#name7, name7, param); \
+        GWPP(#name8, name8, param); \
+        GWPP(#name9, name9, param); \
+        GWPP(#name10, name10, param); \
+        GWPP(#name11, name11, param); \
+        GWPP(#name12, name12, param); \
+        GWPP(#name13, name13, param); \
+        GWPP(#name14, name14, param); \
+        GWPP(#name15, name15, param); \
+        GWPP(#name16, name16, param); \
+        GWPP(#name17, name17, param); \
+        GWPP(#name18, name18, param); \
+        GWPP(#name19, name19, param); \
+        GWPP(#name20, name20, param); \
+        GWPP(#name21, name21, param); \
+        GWPP(#name22, name22, param); \
+        GWPP(#name23, name23, param); \
+        GWPP(#name24, name24, param); \
+        GWPP(#name25, name25, param); \
+        GWPP(#name26, name26, param); \
+        GWPP(#name27, name27, param); \
+        GWPP(#name28, name28, param); \
+        GWPP(#name29, name29, param); \
+        GWPP(#name30, name30, param); \
+        GWPP(#name31, name31, param); \
+        GWPP(#name32, name32, param); \
+        GWPP(#name33, name33, param); \
+        GWPP(#name34, name34, param); \
+        GWPP(#name35, name35, param); \
+        GWPP(#name36, name36, param); \
+        GWPP(#name37, name37, param); \
+        GWPP(#name38, name38, param); \
+        GWPP(#name39, name39, param); \
+        GWPP(#name40, name40, param); \
     }
     #define DECLARE_VAR82(type, name, type2, name2, type3, name3, type4, name4, type5, name5, type6, name6, type7, name7, type8, name8, type9, name9, type10, name10, type11, name11, type12, name12, type13, name13 \
     , type14, name14, type15, name15, type16, name16, type17, name17, type18, name18, type19, name19, type20, name20, type21, name21, type22, name22, type23, name23, type24, name24, type25, name25 \
@@ -1914,48 +1914,48 @@
     type40 name40; \
     type41 name41; \
     __MEMMNGR_INTERNAL_HEADER_PERMISSION \
-    private:private:void save_fetch(mem::memPara para) override { \
-        GWPP(#name, name, para); \
-        GWPP(#name2, name2, para); \
-        GWPP(#name3, name3, para); \
-        GWPP(#name4, name4, para); \
-        GWPP(#name5, name5, para); \
-        GWPP(#name6, name6, para); \
-        GWPP(#name7, name7, para); \
-        GWPP(#name8, name8, para); \
-        GWPP(#name9, name9, para); \
-        GWPP(#name10, name10, para); \
-        GWPP(#name11, name11, para); \
-        GWPP(#name12, name12, para); \
-        GWPP(#name13, name13, para); \
-        GWPP(#name14, name14, para); \
-        GWPP(#name15, name15, para); \
-        GWPP(#name16, name16, para); \
-        GWPP(#name17, name17, para); \
-        GWPP(#name18, name18, para); \
-        GWPP(#name19, name19, para); \
-        GWPP(#name20, name20, para); \
-        GWPP(#name21, name21, para); \
-        GWPP(#name22, name22, para); \
-        GWPP(#name23, name23, para); \
-        GWPP(#name24, name24, para); \
-        GWPP(#name25, name25, para); \
-        GWPP(#name26, name26, para); \
-        GWPP(#name27, name27, para); \
-        GWPP(#name28, name28, para); \
-        GWPP(#name29, name29, para); \
-        GWPP(#name30, name30, para); \
-        GWPP(#name31, name31, para); \
-        GWPP(#name32, name32, para); \
-        GWPP(#name33, name33, para); \
-        GWPP(#name34, name34, para); \
-        GWPP(#name35, name35, para); \
-        GWPP(#name36, name36, para); \
-        GWPP(#name37, name37, para); \
-        GWPP(#name38, name38, para); \
-        GWPP(#name39, name39, para); \
-        GWPP(#name40, name40, para); \
-        GWPP(#name41, name41, para); \
+    private:private:void save_fetch(eb::para param) override { \
+        GWPP(#name, name, param); \
+        GWPP(#name2, name2, param); \
+        GWPP(#name3, name3, param); \
+        GWPP(#name4, name4, param); \
+        GWPP(#name5, name5, param); \
+        GWPP(#name6, name6, param); \
+        GWPP(#name7, name7, param); \
+        GWPP(#name8, name8, param); \
+        GWPP(#name9, name9, param); \
+        GWPP(#name10, name10, param); \
+        GWPP(#name11, name11, param); \
+        GWPP(#name12, name12, param); \
+        GWPP(#name13, name13, param); \
+        GWPP(#name14, name14, param); \
+        GWPP(#name15, name15, param); \
+        GWPP(#name16, name16, param); \
+        GWPP(#name17, name17, param); \
+        GWPP(#name18, name18, param); \
+        GWPP(#name19, name19, param); \
+        GWPP(#name20, name20, param); \
+        GWPP(#name21, name21, param); \
+        GWPP(#name22, name22, param); \
+        GWPP(#name23, name23, param); \
+        GWPP(#name24, name24, param); \
+        GWPP(#name25, name25, param); \
+        GWPP(#name26, name26, param); \
+        GWPP(#name27, name27, param); \
+        GWPP(#name28, name28, param); \
+        GWPP(#name29, name29, param); \
+        GWPP(#name30, name30, param); \
+        GWPP(#name31, name31, param); \
+        GWPP(#name32, name32, param); \
+        GWPP(#name33, name33, param); \
+        GWPP(#name34, name34, param); \
+        GWPP(#name35, name35, param); \
+        GWPP(#name36, name36, param); \
+        GWPP(#name37, name37, param); \
+        GWPP(#name38, name38, param); \
+        GWPP(#name39, name39, param); \
+        GWPP(#name40, name40, param); \
+        GWPP(#name41, name41, param); \
     }
     #define DECLARE_VAR84(type, name, type2, name2, type3, name3, type4, name4, type5, name5, type6, name6, type7, name7, type8, name8, type9, name9, type10, name10, type11, name11, type12, name12, type13, name13 \
     , type14, name14, type15, name15, type16, name16, type17, name17, type18, name18, type19, name19, type20, name20, type21, name21, type22, name22, type23, name23, type24, name24, type25, name25 \
@@ -2004,49 +2004,49 @@
     type41 name41; \
     type42 name42; \
     __MEMMNGR_INTERNAL_HEADER_PERMISSION \
-    private:private:void save_fetch(mem::memPara para) override { \
-        GWPP(#name, name, para); \
-        GWPP(#name2, name2, para); \
-        GWPP(#name3, name3, para); \
-        GWPP(#name4, name4, para); \
-        GWPP(#name5, name5, para); \
-        GWPP(#name6, name6, para); \
-        GWPP(#name7, name7, para); \
-        GWPP(#name8, name8, para); \
-        GWPP(#name9, name9, para); \
-        GWPP(#name10, name10, para); \
-        GWPP(#name11, name11, para); \
-        GWPP(#name12, name12, para); \
-        GWPP(#name13, name13, para); \
-        GWPP(#name14, name14, para); \
-        GWPP(#name15, name15, para); \
-        GWPP(#name16, name16, para); \
-        GWPP(#name17, name17, para); \
-        GWPP(#name18, name18, para); \
-        GWPP(#name19, name19, para); \
-        GWPP(#name20, name20, para); \
-        GWPP(#name21, name21, para); \
-        GWPP(#name22, name22, para); \
-        GWPP(#name23, name23, para); \
-        GWPP(#name24, name24, para); \
-        GWPP(#name25, name25, para); \
-        GWPP(#name26, name26, para); \
-        GWPP(#name27, name27, para); \
-        GWPP(#name28, name28, para); \
-        GWPP(#name29, name29, para); \
-        GWPP(#name30, name30, para); \
-        GWPP(#name31, name31, para); \
-        GWPP(#name32, name32, para); \
-        GWPP(#name33, name33, para); \
-        GWPP(#name34, name34, para); \
-        GWPP(#name35, name35, para); \
-        GWPP(#name36, name36, para); \
-        GWPP(#name37, name37, para); \
-        GWPP(#name38, name38, para); \
-        GWPP(#name39, name39, para); \
-        GWPP(#name40, name40, para); \
-        GWPP(#name41, name41, para); \
-        GWPP(#name42, name42, para); \
+    private:private:void save_fetch(eb::para param) override { \
+        GWPP(#name, name, param); \
+        GWPP(#name2, name2, param); \
+        GWPP(#name3, name3, param); \
+        GWPP(#name4, name4, param); \
+        GWPP(#name5, name5, param); \
+        GWPP(#name6, name6, param); \
+        GWPP(#name7, name7, param); \
+        GWPP(#name8, name8, param); \
+        GWPP(#name9, name9, param); \
+        GWPP(#name10, name10, param); \
+        GWPP(#name11, name11, param); \
+        GWPP(#name12, name12, param); \
+        GWPP(#name13, name13, param); \
+        GWPP(#name14, name14, param); \
+        GWPP(#name15, name15, param); \
+        GWPP(#name16, name16, param); \
+        GWPP(#name17, name17, param); \
+        GWPP(#name18, name18, param); \
+        GWPP(#name19, name19, param); \
+        GWPP(#name20, name20, param); \
+        GWPP(#name21, name21, param); \
+        GWPP(#name22, name22, param); \
+        GWPP(#name23, name23, param); \
+        GWPP(#name24, name24, param); \
+        GWPP(#name25, name25, param); \
+        GWPP(#name26, name26, param); \
+        GWPP(#name27, name27, param); \
+        GWPP(#name28, name28, param); \
+        GWPP(#name29, name29, param); \
+        GWPP(#name30, name30, param); \
+        GWPP(#name31, name31, param); \
+        GWPP(#name32, name32, param); \
+        GWPP(#name33, name33, param); \
+        GWPP(#name34, name34, param); \
+        GWPP(#name35, name35, param); \
+        GWPP(#name36, name36, param); \
+        GWPP(#name37, name37, param); \
+        GWPP(#name38, name38, param); \
+        GWPP(#name39, name39, param); \
+        GWPP(#name40, name40, param); \
+        GWPP(#name41, name41, param); \
+        GWPP(#name42, name42, param); \
     }
     #define DECLARE_VAR86(type, name, type2, name2, type3, name3, type4, name4, type5, name5, type6, name6, type7, name7, type8, name8, type9, name9, type10, name10, type11, name11, type12, name12, type13, name13 \
     , type14, name14, type15, name15, type16, name16, type17, name17, type18, name18, type19, name19, type20, name20, type21, name21, type22, name22, type23, name23, type24, name24, type25, name25 \
@@ -2096,50 +2096,50 @@
     type42 name42; \
     type43 name43; \
     __MEMMNGR_INTERNAL_HEADER_PERMISSION \
-    private:private:void save_fetch(mem::memPara para) override { \
-        GWPP(#name, name, para); \
-        GWPP(#name2, name2, para); \
-        GWPP(#name3, name3, para); \
-        GWPP(#name4, name4, para); \
-        GWPP(#name5, name5, para); \
-        GWPP(#name6, name6, para); \
-        GWPP(#name7, name7, para); \
-        GWPP(#name8, name8, para); \
-        GWPP(#name9, name9, para); \
-        GWPP(#name10, name10, para); \
-        GWPP(#name11, name11, para); \
-        GWPP(#name12, name12, para); \
-        GWPP(#name13, name13, para); \
-        GWPP(#name14, name14, para); \
-        GWPP(#name15, name15, para); \
-        GWPP(#name16, name16, para); \
-        GWPP(#name17, name17, para); \
-        GWPP(#name18, name18, para); \
-        GWPP(#name19, name19, para); \
-        GWPP(#name20, name20, para); \
-        GWPP(#name21, name21, para); \
-        GWPP(#name22, name22, para); \
-        GWPP(#name23, name23, para); \
-        GWPP(#name24, name24, para); \
-        GWPP(#name25, name25, para); \
-        GWPP(#name26, name26, para); \
-        GWPP(#name27, name27, para); \
-        GWPP(#name28, name28, para); \
-        GWPP(#name29, name29, para); \
-        GWPP(#name30, name30, para); \
-        GWPP(#name31, name31, para); \
-        GWPP(#name32, name32, para); \
-        GWPP(#name33, name33, para); \
-        GWPP(#name34, name34, para); \
-        GWPP(#name35, name35, para); \
-        GWPP(#name36, name36, para); \
-        GWPP(#name37, name37, para); \
-        GWPP(#name38, name38, para); \
-        GWPP(#name39, name39, para); \
-        GWPP(#name40, name40, para); \
-        GWPP(#name41, name41, para); \
-        GWPP(#name42, name42, para); \
-        GWPP(#name43, name43, para); \
+    private:private:void save_fetch(eb::para param) override { \
+        GWPP(#name, name, param); \
+        GWPP(#name2, name2, param); \
+        GWPP(#name3, name3, param); \
+        GWPP(#name4, name4, param); \
+        GWPP(#name5, name5, param); \
+        GWPP(#name6, name6, param); \
+        GWPP(#name7, name7, param); \
+        GWPP(#name8, name8, param); \
+        GWPP(#name9, name9, param); \
+        GWPP(#name10, name10, param); \
+        GWPP(#name11, name11, param); \
+        GWPP(#name12, name12, param); \
+        GWPP(#name13, name13, param); \
+        GWPP(#name14, name14, param); \
+        GWPP(#name15, name15, param); \
+        GWPP(#name16, name16, param); \
+        GWPP(#name17, name17, param); \
+        GWPP(#name18, name18, param); \
+        GWPP(#name19, name19, param); \
+        GWPP(#name20, name20, param); \
+        GWPP(#name21, name21, param); \
+        GWPP(#name22, name22, param); \
+        GWPP(#name23, name23, param); \
+        GWPP(#name24, name24, param); \
+        GWPP(#name25, name25, param); \
+        GWPP(#name26, name26, param); \
+        GWPP(#name27, name27, param); \
+        GWPP(#name28, name28, param); \
+        GWPP(#name29, name29, param); \
+        GWPP(#name30, name30, param); \
+        GWPP(#name31, name31, param); \
+        GWPP(#name32, name32, param); \
+        GWPP(#name33, name33, param); \
+        GWPP(#name34, name34, param); \
+        GWPP(#name35, name35, param); \
+        GWPP(#name36, name36, param); \
+        GWPP(#name37, name37, param); \
+        GWPP(#name38, name38, param); \
+        GWPP(#name39, name39, param); \
+        GWPP(#name40, name40, param); \
+        GWPP(#name41, name41, param); \
+        GWPP(#name42, name42, param); \
+        GWPP(#name43, name43, param); \
     }
     #define DECLARE_VAR88(type, name, type2, name2, type3, name3, type4, name4, type5, name5, type6, name6, type7, name7, type8, name8, type9, name9, type10, name10, type11, name11, type12, name12, type13, name13 \
     , type14, name14, type15, name15, type16, name16, type17, name17, type18, name18, type19, name19, type20, name20, type21, name21, type22, name22, type23, name23, type24, name24, type25, name25 \
@@ -2190,51 +2190,51 @@
     type43 name43; \
     type44 name44; \
     __MEMMNGR_INTERNAL_HEADER_PERMISSION \
-    private:private:void save_fetch(mem::memPara para) override { \
-        GWPP(#name, name, para); \
-        GWPP(#name2, name2, para); \
-        GWPP(#name3, name3, para); \
-        GWPP(#name4, name4, para); \
-        GWPP(#name5, name5, para); \
-        GWPP(#name6, name6, para); \
-        GWPP(#name7, name7, para); \
-        GWPP(#name8, name8, para); \
-        GWPP(#name9, name9, para); \
-        GWPP(#name10, name10, para); \
-        GWPP(#name11, name11, para); \
-        GWPP(#name12, name12, para); \
-        GWPP(#name13, name13, para); \
-        GWPP(#name14, name14, para); \
-        GWPP(#name15, name15, para); \
-        GWPP(#name16, name16, para); \
-        GWPP(#name17, name17, para); \
-        GWPP(#name18, name18, para); \
-        GWPP(#name19, name19, para); \
-        GWPP(#name20, name20, para); \
-        GWPP(#name21, name21, para); \
-        GWPP(#name22, name22, para); \
-        GWPP(#name23, name23, para); \
-        GWPP(#name24, name24, para); \
-        GWPP(#name25, name25, para); \
-        GWPP(#name26, name26, para); \
-        GWPP(#name27, name27, para); \
-        GWPP(#name28, name28, para); \
-        GWPP(#name29, name29, para); \
-        GWPP(#name30, name30, para); \
-        GWPP(#name31, name31, para); \
-        GWPP(#name32, name32, para); \
-        GWPP(#name33, name33, para); \
-        GWPP(#name34, name34, para); \
-        GWPP(#name35, name35, para); \
-        GWPP(#name36, name36, para); \
-        GWPP(#name37, name37, para); \
-        GWPP(#name38, name38, para); \
-        GWPP(#name39, name39, para); \
-        GWPP(#name40, name40, para); \
-        GWPP(#name41, name41, para); \
-        GWPP(#name42, name42, para); \
-        GWPP(#name43, name43, para); \
-        GWPP(#name44, name44, para); \
+    private:private:void save_fetch(eb::para param) override { \
+        GWPP(#name, name, param); \
+        GWPP(#name2, name2, param); \
+        GWPP(#name3, name3, param); \
+        GWPP(#name4, name4, param); \
+        GWPP(#name5, name5, param); \
+        GWPP(#name6, name6, param); \
+        GWPP(#name7, name7, param); \
+        GWPP(#name8, name8, param); \
+        GWPP(#name9, name9, param); \
+        GWPP(#name10, name10, param); \
+        GWPP(#name11, name11, param); \
+        GWPP(#name12, name12, param); \
+        GWPP(#name13, name13, param); \
+        GWPP(#name14, name14, param); \
+        GWPP(#name15, name15, param); \
+        GWPP(#name16, name16, param); \
+        GWPP(#name17, name17, param); \
+        GWPP(#name18, name18, param); \
+        GWPP(#name19, name19, param); \
+        GWPP(#name20, name20, param); \
+        GWPP(#name21, name21, param); \
+        GWPP(#name22, name22, param); \
+        GWPP(#name23, name23, param); \
+        GWPP(#name24, name24, param); \
+        GWPP(#name25, name25, param); \
+        GWPP(#name26, name26, param); \
+        GWPP(#name27, name27, param); \
+        GWPP(#name28, name28, param); \
+        GWPP(#name29, name29, param); \
+        GWPP(#name30, name30, param); \
+        GWPP(#name31, name31, param); \
+        GWPP(#name32, name32, param); \
+        GWPP(#name33, name33, param); \
+        GWPP(#name34, name34, param); \
+        GWPP(#name35, name35, param); \
+        GWPP(#name36, name36, param); \
+        GWPP(#name37, name37, param); \
+        GWPP(#name38, name38, param); \
+        GWPP(#name39, name39, param); \
+        GWPP(#name40, name40, param); \
+        GWPP(#name41, name41, param); \
+        GWPP(#name42, name42, param); \
+        GWPP(#name43, name43, param); \
+        GWPP(#name44, name44, param); \
     }
     #define DECLARE_VAR90(type, name, type2, name2, type3, name3, type4, name4, type5, name5, type6, name6, type7, name7, type8, name8, type9, name9, type10, name10, type11, name11, type12, name12, type13, name13 \
     , type14, name14, type15, name15, type16, name16, type17, name17, type18, name18, type19, name19, type20, name20, type21, name21, type22, name22, type23, name23, type24, name24, type25, name25 \
@@ -2286,52 +2286,52 @@
     type44 name44; \
     type45 name45; \
     __MEMMNGR_INTERNAL_HEADER_PERMISSION \
-    private:private:void save_fetch(mem::memPara para) override { \
-        GWPP(#name, name, para); \
-        GWPP(#name2, name2, para); \
-        GWPP(#name3, name3, para); \
-        GWPP(#name4, name4, para); \
-        GWPP(#name5, name5, para); \
-        GWPP(#name6, name6, para); \
-        GWPP(#name7, name7, para); \
-        GWPP(#name8, name8, para); \
-        GWPP(#name9, name9, para); \
-        GWPP(#name10, name10, para); \
-        GWPP(#name11, name11, para); \
-        GWPP(#name12, name12, para); \
-        GWPP(#name13, name13, para); \
-        GWPP(#name14, name14, para); \
-        GWPP(#name15, name15, para); \
-        GWPP(#name16, name16, para); \
-        GWPP(#name17, name17, para); \
-        GWPP(#name18, name18, para); \
-        GWPP(#name19, name19, para); \
-        GWPP(#name20, name20, para); \
-        GWPP(#name21, name21, para); \
-        GWPP(#name22, name22, para); \
-        GWPP(#name23, name23, para); \
-        GWPP(#name24, name24, para); \
-        GWPP(#name25, name25, para); \
-        GWPP(#name26, name26, para); \
-        GWPP(#name27, name27, para); \
-        GWPP(#name28, name28, para); \
-        GWPP(#name29, name29, para); \
-        GWPP(#name30, name30, para); \
-        GWPP(#name31, name31, para); \
-        GWPP(#name32, name32, para); \
-        GWPP(#name33, name33, para); \
-        GWPP(#name34, name34, para); \
-        GWPP(#name35, name35, para); \
-        GWPP(#name36, name36, para); \
-        GWPP(#name37, name37, para); \
-        GWPP(#name38, name38, para); \
-        GWPP(#name39, name39, para); \
-        GWPP(#name40, name40, para); \
-        GWPP(#name41, name41, para); \
-        GWPP(#name42, name42, para); \
-        GWPP(#name43, name43, para); \
-        GWPP(#name44, name44, para); \
-        GWPP(#name45, name45, para); \
+    private:private:void save_fetch(eb::para param) override { \
+        GWPP(#name, name, param); \
+        GWPP(#name2, name2, param); \
+        GWPP(#name3, name3, param); \
+        GWPP(#name4, name4, param); \
+        GWPP(#name5, name5, param); \
+        GWPP(#name6, name6, param); \
+        GWPP(#name7, name7, param); \
+        GWPP(#name8, name8, param); \
+        GWPP(#name9, name9, param); \
+        GWPP(#name10, name10, param); \
+        GWPP(#name11, name11, param); \
+        GWPP(#name12, name12, param); \
+        GWPP(#name13, name13, param); \
+        GWPP(#name14, name14, param); \
+        GWPP(#name15, name15, param); \
+        GWPP(#name16, name16, param); \
+        GWPP(#name17, name17, param); \
+        GWPP(#name18, name18, param); \
+        GWPP(#name19, name19, param); \
+        GWPP(#name20, name20, param); \
+        GWPP(#name21, name21, param); \
+        GWPP(#name22, name22, param); \
+        GWPP(#name23, name23, param); \
+        GWPP(#name24, name24, param); \
+        GWPP(#name25, name25, param); \
+        GWPP(#name26, name26, param); \
+        GWPP(#name27, name27, param); \
+        GWPP(#name28, name28, param); \
+        GWPP(#name29, name29, param); \
+        GWPP(#name30, name30, param); \
+        GWPP(#name31, name31, param); \
+        GWPP(#name32, name32, param); \
+        GWPP(#name33, name33, param); \
+        GWPP(#name34, name34, param); \
+        GWPP(#name35, name35, param); \
+        GWPP(#name36, name36, param); \
+        GWPP(#name37, name37, param); \
+        GWPP(#name38, name38, param); \
+        GWPP(#name39, name39, param); \
+        GWPP(#name40, name40, param); \
+        GWPP(#name41, name41, param); \
+        GWPP(#name42, name42, param); \
+        GWPP(#name43, name43, param); \
+        GWPP(#name44, name44, param); \
+        GWPP(#name45, name45, param); \
     }
     #define DECLARE_VAR92(type, name, type2, name2, type3, name3, type4, name4, type5, name5, type6, name6, type7, name7, type8, name8, type9, name9, type10, name10, type11, name11, type12, name12, type13, name13 \
     , type14, name14, type15, name15, type16, name16, type17, name17, type18, name18, type19, name19, type20, name20, type21, name21, type22, name22, type23, name23, type24, name24, type25, name25 \
@@ -2384,53 +2384,53 @@
     type45 name45; \
     type46 name46; \
     __MEMMNGR_INTERNAL_HEADER_PERMISSION \
-    private:private:void save_fetch(mem::memPara para) override { \
-        GWPP(#name, name, para); \
-        GWPP(#name2, name2, para); \
-        GWPP(#name3, name3, para); \
-        GWPP(#name4, name4, para); \
-        GWPP(#name5, name5, para); \
-        GWPP(#name6, name6, para); \
-        GWPP(#name7, name7, para); \
-        GWPP(#name8, name8, para); \
-        GWPP(#name9, name9, para); \
-        GWPP(#name10, name10, para); \
-        GWPP(#name11, name11, para); \
-        GWPP(#name12, name12, para); \
-        GWPP(#name13, name13, para); \
-        GWPP(#name14, name14, para); \
-        GWPP(#name15, name15, para); \
-        GWPP(#name16, name16, para); \
-        GWPP(#name17, name17, para); \
-        GWPP(#name18, name18, para); \
-        GWPP(#name19, name19, para); \
-        GWPP(#name20, name20, para); \
-        GWPP(#name21, name21, para); \
-        GWPP(#name22, name22, para); \
-        GWPP(#name23, name23, para); \
-        GWPP(#name24, name24, para); \
-        GWPP(#name25, name25, para); \
-        GWPP(#name26, name26, para); \
-        GWPP(#name27, name27, para); \
-        GWPP(#name28, name28, para); \
-        GWPP(#name29, name29, para); \
-        GWPP(#name30, name30, para); \
-        GWPP(#name31, name31, para); \
-        GWPP(#name32, name32, para); \
-        GWPP(#name33, name33, para); \
-        GWPP(#name34, name34, para); \
-        GWPP(#name35, name35, para); \
-        GWPP(#name36, name36, para); \
-        GWPP(#name37, name37, para); \
-        GWPP(#name38, name38, para); \
-        GWPP(#name39, name39, para); \
-        GWPP(#name40, name40, para); \
-        GWPP(#name41, name41, para); \
-        GWPP(#name42, name42, para); \
-        GWPP(#name43, name43, para); \
-        GWPP(#name44, name44, para); \
-        GWPP(#name45, name45, para); \
-        GWPP(#name46, name46, para); \
+    private:private:void save_fetch(eb::para param) override { \
+        GWPP(#name, name, param); \
+        GWPP(#name2, name2, param); \
+        GWPP(#name3, name3, param); \
+        GWPP(#name4, name4, param); \
+        GWPP(#name5, name5, param); \
+        GWPP(#name6, name6, param); \
+        GWPP(#name7, name7, param); \
+        GWPP(#name8, name8, param); \
+        GWPP(#name9, name9, param); \
+        GWPP(#name10, name10, param); \
+        GWPP(#name11, name11, param); \
+        GWPP(#name12, name12, param); \
+        GWPP(#name13, name13, param); \
+        GWPP(#name14, name14, param); \
+        GWPP(#name15, name15, param); \
+        GWPP(#name16, name16, param); \
+        GWPP(#name17, name17, param); \
+        GWPP(#name18, name18, param); \
+        GWPP(#name19, name19, param); \
+        GWPP(#name20, name20, param); \
+        GWPP(#name21, name21, param); \
+        GWPP(#name22, name22, param); \
+        GWPP(#name23, name23, param); \
+        GWPP(#name24, name24, param); \
+        GWPP(#name25, name25, param); \
+        GWPP(#name26, name26, param); \
+        GWPP(#name27, name27, param); \
+        GWPP(#name28, name28, param); \
+        GWPP(#name29, name29, param); \
+        GWPP(#name30, name30, param); \
+        GWPP(#name31, name31, param); \
+        GWPP(#name32, name32, param); \
+        GWPP(#name33, name33, param); \
+        GWPP(#name34, name34, param); \
+        GWPP(#name35, name35, param); \
+        GWPP(#name36, name36, param); \
+        GWPP(#name37, name37, param); \
+        GWPP(#name38, name38, param); \
+        GWPP(#name39, name39, param); \
+        GWPP(#name40, name40, param); \
+        GWPP(#name41, name41, param); \
+        GWPP(#name42, name42, param); \
+        GWPP(#name43, name43, param); \
+        GWPP(#name44, name44, param); \
+        GWPP(#name45, name45, param); \
+        GWPP(#name46, name46, param); \
     }
     #define DECLARE_VAR94(type, name, type2, name2, type3, name3, type4, name4, type5, name5, type6, name6, type7, name7, type8, name8, type9, name9, type10, name10, type11, name11, type12, name12, type13, name13 \
     , type14, name14, type15, name15, type16, name16, type17, name17, type18, name18, type19, name19, type20, name20, type21, name21, type22, name22, type23, name23, type24, name24, type25, name25 \
@@ -2484,54 +2484,54 @@
     type46 name46; \
     type47 name47; \
     __MEMMNGR_INTERNAL_HEADER_PERMISSION \
-    private:private:void save_fetch(mem::memPara para) override { \
-        GWPP(#name, name, para); \
-        GWPP(#name2, name2, para); \
-        GWPP(#name3, name3, para); \
-        GWPP(#name4, name4, para); \
-        GWPP(#name5, name5, para); \
-        GWPP(#name6, name6, para); \
-        GWPP(#name7, name7, para); \
-        GWPP(#name8, name8, para); \
-        GWPP(#name9, name9, para); \
-        GWPP(#name10, name10, para); \
-        GWPP(#name11, name11, para); \
-        GWPP(#name12, name12, para); \
-        GWPP(#name13, name13, para); \
-        GWPP(#name14, name14, para); \
-        GWPP(#name15, name15, para); \
-        GWPP(#name16, name16, para); \
-        GWPP(#name17, name17, para); \
-        GWPP(#name18, name18, para); \
-        GWPP(#name19, name19, para); \
-        GWPP(#name20, name20, para); \
-        GWPP(#name21, name21, para); \
-        GWPP(#name22, name22, para); \
-        GWPP(#name23, name23, para); \
-        GWPP(#name24, name24, para); \
-        GWPP(#name25, name25, para); \
-        GWPP(#name26, name26, para); \
-        GWPP(#name27, name27, para); \
-        GWPP(#name28, name28, para); \
-        GWPP(#name29, name29, para); \
-        GWPP(#name30, name30, para); \
-        GWPP(#name31, name31, para); \
-        GWPP(#name32, name32, para); \
-        GWPP(#name33, name33, para); \
-        GWPP(#name34, name34, para); \
-        GWPP(#name35, name35, para); \
-        GWPP(#name36, name36, para); \
-        GWPP(#name37, name37, para); \
-        GWPP(#name38, name38, para); \
-        GWPP(#name39, name39, para); \
-        GWPP(#name40, name40, para); \
-        GWPP(#name41, name41, para); \
-        GWPP(#name42, name42, para); \
-        GWPP(#name43, name43, para); \
-        GWPP(#name44, name44, para); \
-        GWPP(#name45, name45, para); \
-        GWPP(#name46, name46, para); \
-        GWPP(#name47, name47, para); \
+    private:private:void save_fetch(eb::para param) override { \
+        GWPP(#name, name, param); \
+        GWPP(#name2, name2, param); \
+        GWPP(#name3, name3, param); \
+        GWPP(#name4, name4, param); \
+        GWPP(#name5, name5, param); \
+        GWPP(#name6, name6, param); \
+        GWPP(#name7, name7, param); \
+        GWPP(#name8, name8, param); \
+        GWPP(#name9, name9, param); \
+        GWPP(#name10, name10, param); \
+        GWPP(#name11, name11, param); \
+        GWPP(#name12, name12, param); \
+        GWPP(#name13, name13, param); \
+        GWPP(#name14, name14, param); \
+        GWPP(#name15, name15, param); \
+        GWPP(#name16, name16, param); \
+        GWPP(#name17, name17, param); \
+        GWPP(#name18, name18, param); \
+        GWPP(#name19, name19, param); \
+        GWPP(#name20, name20, param); \
+        GWPP(#name21, name21, param); \
+        GWPP(#name22, name22, param); \
+        GWPP(#name23, name23, param); \
+        GWPP(#name24, name24, param); \
+        GWPP(#name25, name25, param); \
+        GWPP(#name26, name26, param); \
+        GWPP(#name27, name27, param); \
+        GWPP(#name28, name28, param); \
+        GWPP(#name29, name29, param); \
+        GWPP(#name30, name30, param); \
+        GWPP(#name31, name31, param); \
+        GWPP(#name32, name32, param); \
+        GWPP(#name33, name33, param); \
+        GWPP(#name34, name34, param); \
+        GWPP(#name35, name35, param); \
+        GWPP(#name36, name36, param); \
+        GWPP(#name37, name37, param); \
+        GWPP(#name38, name38, param); \
+        GWPP(#name39, name39, param); \
+        GWPP(#name40, name40, param); \
+        GWPP(#name41, name41, param); \
+        GWPP(#name42, name42, param); \
+        GWPP(#name43, name43, param); \
+        GWPP(#name44, name44, param); \
+        GWPP(#name45, name45, param); \
+        GWPP(#name46, name46, param); \
+        GWPP(#name47, name47, param); \
     }
     #define DECLARE_VAR96(type, name, type2, name2, type3, name3, type4, name4, type5, name5, type6, name6, type7, name7, type8, name8, type9, name9, type10, name10, type11, name11, type12, name12, type13, name13 \
     , type14, name14, type15, name15, type16, name16, type17, name17, type18, name18, type19, name19, type20, name20, type21, name21, type22, name22, type23, name23, type24, name24, type25, name25 \
@@ -2586,55 +2586,55 @@
     type47 name47; \
     type48 name48; \
     __MEMMNGR_INTERNAL_HEADER_PERMISSION \
-    private:private:void save_fetch(mem::memPara para) override { \
-        GWPP(#name, name, para); \
-        GWPP(#name2, name2, para); \
-        GWPP(#name3, name3, para); \
-        GWPP(#name4, name4, para); \
-        GWPP(#name5, name5, para); \
-        GWPP(#name6, name6, para); \
-        GWPP(#name7, name7, para); \
-        GWPP(#name8, name8, para); \
-        GWPP(#name9, name9, para); \
-        GWPP(#name10, name10, para); \
-        GWPP(#name11, name11, para); \
-        GWPP(#name12, name12, para); \
-        GWPP(#name13, name13, para); \
-        GWPP(#name14, name14, para); \
-        GWPP(#name15, name15, para); \
-        GWPP(#name16, name16, para); \
-        GWPP(#name17, name17, para); \
-        GWPP(#name18, name18, para); \
-        GWPP(#name19, name19, para); \
-        GWPP(#name20, name20, para); \
-        GWPP(#name21, name21, para); \
-        GWPP(#name22, name22, para); \
-        GWPP(#name23, name23, para); \
-        GWPP(#name24, name24, para); \
-        GWPP(#name25, name25, para); \
-        GWPP(#name26, name26, para); \
-        GWPP(#name27, name27, para); \
-        GWPP(#name28, name28, para); \
-        GWPP(#name29, name29, para); \
-        GWPP(#name30, name30, para); \
-        GWPP(#name31, name31, para); \
-        GWPP(#name32, name32, para); \
-        GWPP(#name33, name33, para); \
-        GWPP(#name34, name34, para); \
-        GWPP(#name35, name35, para); \
-        GWPP(#name36, name36, para); \
-        GWPP(#name37, name37, para); \
-        GWPP(#name38, name38, para); \
-        GWPP(#name39, name39, para); \
-        GWPP(#name40, name40, para); \
-        GWPP(#name41, name41, para); \
-        GWPP(#name42, name42, para); \
-        GWPP(#name43, name43, para); \
-        GWPP(#name44, name44, para); \
-        GWPP(#name45, name45, para); \
-        GWPP(#name46, name46, para); \
-        GWPP(#name47, name47, para); \
-        GWPP(#name48, name48, para); \
+    private:private:void save_fetch(eb::para param) override { \
+        GWPP(#name, name, param); \
+        GWPP(#name2, name2, param); \
+        GWPP(#name3, name3, param); \
+        GWPP(#name4, name4, param); \
+        GWPP(#name5, name5, param); \
+        GWPP(#name6, name6, param); \
+        GWPP(#name7, name7, param); \
+        GWPP(#name8, name8, param); \
+        GWPP(#name9, name9, param); \
+        GWPP(#name10, name10, param); \
+        GWPP(#name11, name11, param); \
+        GWPP(#name12, name12, param); \
+        GWPP(#name13, name13, param); \
+        GWPP(#name14, name14, param); \
+        GWPP(#name15, name15, param); \
+        GWPP(#name16, name16, param); \
+        GWPP(#name17, name17, param); \
+        GWPP(#name18, name18, param); \
+        GWPP(#name19, name19, param); \
+        GWPP(#name20, name20, param); \
+        GWPP(#name21, name21, param); \
+        GWPP(#name22, name22, param); \
+        GWPP(#name23, name23, param); \
+        GWPP(#name24, name24, param); \
+        GWPP(#name25, name25, param); \
+        GWPP(#name26, name26, param); \
+        GWPP(#name27, name27, param); \
+        GWPP(#name28, name28, param); \
+        GWPP(#name29, name29, param); \
+        GWPP(#name30, name30, param); \
+        GWPP(#name31, name31, param); \
+        GWPP(#name32, name32, param); \
+        GWPP(#name33, name33, param); \
+        GWPP(#name34, name34, param); \
+        GWPP(#name35, name35, param); \
+        GWPP(#name36, name36, param); \
+        GWPP(#name37, name37, param); \
+        GWPP(#name38, name38, param); \
+        GWPP(#name39, name39, param); \
+        GWPP(#name40, name40, param); \
+        GWPP(#name41, name41, param); \
+        GWPP(#name42, name42, param); \
+        GWPP(#name43, name43, param); \
+        GWPP(#name44, name44, param); \
+        GWPP(#name45, name45, param); \
+        GWPP(#name46, name46, param); \
+        GWPP(#name47, name47, param); \
+        GWPP(#name48, name48, param); \
     }
     #define DECLARE_VAR98(type, name, type2, name2, type3, name3, type4, name4, type5, name5, type6, name6, type7, name7, type8, name8, type9, name9, type10, name10, type11, name11, type12, name12, type13, name13 \
     , type14, name14, type15, name15, type16, name16, type17, name17, type18, name18, type19, name19, type20, name20, type21, name21, type22, name22, type23, name23, type24, name24, type25, name25 \
@@ -2690,56 +2690,56 @@
     type48 name48; \
     type49 name49; \
     __MEMMNGR_INTERNAL_HEADER_PERMISSION \
-    private:private:void save_fetch(mem::memPara para) override { \
-        GWPP(#name, name, para); \
-        GWPP(#name2, name2, para); \
-        GWPP(#name3, name3, para); \
-        GWPP(#name4, name4, para); \
-        GWPP(#name5, name5, para); \
-        GWPP(#name6, name6, para); \
-        GWPP(#name7, name7, para); \
-        GWPP(#name8, name8, para); \
-        GWPP(#name9, name9, para); \
-        GWPP(#name10, name10, para); \
-        GWPP(#name11, name11, para); \
-        GWPP(#name12, name12, para); \
-        GWPP(#name13, name13, para); \
-        GWPP(#name14, name14, para); \
-        GWPP(#name15, name15, para); \
-        GWPP(#name16, name16, para); \
-        GWPP(#name17, name17, para); \
-        GWPP(#name18, name18, para); \
-        GWPP(#name19, name19, para); \
-        GWPP(#name20, name20, para); \
-        GWPP(#name21, name21, para); \
-        GWPP(#name22, name22, para); \
-        GWPP(#name23, name23, para); \
-        GWPP(#name24, name24, para); \
-        GWPP(#name25, name25, para); \
-        GWPP(#name26, name26, para); \
-        GWPP(#name27, name27, para); \
-        GWPP(#name28, name28, para); \
-        GWPP(#name29, name29, para); \
-        GWPP(#name30, name30, para); \
-        GWPP(#name31, name31, para); \
-        GWPP(#name32, name32, para); \
-        GWPP(#name33, name33, para); \
-        GWPP(#name34, name34, para); \
-        GWPP(#name35, name35, para); \
-        GWPP(#name36, name36, para); \
-        GWPP(#name37, name37, para); \
-        GWPP(#name38, name38, para); \
-        GWPP(#name39, name39, para); \
-        GWPP(#name40, name40, para); \
-        GWPP(#name41, name41, para); \
-        GWPP(#name42, name42, para); \
-        GWPP(#name43, name43, para); \
-        GWPP(#name44, name44, para); \
-        GWPP(#name45, name45, para); \
-        GWPP(#name46, name46, para); \
-        GWPP(#name47, name47, para); \
-        GWPP(#name48, name48, para); \
-        GWPP(#name49, name49, para); \
+    private:private:void save_fetch(eb::para param) override { \
+        GWPP(#name, name, param); \
+        GWPP(#name2, name2, param); \
+        GWPP(#name3, name3, param); \
+        GWPP(#name4, name4, param); \
+        GWPP(#name5, name5, param); \
+        GWPP(#name6, name6, param); \
+        GWPP(#name7, name7, param); \
+        GWPP(#name8, name8, param); \
+        GWPP(#name9, name9, param); \
+        GWPP(#name10, name10, param); \
+        GWPP(#name11, name11, param); \
+        GWPP(#name12, name12, param); \
+        GWPP(#name13, name13, param); \
+        GWPP(#name14, name14, param); \
+        GWPP(#name15, name15, param); \
+        GWPP(#name16, name16, param); \
+        GWPP(#name17, name17, param); \
+        GWPP(#name18, name18, param); \
+        GWPP(#name19, name19, param); \
+        GWPP(#name20, name20, param); \
+        GWPP(#name21, name21, param); \
+        GWPP(#name22, name22, param); \
+        GWPP(#name23, name23, param); \
+        GWPP(#name24, name24, param); \
+        GWPP(#name25, name25, param); \
+        GWPP(#name26, name26, param); \
+        GWPP(#name27, name27, param); \
+        GWPP(#name28, name28, param); \
+        GWPP(#name29, name29, param); \
+        GWPP(#name30, name30, param); \
+        GWPP(#name31, name31, param); \
+        GWPP(#name32, name32, param); \
+        GWPP(#name33, name33, param); \
+        GWPP(#name34, name34, param); \
+        GWPP(#name35, name35, param); \
+        GWPP(#name36, name36, param); \
+        GWPP(#name37, name37, param); \
+        GWPP(#name38, name38, param); \
+        GWPP(#name39, name39, param); \
+        GWPP(#name40, name40, param); \
+        GWPP(#name41, name41, param); \
+        GWPP(#name42, name42, param); \
+        GWPP(#name43, name43, param); \
+        GWPP(#name44, name44, param); \
+        GWPP(#name45, name45, param); \
+        GWPP(#name46, name46, param); \
+        GWPP(#name47, name47, param); \
+        GWPP(#name48, name48, param); \
+        GWPP(#name49, name49, param); \
     }
     #define DECLARE_VAR100(type, name, type2, name2, type3, name3, type4, name4, type5, name5, type6, name6, type7, name7, type8, name8, type9, name9, type10, name10, type11, name11, type12, name12, type13, name13 \
     , type14, name14, type15, name15, type16, name16, type17, name17, type18, name18, type19, name19, type20, name20, type21, name21, type22, name22, type23, name23, type24, name24, type25, name25 \
@@ -2796,57 +2796,57 @@
     type49 name49; \
     type50 name50; \
     __MEMMNGR_INTERNAL_HEADER_PERMISSION \
-    private:private:void save_fetch(mem::memPara para) override { \
-        GWPP(#name, name, para); \
-        GWPP(#name2, name2, para); \
-        GWPP(#name3, name3, para); \
-        GWPP(#name4, name4, para); \
-        GWPP(#name5, name5, para); \
-        GWPP(#name6, name6, para); \
-        GWPP(#name7, name7, para); \
-        GWPP(#name8, name8, para); \
-        GWPP(#name9, name9, para); \
-        GWPP(#name10, name10, para); \
-        GWPP(#name11, name11, para); \
-        GWPP(#name12, name12, para); \
-        GWPP(#name13, name13, para); \
-        GWPP(#name14, name14, para); \
-        GWPP(#name15, name15, para); \
-        GWPP(#name16, name16, para); \
-        GWPP(#name17, name17, para); \
-        GWPP(#name18, name18, para); \
-        GWPP(#name19, name19, para); \
-        GWPP(#name20, name20, para); \
-        GWPP(#name21, name21, para); \
-        GWPP(#name22, name22, para); \
-        GWPP(#name23, name23, para); \
-        GWPP(#name24, name24, para); \
-        GWPP(#name25, name25, para); \
-        GWPP(#name26, name26, para); \
-        GWPP(#name27, name27, para); \
-        GWPP(#name28, name28, para); \
-        GWPP(#name29, name29, para); \
-        GWPP(#name30, name30, para); \
-        GWPP(#name31, name31, para); \
-        GWPP(#name32, name32, para); \
-        GWPP(#name33, name33, para); \
-        GWPP(#name34, name34, para); \
-        GWPP(#name35, name35, para); \
-        GWPP(#name36, name36, para); \
-        GWPP(#name37, name37, para); \
-        GWPP(#name38, name38, para); \
-        GWPP(#name39, name39, para); \
-        GWPP(#name40, name40, para); \
-        GWPP(#name41, name41, para); \
-        GWPP(#name42, name42, para); \
-        GWPP(#name43, name43, para); \
-        GWPP(#name44, name44, para); \
-        GWPP(#name45, name45, para); \
-        GWPP(#name46, name46, para); \
-        GWPP(#name47, name47, para); \
-        GWPP(#name48, name48, para); \
-        GWPP(#name49, name49, para); \
-        GWPP(#name50, name50, para); \
+    private:private:void save_fetch(eb::para param) override { \
+        GWPP(#name, name, param); \
+        GWPP(#name2, name2, param); \
+        GWPP(#name3, name3, param); \
+        GWPP(#name4, name4, param); \
+        GWPP(#name5, name5, param); \
+        GWPP(#name6, name6, param); \
+        GWPP(#name7, name7, param); \
+        GWPP(#name8, name8, param); \
+        GWPP(#name9, name9, param); \
+        GWPP(#name10, name10, param); \
+        GWPP(#name11, name11, param); \
+        GWPP(#name12, name12, param); \
+        GWPP(#name13, name13, param); \
+        GWPP(#name14, name14, param); \
+        GWPP(#name15, name15, param); \
+        GWPP(#name16, name16, param); \
+        GWPP(#name17, name17, param); \
+        GWPP(#name18, name18, param); \
+        GWPP(#name19, name19, param); \
+        GWPP(#name20, name20, param); \
+        GWPP(#name21, name21, param); \
+        GWPP(#name22, name22, param); \
+        GWPP(#name23, name23, param); \
+        GWPP(#name24, name24, param); \
+        GWPP(#name25, name25, param); \
+        GWPP(#name26, name26, param); \
+        GWPP(#name27, name27, param); \
+        GWPP(#name28, name28, param); \
+        GWPP(#name29, name29, param); \
+        GWPP(#name30, name30, param); \
+        GWPP(#name31, name31, param); \
+        GWPP(#name32, name32, param); \
+        GWPP(#name33, name33, param); \
+        GWPP(#name34, name34, param); \
+        GWPP(#name35, name35, param); \
+        GWPP(#name36, name36, param); \
+        GWPP(#name37, name37, param); \
+        GWPP(#name38, name38, param); \
+        GWPP(#name39, name39, param); \
+        GWPP(#name40, name40, param); \
+        GWPP(#name41, name41, param); \
+        GWPP(#name42, name42, param); \
+        GWPP(#name43, name43, param); \
+        GWPP(#name44, name44, param); \
+        GWPP(#name45, name45, param); \
+        GWPP(#name46, name46, param); \
+        GWPP(#name47, name47, param); \
+        GWPP(#name48, name48, param); \
+        GWPP(#name49, name49, param); \
+        GWPP(#name50, name50, param); \
     }
 
     //what is the problem with msvc and gcc, clang?

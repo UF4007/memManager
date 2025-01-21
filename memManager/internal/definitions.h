@@ -21,24 +21,24 @@ inline void dumbPtr<mu, releaseable>::equalAny(const dumbPtr<_any, _r>& mp)
 template<typename mu, bool releaseable>
 inline dumbPtr<mu, releaseable>::dumbPtr()
 {
-	static_assert(std::is_base_of_v<memUnit, mu>, "smart pointer template ERROR: template is not Base on memUnit");
+	static_assert(std::is_base_of_v<base, mu>, "smart pointer template ERROR: template is not Base on base");
 	ptr = nullptr;
 }
 template<typename mu, bool releaseable>
 inline dumbPtr<mu, releaseable>::dumbPtr(mu* pmu)
 {
-	static_assert(std::is_base_of_v<memUnit, mu>, "smart pointer template ERROR: template is not Base on memUnit");
+	static_assert(std::is_base_of_v<base, mu>, "smart pointer template ERROR: template is not Base on base");
 	if (pmu)
 	{
-		if (((memUnit*)pmu)->sharedPtr)
+		if (((base*)pmu)->sharedPtr)
 		{
-			ptr = ((memUnit*)pmu)->sharedPtr;
+			ptr = ((base*)pmu)->sharedPtr;
 			(ptr->count)++;
 		}
 		else
 		{
-			ptr = new lowlevel::memPtrComm((memUnit*)pmu);
-			((memUnit*)pmu)->sharedPtr = ptr;
+			ptr = new lowlevel::memPtrComm((base*)pmu);
+			((base*)pmu)->sharedPtr = ptr;
 		}
 	}
 	else
@@ -128,7 +128,7 @@ inline void dumbPtr<mu, releaseable>::degeneracy()
 }
 template<class mu, bool releaseable>
 template<typename _anotherMu>
-inline std::enable_if_t<std::is_base_of<memUnit, _anotherMu>::value, bool>
+inline std::enable_if_t<std::is_base_of<base, _anotherMu>::value, bool>
 dumbPtr<mu, releaseable>::precision_cast(_anotherMu* pamu) {
 	if (pamu == nullptr)
 		return false;
@@ -140,7 +140,7 @@ dumbPtr<mu, releaseable>::precision_cast(_anotherMu* pamu) {
 	else
 	{
 		//this->operator=(dynamic_cast<mu>(pamu));
-		if (memUnit::get_vtable_ptr<mu>::ptr() == *(void**)std::addressof(*pamu))		//if RTTI was banned use the vTable pointer to judge
+		if (base::get_vtable_ptr<mu>::ptr() == *(void**)std::addressof(*pamu))		//if RTTI was banned use the vTable pointer to judge
 		{
 			this->operator=(reinterpret_cast<mu*>(pamu));
 			return true;
@@ -150,7 +150,7 @@ dumbPtr<mu, releaseable>::precision_cast(_anotherMu* pamu) {
 }
 template<class mu, bool releaseable>
 template<typename _anotherMuPtr>
-inline std::enable_if_t<std::is_base_of<memUnit, typename std::remove_pointer<_anotherMuPtr>::type>::value, _anotherMuPtr>
+inline std::enable_if_t<std::is_base_of<base, typename std::remove_pointer<_anotherMuPtr>::type>::value, _anotherMuPtr>
 dumbPtr<mu, releaseable>::precision_cast() {
 	using _anotherMu = typename std::remove_pointer<_anotherMuPtr>::type;
 	if (this->isEmpty())
@@ -161,7 +161,7 @@ dumbPtr<mu, releaseable>::precision_cast() {
 	}
 	else
 	{
-		if (memUnit::get_vtable_ptr<_anotherMu>::ptr() == *(void**)std::addressof(*ptr->content))		//if RTTI was banned use the vTable pointer to judge
+		if (base::get_vtable_ptr<_anotherMu>::ptr() == *(void**)std::addressof(*ptr->content))		//if RTTI was banned use the vTable pointer to judge
 		{
 			return reinterpret_cast<_anotherMu*>(ptr->content);
 		}
@@ -171,7 +171,7 @@ dumbPtr<mu, releaseable>::precision_cast() {
 template<typename mu, bool releaseable>
 template<typename _any, bool _r>
 inline dumbPtr<mu, releaseable>::dumbPtr(const dumbPtr<_any, _r>& mp) {
-	static_assert(std::is_base_of_v<memUnit, mu>, "smart pointer template ERROR: template is not Base on memUnit");
+	static_assert(std::is_base_of_v<base, mu>, "smart pointer template ERROR: template is not Base on base");
 	static_assert((!std::is_same_v<mu, _any> &&
 		(std::is_base_of_v<mu, _any> //|| std::is_base_of_v<_any, mu>						//no idea to transfer base into derive without RTTI. consider precision_cast
 			) && _r == releaseable), "smart pointer polymorphic ERROR: param pointer has nothing polymorphic to do with the new pointer");
@@ -193,15 +193,15 @@ inline void dumbPtr<mu, releaseable>::operator=(mu* pmu)
 	cdd();
 	if (pmu)
 	{
-		if (((memUnit*)pmu)->sharedPtr)
+		if (((base*)pmu)->sharedPtr)
 		{
-			ptr = ((memUnit*)pmu)->sharedPtr;
+			ptr = ((base*)pmu)->sharedPtr;
 			(ptr->count)++;
 		}
 		else
 		{
-			ptr = new lowlevel::memPtrComm((memUnit*)pmu);
-			((memUnit*)pmu)->sharedPtr = ptr;
+			ptr = new lowlevel::memPtrComm((base*)pmu);
+			((base*)pmu)->sharedPtr = ptr;
 		}
 	}
 	else
@@ -243,7 +243,7 @@ inline bool dumbPtr<mu, releaseable>::operator==(const dumbPtr& right) const
 template<class mu, bool releaseable>
 inline bool dumbPtr<mu, releaseable>::operator==(const mu* right) const {
 	if (isFilled())
-		return ptr->content == (memUnit*)right;
+		return ptr->content == (base*)right;
 	else if (right == nullptr)
 		return true;
 	else
@@ -271,7 +271,7 @@ inline void dumbPtr<mu, releaseable>::release()
 	static_assert(releaseable == true, "smart pointer release() ERROR: this memPtr was defined that cannot be released");
 	if (this->isFilled())
 	{
-		memUnit* i = ptr->content;	//here cannot be optimized. although the program will execute the same operation in the Base class memUnit destructor C++ executes the destructor in the derived class first, must erase memPtr of memUnit before the derived class destructor runs.
+		base* i = ptr->content;	//here cannot be optimized. although the program will execute the same operation in the Base class base destructor C++ executes the destructor in the derived class first, must erase memPtr of base before the derived class destructor runs.
 		ptr->content = nullptr;
 		delete i;
 	}
@@ -287,8 +287,8 @@ inline void dumbPtr<mu, releaseable>::supplantIn(mu* newOne) {
 	static_assert(releaseable == true, "smart pointer release() ERROR: this memPtr was defined that cannot be released");
 	if (this->isFilled())
 	{
-		memUnit* i = ptr->content;
-		ptr->content = (memUnit*)newOne;
+		base* i = ptr->content;
+		ptr->content = (base*)newOne;
 		delete i;
 	}
 	else
@@ -302,14 +302,14 @@ inline void dumbPtr<mu, releaseable>::supplantIn(mu* newOne) {
 #if MEM_REFLECTION_ON
 //ReflectResultKeyValue
 template<bool _void>
-inline void ReflectResultKeyValue::MatchVariant(void* vtptr, uint32_t& type, memPtr<memUnit>& ptr)
+inline void ReflectResultKeyValue::MatchVariant(void* vtptr, uint32_t& type, memPtr<base>& ptr)
 {
 	type = 0;
 	ptr = nullptr;
 }
 template<bool _void, typename IterFirst, typename... IterArgs>
-inline void ReflectResultKeyValue::MatchVariant(void* vtptr, uint32_t& type, memPtr<memUnit>& ptr) {
-	if (memUnit::get_vtable_ptr<IterFirst>::ptr() == vtptr)
+inline void ReflectResultKeyValue::MatchVariant(void* vtptr, uint32_t& type, memPtr<base>& ptr) {
+	if (base::get_vtable_ptr<IterFirst>::ptr() == vtptr)
 	{
 		key[0] = L'\0';
 		ptr = value.ptr;
@@ -321,16 +321,16 @@ inline void ReflectResultKeyValue::MatchVariant(void* vtptr, uint32_t& type, mem
 	}
 }
 template<bool isSet, class _T, class e_T>
-inline void ReflectResultKeyValue::SetOrGetType(_T& thisSide, _T& memUnitSide, e_T et) {
+inline void ReflectResultKeyValue::SetOrGetType(_T& thisSide, _T& baseSide, e_T et) {
 	if constexpr (isSet)
 	{
-		thisSide = memUnitSide;
+		thisSide = baseSide;
 		type = et;
 	}
 	else
 	{
 		key[0] = L'\0';
-		memUnitSide = thisSide;
+		baseSide = thisSide;
 	}
 }
 //template<bool isSet, class First, class ...Args>
@@ -339,7 +339,7 @@ inline void ReflectResultKeyValue::SetOrGetType(_T& thisSide, _T& memUnitSide, e
 //	if constexpr (isSet)
 //	{
 //		type = p_variant;
-//		value.ptr = reinterpret_cast<memUnit*>(*(va.ptr));
+//		value.ptr = reinterpret_cast<base*>(*(va.ptr));
 //	}
 //	else
 //	{
@@ -351,13 +351,13 @@ template <bool isSet, class _MU, bool re>
 inline void ReflectResultKeyValue::TypeFunc(memPtr<_MU, re>& va) {
 	if constexpr (isSet)
 	{
-		type = p_memUnit;
-		value.ptr = reinterpret_cast<memUnit*>(*va);
+		type = p_base;
+		value.ptr = reinterpret_cast<base*>(*va);
 	}
 	else
 	{
 		//if (typeid(_MU) == typeid(*value.ptr))
-		if (memUnit::get_vtable_ptr<_MU>::ptr() == *(void**)std::addressof(*value.ptr))		//if RTTI was banned use the vTable pointer to judge
+		if (base::get_vtable_ptr<_MU>::ptr() == *(void**)std::addressof(*value.ptr))		//if RTTI was banned use the vTable pointer to judge
 		{
 			key[0] = L'\0';
 			va = reinterpret_cast<_MU*>(value.ptr);
@@ -393,7 +393,7 @@ inline ReflectResultKeyValue::ReflectResultKeyValue() {
 template<class _T, typename std::enable_if<
 	!std::is_convertible<_T, const wchar_t*>::value &&
 	!std::is_convertible<_T, const char*>::value &&
-	!std::is_convertible<_T, memUnit*>::value
+	!std::is_convertible<_T, base*>::value
 	, int>::type>
 inline ReflectResultKeyValue::ReflectResultKeyValue(const char* _key, _T& va) {
 	key = _key;
@@ -409,23 +409,23 @@ inline ReflectResultKeyValue::ReflectResultKeyValue(const char* _key, const char
 	value.char_p = (char*)va;
 	type = char_;
 }
-inline ReflectResultKeyValue::ReflectResultKeyValue(const char* _key, memUnit* va) {
+inline ReflectResultKeyValue::ReflectResultKeyValue(const char* _key, base* va) {
 	key = _key;
 	value.ptr = va;
-	type = p_memUnit;
+	type = p_base;
 }
-inline void memUnit::reflectionRead(ReflectResult* output)
+inline void base::reflectionRead(ReflectResult* output)
 {
-	memPara para;
+	para para;
 	para.reflection = output;
-	para.order = memPara::reflection_read;
+	para.order = para::reflection_read;
 	this->save_fetch(para);
 }
-inline bool memUnit::reflectionWrite(ReflectResultKeyValue inputKW)
+inline bool base::reflectionWrite(ReflectResultKeyValue inputKW)
 {
-	memPara para;
+	para para;
 	para.reflection_single = &inputKW;
-	para.order = memPara::reflection_write;
+	para.order = para::reflection_write;
 	this->save_fetch(para);
 	return !(inputKW.key[0]);		//put first char to '\0' if write success
 }
@@ -433,18 +433,18 @@ inline bool memUnit::reflectionWrite(ReflectResultKeyValue inputKW)
 
 
 
-//memUnit
+//base
 template<typename T>
-struct memUnit::get_vtable_ptr {
+struct base::get_vtable_ptr {
 	static_assert(std::is_polymorphic<T>::value, "get vtable pointer ERROR: T must be a polymorphic type");
 	static inline void* ptr() {
 		static void* ptr = [] {
-			if constexpr (std::is_default_constructible<T>::value)	//memManager
+			if constexpr (std::is_default_constructible<T>::value)	//manager
 			{
 				T temp = T();
 				return *(void**)std::addressof(temp);
 			}
-			else													//memUnit
+			else													//base
 			{
 				T temp = T(nullptr);
 				return *(void**)std::addressof(temp);
@@ -453,34 +453,34 @@ struct memUnit::get_vtable_ptr {
 		return ptr;
 	}
 };
-inline memUnit::memUnit(memManager* manager) {
+inline base::base(manager* manager) {
 	this->mngr = manager;
 	if (manager)
-		manager->memUnits.insert(this);
-	//else assert(!"a memManager must be designated when creating a new memUnit.");					//technically we allow this behavior
+		manager->bases.insert(this);
+	//else assert(!"a manager must be designated when creating a new base.");					//technically we allow this behavior
 	sharedPtr = nullptr;
 }
-inline memUnit::memUnit(const memUnit& munit) {
+inline base::base(const base& munit) {
 	mngr = munit.mngr;
-	mngr->memUnits.insert(this);
+	mngr->bases.insert(this);
 	sharedPtr = nullptr;
 }
-inline memUnit::memUnit(memUnit&& munit) noexcept {
+inline base::base(base&& munit) noexcept {
 	mngr = munit.mngr;
-	mngr->memUnits.insert(this);
+	mngr->bases.insert(this);
 	if (sharedPtr)
 	{
 		sharedPtr->content = this;
 		munit.sharedPtr = nullptr;
 	}
 }
-inline memUnit::~memUnit()
+inline base::~base()
 {
 	if (mngr)
 	{
-		auto i = mngr->memUnits.find(this);
+		auto i = mngr->bases.find(this);
 		if (*i == this)
-			mngr->memUnits.erase(i);
+			mngr->bases.erase(i);
 	}
 	if (sharedPtr)
 		sharedPtr->content = nullptr;
@@ -488,19 +488,23 @@ inline memUnit::~memUnit()
 
 
 
-//memManager
-inline memManager::memManager() :memUnit() {
+//manager
+inline manager::manager() :base() {
 	thisCons();
 }
-inline memManager::memManager(const char* path) {
+inline manager::manager(const char* path) {
 	thisCons();
     url = path;
 }
-inline memManager::~memManager()
+inline manager::~manager()
 {
 	thisDest();
+	if (this->rjson.doc != nullptr)
+	{
+		delete this->rjson.doc;
+	}
 }
-inline char* memManager::getFileName()
+inline char* manager::getFileName()
 {
 	if (url[0]) {
 		char* ret = strrchr(url.data(), '\\');
@@ -511,16 +515,16 @@ inline char* memManager::getFileName()
 	}
 	return nullptr;
 }
-inline void memManager::thisCons()
+inline void manager::thisCons()
 {
 	this->mngr = this;
-    std::lock_guard<std::mutex> lck (memManager::global_mutex);
+    std::lock_guard<std::mutex> lck (manager::global_mutex);
 	global_load.push_back(this);
 }
-inline void memManager::thisDest()
+inline void manager::thisDest()
 {
     {
-        std::lock_guard<std::mutex> lck(memManager::global_mutex);
+        std::lock_guard<std::mutex> lck(manager::global_mutex);
         for (auto i = global_load.begin(); i != global_load.end(); i++)
         {
             if (*i == this)
@@ -531,74 +535,74 @@ inline void memManager::thisDest()
         }
     }
     this->mngr = nullptr;				//it is a sign to protect against repeat destruction
-	auto iter = memUnits.begin();				//other memUnits will be erased in the destructor of the specific memUnit
-	for (; iter != memUnits.end();)
+	auto iter = bases.begin();				//other bases will be erased in the destructor of the specific base
+	for (; iter != bases.end();)
 	{
-		memUnit* mu = *iter;
-		memUnits.erase(iter);
+		base* mu = *iter;
+		bases.erase(iter);
 		mu->mngr = nullptr;
 		if (mu->sharedPtr)						//here cannot be optimized, see memPtr::release()
 			mu->sharedPtr->content = nullptr;
 		delete mu;
-		iter = memUnits.begin();
+		iter = bases.begin();
 	}
-	//subFiles and ingressInte are also memUnit that will be destructed when all of memUnit are destructed.
+	//subFiles and ingressInte are also base that will be destructed when all of base are destructed.
 }
-inline bool memManager::download()
+inline bool manager::download()
 {
 	char* fpath = url.data();
 
-	mem::file::Remove(fpath);
+	eb::file::Remove(fpath);
 
 	std::vector<uint8_t> bc = {};
 	bc.reserve(1000);
 
 	this->serialize(&bc);
 
-	void* handle = mem::file::Fopen_w(fpath);
+	void* handle = eb::file::Fopen_w(fpath);
 	if (!handle)
 	{
 		return 0;
 	}
 
-	if (mem::file::Fwrite(handle, &bc[0], bc.size()))
+	if (eb::file::Fwrite(handle, &bc[0], bc.size()))
 	{
-		mem::file::Fclose(handle);
+		eb::file::Fclose(handle);
 		return 0;
 	}
 
-	mem::file::Fclose(handle);
+	eb::file::Fclose(handle);
 
 	return 1;
 }
-inline bool memManager::upload()
+inline bool manager::upload()
 {
 	char* fpath = url.data();
 
-	void* handle = mem::file::Fopen_r(fpath);
+	void* handle = eb::file::Fopen_r(fpath);
 	if (!handle)
 	{
 		return 0;
 	}
-	uint64_t fileSize = mem::file::GetSize(handle);
+	uint64_t fileSize = eb::file::GetSize(handle);
 	if (!fileSize)
 	{
-		mem::file::Fclose(handle);
+		eb::file::Fclose(handle);
 		return 0;
 	}
 
 	uint8_t* bytes = (uint8_t*)::operator new(fileSize + 10);
 	memset(bytes, 0, fileSize + 10);
 	bool ret = false;
-	if (fileSize == mem::file::Fread(handle, bytes, fileSize))
+	if (fileSize == eb::file::Fread(handle, bytes, fileSize))
 	{
 		ret = this->deserialize(bytes, fileSize);
 	}
-	mem::file::Fclose(handle);
+	eb::file::Fclose(handle);
 	::operator delete(bytes);
 	return ret;
 }
-inline memPtr<Subfile> memManager::findSubfile(const char* fileName)
+inline memPtr<Subfile> manager::findSubfile(const char* fileName)
 {
 	assert(fileName || !("target manager's fileName cannot be null"));
 	for (auto iter = subFiles.begin(); iter != subFiles.end(); iter++)
@@ -616,7 +620,7 @@ inline memPtr<Subfile> memManager::findSubfile(const char* fileName)
 	}
 	return nullptr;
 }
-inline memPtr<Egress> memManager::findEgress(const memPtr<Subfile> subfile, const char* kw, const char* type)
+inline memPtr<Egress> manager::findEgress(const memPtr<Subfile> subfile, const char* kw, const char* type)
 {
 	for (auto iter = subfile->egresses.begin(); iter != subfile->egresses.end(); iter++)
 	{
@@ -633,7 +637,7 @@ inline memPtr<Egress> memManager::findEgress(const memPtr<Subfile> subfile, cons
 	}
 	return nullptr;
 }
-inline memPtr<refIngress> memManager::findIngressRef(const char* kw, const char* type) {
+inline memPtr<refIngress> manager::findIngressRef(const char* kw, const char* type) {
 	for (auto iter = ingressInte.begin(); iter != ingressInte.end(); iter++)
 	{
 		auto& i = *iter;
@@ -649,20 +653,20 @@ inline memPtr<refIngress> memManager::findIngressRef(const char* kw, const char*
 	}
 	return nullptr;
 }
-inline impPtr<Ingress> memManager::findIngress(const char* kw, const char* type)
+inline impPtr<Ingress> manager::findIngress(const char* kw, const char* type)
 {
 	auto found = findIngressRef(kw, type);
 	if (found.isFilled())
 		return found->ptrIng;
 	return nullptr;
 }
-[[nodiscard]] inline memPtr<Egress> memManager::makeEgress_IngressPair(const impPtr<Ingress>& target, const char* kw)
+[[nodiscard]] inline memPtr<Egress> manager::makeEgress_IngressPair(const impPtr<Ingress>& target, const char* kw)
 {
 	if (target.isEmpty())
 		return nullptr;
 	const char* typeName = target->getConstTypeName();
 
-	memManager* targetManager = target->getManager();
+	manager* targetManager = target->getManager();
 
 	memPtr<refIngress> ingrP = targetManager->findIngressRef(kw, typeName);
 	if (ingrP == nullptr)
@@ -709,13 +713,13 @@ inline impPtr<Ingress> memManager::findIngress(const char* kw, const char* type)
 //read/write/reflection/serialize functions
 
 template<class _any>
-inline void memUnit::GWPP_Any(const char* key, _any& var, memPara& para) {
-	static constexpr size_t _subSize = memUnit::getArrayValueTypeSize<_any>();
+inline void base::GWPP_Any(const char* key, _any& var, para& para) {
+	static constexpr size_t _subSize = base::getArrayValueTypeSize<_any>();
 	static constexpr size_t _subSizeMin = _subSize > 8 ? 8 : _subSize;
 	switch (para.order)
 	{
-	case memPara::binary_deserialize_memUnit:
-	case memPara::binary_deserialize_memManager:
+	case para::binary_deserialize_base:
+	case para::binary_deserialize_manager:
 		if (lowlevel::findKeyFrom_section(key, para.section.likelyPointer, para.section.startPointer) == true)
 		{
 			uint8_t* holder = para.section.likelyPointer;
@@ -731,8 +735,8 @@ inline void memUnit::GWPP_Any(const char* key, _any& var, memPara& para) {
 			this->mngr->statusBadValue++;
 		}
 		break;
-	case memPara::binary_serialize_memUnit:
-	case memPara::binary_serialize_memManager:
+	case para::binary_serialize_base:
+	case para::binary_serialize_manager:
 		lowlevel::appendKeyTo_section(key, para.sectionVector);
 		uint32_t offset = para.sectionVector->size();
 		para.sectionVector->emplace_back(0);	//holder
@@ -743,15 +747,15 @@ inline void memUnit::GWPP_Any(const char* key, _any& var, memPara& para) {
 		para.sectionVector->emplace_back(0);
 		break;
 #if MEM_REFLECTION_ON
-	case memPara::reflection_read:
+	case para::reflection_read:
 		//para.reflection->context.emplace_back(key, var);
 		break;
-	case memPara::reflection_write:
+	case para::reflection_write:
 		//para.reflection_single->WriteMU(key, var, size);
 		break;
 #endif
 #if MEM_RJSON_ON
-	case memPara::rjson_seriazlize:
+	case para::rjson_seriazlize:
 	{
 		std::string base64;
 		base64_mem::Encode((const char*)&var, sizeof(_any), &base64);
@@ -761,7 +765,7 @@ inline void memUnit::GWPP_Any(const char* key, _any& var, memPara& para) {
 		para.rapidJson_section->AddMember(jsonKey, vlValue, *this->mngr->rjson.allocator);
 	}
 	break;
-	case memPara::rjson_deseriazlize:
+	case para::rjson_deseriazlize:
 		if (para.rapidJson_section->HasMember(key) &&
 			para.rapidJson_section->operator[](key).IsString())
 		{
@@ -780,13 +784,13 @@ inline void memUnit::GWPP_Any(const char* key, _any& var, memPara& para) {
 	}
 };
 template<typename _T>
-inline void GWPP_sub(memUnit* mem, const char* key1, const char* key2, _T& var, memPara& para)
+inline void GWPP_sub(base* mem, const char* key1, const char* key2, _T& var, para& para)
 {
 	char buffer[maxKey];
 	std::strcpy(buffer, key1);
 	std::strcat(buffer, key2);
 #if MEM_RJSON_ON
-	if (para.order == memPara::rjson_seriazlize)
+	if (para.order == para::rjson_seriazlize)
 	{
 		char* s = static_cast<char*>(mem->mngr->rjson.allocator->Malloc(strlen(buffer) + 1));
 		strcpy(s, buffer);
@@ -797,14 +801,14 @@ inline void GWPP_sub(memUnit* mem, const char* key1, const char* key2, _T& var, 
 	mem->GWPP(buffer, var, para);
 }
 template<class _T>
-inline std::enable_if_t<mem::memUnit::isGWPPValid<_T>, void>
-memUnit::GWPP(const char* key, _T& var, memPara& para) {
-	static constexpr size_t _subSize = memUnit::getArrayValueTypeSize<_T>();
+inline std::enable_if_t<eb::base::isGWPPValid<_T>, void>
+base::GWPP(const char* key, _T& var, para& para) {
+	static constexpr size_t _subSize = base::getArrayValueTypeSize<_T>();
 	static constexpr size_t _subSizeMin = _subSize > 8 ? 8 : _subSize;
 	switch (para.order)
 	{
-	case memPara::binary_deserialize_memUnit:
-	case memPara::binary_deserialize_memManager:
+	case para::binary_deserialize_base:
+	case para::binary_deserialize_manager:
 		if (lowlevel::findKeyFrom_section(key, para.section.likelyPointer, para.section.startPointer) == true)
 		{
 			uint8_t* holder = para.section.likelyPointer;
@@ -819,8 +823,8 @@ memUnit::GWPP(const char* key, _T& var, memPara& para) {
 			this->mngr->statusBadValue++;
 		}
 		break;
-	case memPara::binary_serialize_memUnit:
-	case memPara::binary_serialize_memManager:
+	case para::binary_serialize_base:
+	case para::binary_serialize_manager:
 	{
 		lowlevel::appendKeyTo_section(key, para.sectionVector);
 		uint32_t offset = para.sectionVector->size();
@@ -833,15 +837,15 @@ memUnit::GWPP(const char* key, _T& var, memPara& para) {
 	}
 		break;
 #if MEM_REFLECTION_ON
-	case memPara::reflection_read:
+	case para::reflection_read:
 		//para.reflection->context.emplace_back(key, var);
 		break;
-	case memPara::reflection_write:
+	case para::reflection_write:
 		//para.reflection_single->WriteMU(key, var, size);
 		break;
 #endif
 #if MEM_RJSON_ON
-	case memPara::rjson_seriazlize:
+	case para::rjson_seriazlize:
 	{
 		rapidjson::Value vlValue;
 		GWPP_Base(&vlValue, var, para);
@@ -849,7 +853,7 @@ memUnit::GWPP(const char* key, _T& var, memPara& para) {
 		para.rapidJson_section->AddMember(jsonKey, vlValue, *this->mngr->rjson.allocator);
 	}
 		break;
-	case memPara::rjson_deseriazlize:
+	case para::rjson_deseriazlize:
 		if (para.rapidJson_section->HasMember(key))
 		{
 			GWPP_Base(&para.rapidJson_section->operator[](key), var, para);
@@ -860,37 +864,37 @@ memUnit::GWPP(const char* key, _T& var, memPara& para) {
 		}
         break;
 #if MEM_MYSQL_ON
-    case memPara::mysql_metadata:
-        if constexpr (mem::memUnit::isMySQLValid<_T>)
+    case para::mysql_metadata:
+        if constexpr (eb::base::isMySQLValid<_T>)
             para.mysql_metadata_v->push_back({key, false});
         break;
-    case memPara::mysql_bind:
-    case memPara::mysql_bind_w:
-        if constexpr (mem::memUnit::isMySQLValid<_T>)
+    case para::mysql_bind:
+    case para::mysql_bind_w:
+        if constexpr (eb::base::isMySQLValid<_T>)
             GWPP_Base(nullptr, var, para);
         break;
-    case memPara::mysql_checksize:
-        if constexpr (mem::memUnit::isMySQLValid<_T>)
+    case para::mysql_checksize:
+        if constexpr (eb::base::isMySQLValid<_T>)
             GWPP_Base(nullptr, var, para);
         break;
 #endif
 #endif
     default:
-        assert(!"unhandled memPara.order");
+        assert(!"unhandled para.order");
         break;
     }
 }
 template<typename _memSub>
-inline std::enable_if_t<mem::has_save_fetch_sub<_memSub>::value, void>
-memUnit::GWPP(const char* key, _memSub& varST, memPara& para)
+inline std::enable_if_t<eb::has_save_fetch_sub<_memSub>::value, void>
+base::GWPP(const char* key, _memSub& varST, para& para)
 {
 	varST.save_fetch_sub(this, key, para);
 }
 #if MEM_MYSQL_ON
-inline void memUnit::SQL_bind(std::vector<memUnit::mysql_meta> &metadata, MYSQL_BIND *read_bind_out, MYSQL_BIND *write_bind_out, size_t *psize)
+inline void base::SQL_bind(std::vector<base::mysql_meta> &metadata, MYSQL_BIND *read_bind_out, MYSQL_BIND *write_bind_out, size_t *psize)
 {
-    mem::memPara para;
-    para.order = memPara::mysql_bind;
+    eb::para para;
+    para.order = para::mysql_bind;
     para.mysql.bind = read_bind_out;
     this->save_fetch(para);
     for (int k = 0; k < metadata.size(); k++)
@@ -913,10 +917,10 @@ inline void memUnit::SQL_bind(std::vector<memUnit::mysql_meta> &metadata, MYSQL_
         i++;
     }
 }
-inline void memUnit::SQL_bind(std::vector<memUnit::mysql_meta> &metadata, MYSQL_BIND *read_bind_out, size_t *psize)
+inline void base::SQL_bind(std::vector<base::mysql_meta> &metadata, MYSQL_BIND *read_bind_out, size_t *psize)
 {
-    mem::memPara para;
-    para.order = memPara::mysql_bind;
+    eb::para para;
+    para.order = para::mysql_bind;
     para.mysql.bind = read_bind_out;
     this->save_fetch(para);
     for (int k = 0; k < metadata.size(); k++)
@@ -928,32 +932,32 @@ inline void memUnit::SQL_bind(std::vector<memUnit::mysql_meta> &metadata, MYSQL_
         }
     }
 }
-inline void memUnit::SQL_bind(MYSQL_BIND *read_bind_out)
+inline void base::SQL_bind(MYSQL_BIND *read_bind_out)
 {
-    mem::memPara para;
-    para.order = memPara::mysql_bind_w;
+    eb::para para;
+    para.order = para::mysql_bind_w;
     para.mysql.bind = read_bind_out;
     this->save_fetch(para);
 }
-inline size_t memUnit::SQL_checkstr(MYSQL_BIND *bind_in)
+inline size_t base::SQL_checkstr(MYSQL_BIND *bind_in)
 {
     if (bind_in == nullptr)
     {
         throw std::invalid_argument("bind_in parameter cannot be null");
     }
     size_t ret = 0;
-    mem::memPara para;
-    para.order = memPara::mysql_checksize;
+    eb::para para;
+    para.order = para::mysql_checksize;
     para.mysql.bind = bind_in;
     para.mysql.resized = &ret;
     this->save_fetch(para);
     return ret;
 }
 template <class _T>
-inline std::enable_if_t<mem::memUnit::isMySQLValid<_T> || mem::has_save_fetch_sub<_T>::value, void>
-memUnit::GWPP_SQL_READ(const char *key, _T &var, memPara &para)
+inline std::enable_if_t<eb::base::isMySQLValid<_T> || eb::has_save_fetch_sub<_T>::value, void>
+base::GWPP_SQL_READ(const char *key, _T &var, para &para)
 {
-    if constexpr (mem::memUnit::isMySQLValid<_T> == false)
+    if constexpr (eb::base::isMySQLValid<_T> == false)
     {
         size_t size = para.mysql_metadata_v->size();
         var.save_fetch_sub(this, key, para);
@@ -966,7 +970,7 @@ memUnit::GWPP_SQL_READ(const char *key, _T &var, memPara &para)
     }
     switch (para.order)
     {
-    case memPara::mysql_metadata:
+    case para::mysql_metadata:
         para.mysql_metadata_v->push_back({key, true});
         break;
     default:
@@ -974,11 +978,11 @@ memUnit::GWPP_SQL_READ(const char *key, _T &var, memPara &para)
         break;
     }
 }
-inline void memUnit::GWPP_SQL_TIME_READ(const char *key, MYSQL_TIME &var, memPara &para)
+inline void base::GWPP_SQL_TIME_READ(const char *key, MYSQL_TIME &var, para &para)
 {
     switch (para.order)
     {
-    case memPara::mysql_metadata:
+    case para::mysql_metadata:
         para.mysql_metadata_v->push_back({key, true});
         break;
     default:
@@ -986,12 +990,12 @@ inline void memUnit::GWPP_SQL_TIME_READ(const char *key, MYSQL_TIME &var, memPar
         break;
     }
 }
-inline void memUnit::GWPP_SQL_TIME(const char* key, MYSQL_TIME& var, memPara& para)
+inline void base::GWPP_SQL_TIME(const char* key, MYSQL_TIME& var, para& para)
 {
 	switch (para.order)
     {
-    case memPara::mysql_bind:
-    case memPara::mysql_bind_w:
+    case para::mysql_bind:
+    case para::mysql_bind_w:
     {
         para.mysql.bind->buffer = &var;
         para.mysql.bind->buffer_type = MYSQL_TYPE_DATETIME;
@@ -999,10 +1003,10 @@ inline void memUnit::GWPP_SQL_TIME(const char* key, MYSQL_TIME& var, memPara& pa
         para.mysql.bind++;
     }
         break;
-    case memPara::mysql_metadata:
+    case para::mysql_metadata:
         para.mysql_metadata_v->push_back({key, false});
         break;
-    case memPara::mysql_checksize:
+    case para::mysql_checksize:
         para.mysql.bind++;
         break;
     default:
@@ -1010,18 +1014,18 @@ inline void memUnit::GWPP_SQL_TIME(const char* key, MYSQL_TIME& var, memPara& pa
     }
 }
 template <typename T>
-inline std::enable_if_t<std::is_base_of<memUnit, T>::value, std::vector<memUnit::mysql_meta>>
-memUnit::get_SQL_metadata()
+inline std::enable_if_t<std::is_base_of<base, T>::value, std::vector<base::mysql_meta>>
+base::get_SQL_metadata()
 {
     T temp = T(nullptr);
-    mem::memPara para;
-    para.order = memPara::mysql_metadata;
+    eb::para para;
+    para.order = para::mysql_metadata;
     std::vector<mysql_meta> metadata;
     para.mysql_metadata_v = &metadata;
     temp.save_fetch(para);
     return metadata;
 }
-inline std::chrono::system_clock::time_point memUnit::SQL_TIME_to_tp(MYSQL_TIME time)
+inline std::chrono::system_clock::time_point base::SQL_TIME_to_tp(MYSQL_TIME time)
 {
     std::tm tm = {};
     tm.tm_year = time.year - 1900;
@@ -1038,7 +1042,7 @@ inline std::chrono::system_clock::time_point memUnit::SQL_TIME_to_tp(MYSQL_TIME 
 
     return timePoint;
 }
-inline MYSQL_TIME memUnit::tp_to_SQL_TIME(std::chrono::system_clock::time_point tp)
+inline MYSQL_TIME base::tp_to_SQL_TIME(std::chrono::system_clock::time_point tp)
 {
     auto micros = std::chrono::duration_cast<std::chrono::microseconds>(tp.time_since_epoch()).count() % 1'000'000;
     std::time_t tt = std::chrono::system_clock::to_time_t(tp);
@@ -1059,44 +1063,44 @@ inline MYSQL_TIME memUnit::tp_to_SQL_TIME(std::chrono::system_clock::time_point 
 }
 #endif
 template<class _subType>
-inline constexpr size_t memUnit::getArrayValueTypeSize() {
+inline constexpr size_t base::getArrayValueTypeSize() {
 	//assert: the size must be less than 8 bytes
 	if constexpr (std::is_arithmetic<_subType>::value || std::is_enum<_subType>::value)
 	{
 		return sizeof(_subType) > 8 ? sizeof(uint32_t) : sizeof(_subType); //min
 	}
-	else if constexpr (std::is_array<_subType>::value || mem::is_stl_container<_subType>::value || mem::is_string<_subType>::value)
+	else if constexpr (std::is_array<_subType>::value || eb::is_stl_container<_subType>::value || eb::is_string<_subType>::value)
 	{
 		return sizeof(uint32_t);
 	}
-	else if constexpr (mem::is_variant<_subType>::value)
+	else if constexpr (eb::is_variant<_subType>::value)
 	{
 		return sizeof(variantOfFile);
 	}
-	else if constexpr (mem::is_pair<_subType>::value)
+	else if constexpr (eb::is_pair<_subType>::value)
 	{
 		return sizeof(pairOfFile);
 	}
-	else if constexpr (mem::is_optional<_subType>::value)
+	else if constexpr (eb::is_optional<_subType>::value)
 	{
 		return sizeof(optionalOfFile);
 	}
-	else if constexpr (mem::has_save_fetch_struct<_subType>::value)
+	else if constexpr (eb::has_save_fetch_struct<_subType>::value)
 	{
 		return _subType::save_fetch_size > 8 ? sizeof(uint32_t) : _subType::save_fetch_size; //min
 	}
-	else if constexpr (mem::is_impPtr<_subType>::value || mem::is_memPtr<_subType>::value)
+	else if constexpr (eb::is_impPtr<_subType>::value || eb::is_memPtr<_subType>::value)
 	{
 		return sizeof(void*);
 	}
-	else if constexpr (mem::is_atomic<_subType>::value)
+	else if constexpr (eb::is_atomic<_subType>::value)
 	{
-		using underType = typename mem::atomic_under_type<_subType>::type;
+		using underType = typename eb::atomic_under_type<_subType>::type;
 		return getArrayValueTypeSize<underType>();
 	}
-	else if constexpr (mem::is_chrono<_subType>::value)
+	else if constexpr (eb::is_chrono<_subType>::value)
 	{
-		using underType = typename mem::chrono_under_type<_subType>::type;
+		using underType = typename eb::chrono_under_type<_subType>::type;
 		return getArrayValueTypeSize<underType>();
 	}
 	else
@@ -1107,11 +1111,11 @@ inline constexpr size_t memUnit::getArrayValueTypeSize() {
 }
 template<class _arit>
 inline std::enable_if_t<std::is_arithmetic<_arit>::value, void>
-memUnit::GWPP_Base(void* pValue, _arit& var, memPara& para) {
+base::GWPP_Base(void* pValue, _arit& var, para& para) {
 	switch (para.order)
 	{
-	case memPara::binary_deserialize_memUnit:
-	case memPara::binary_deserialize_memManager:
+	case para::binary_deserialize_base:
+	case para::binary_deserialize_manager:
 	{
 		uint8_t* dataPointer = (uint8_t*)pValue;
 		if (lowlevel::BytesTo_mem(var, dataPointer, this->mngr->binSeri.start, this->mngr->binSeri.end) == false)
@@ -1120,23 +1124,23 @@ memUnit::GWPP_Base(void* pValue, _arit& var, memPara& para) {
 		}
 	}
 		break;
-	case memPara::binary_serialize_memUnit:
-	case memPara::binary_serialize_memManager:
+	case para::binary_serialize_base:
+	case para::binary_serialize_manager:
 	{
 		std::vector<uint8_t>* dataVector = (std::vector<uint8_t>*)pValue;
 		lowlevel::mem_toBytes(var, dataVector, this->mngr->binSeri.bytes);
 	}
 		break;
 #if MEM_REFLECTION_ON
-	case memPara::reflection_read:
+	case para::reflection_read:
 		//para.reflection->context.emplace_back(key, var);
 		break;
-	case memPara::reflection_write:
+	case para::reflection_write:
 		//para.reflection_single->WriteMU(key, var, size);
 		break;
 #endif
 #if MEM_RJSON_ON
-	case memPara::rjson_seriazlize:
+	case para::rjson_seriazlize:
 	{
 		rapidjson::Value* vlValue = (rapidjson::Value*)pValue;
 		if constexpr (std::is_same_v<_arit, bool>) {
@@ -1173,7 +1177,7 @@ memUnit::GWPP_Base(void* pValue, _arit& var, memPara& para) {
 		}
 	}
 		break;
-	case memPara::rjson_deseriazlize:
+	case para::rjson_deseriazlize:
 	{
 		rapidjson::Value* vlValue = (rapidjson::Value*)pValue;
 		if constexpr (std::is_same_v<_arit, bool>) {
@@ -1221,11 +1225,11 @@ memUnit::GWPP_Base(void* pValue, _arit& var, memPara& para) {
 	break;
 #endif
 #if MEM_MYSQL_ON
-    case memPara::mysql_checksize:
+    case para::mysql_checksize:
         para.mysql.bind++;
         break;
-    case memPara::mysql_bind:
-    case memPara::mysql_bind_w:
+    case para::mysql_bind:
+    case para::mysql_bind_w:
         para.mysql.bind->buffer = &var;
         if constexpr (std::is_same_v<_arit, bool>)
         {
@@ -1274,15 +1278,15 @@ memUnit::GWPP_Base(void* pValue, _arit& var, memPara& para) {
 	}
 }
 template<class _array>
-inline std::enable_if_t <std::is_array<_array>::value && mem::memUnit::isGWPPValid<typename std::remove_extent<_array>::type>, void>
-memUnit::GWPP_Base(void* pValue, _array& var, memPara& para) {
+inline std::enable_if_t <std::is_array<_array>::value && eb::base::isGWPPValid<typename std::remove_extent<_array>::type>, void>
+base::GWPP_Base(void* pValue, _array& var, para& para) {
 	using _subType = typename std::remove_extent<_array>::type;
-	static constexpr size_t _subSize = memUnit::getArrayValueTypeSize<_subType>();
+	static constexpr size_t _subSize = base::getArrayValueTypeSize<_subType>();
 	static constexpr size_t _arrLength = std::extent<_array>::value;
 	switch (para.order)
 	{
-	case memPara::binary_deserialize_memUnit:
-	case memPara::binary_deserialize_memManager:
+	case para::binary_deserialize_base:
+	case para::binary_deserialize_manager:
 	{
 		uint8_t* dataPointer = (uint8_t*)pValue;
 		uint8_t* vecData;
@@ -1301,8 +1305,8 @@ memUnit::GWPP_Base(void* pValue, _array& var, memPara& para) {
 		}
 	}
 		break;
-	case memPara::binary_serialize_memUnit:
-	case memPara::binary_serialize_memManager:
+	case para::binary_serialize_base:
+	case para::binary_serialize_manager:
 	{
 		std::vector<uint8_t> vecData;
 		for (int iter = 0; iter < _arrLength; iter++)
@@ -1317,15 +1321,15 @@ memUnit::GWPP_Base(void* pValue, _array& var, memPara& para) {
 	}
 		break;
 #if MEM_REFLECTION_ON
-	case memPara::reflection_read:
+	case para::reflection_read:
 		//para.reflection->context.emplace_back(key, var);
 		break;
-	case memPara::reflection_write:
+	case para::reflection_write:
 		//para.reflection_single->WriteMU(key, var, size);
 		break;
 #endif
 #if MEM_RJSON_ON
-	case memPara::rjson_seriazlize:
+	case para::rjson_seriazlize:
 	{
 		rapidjson::Value* vlValue = (rapidjson::Value*)pValue;
 		*vlValue = rapidjson::kArrayType;
@@ -1337,7 +1341,7 @@ memUnit::GWPP_Base(void* pValue, _array& var, memPara& para) {
 		}
 	}
 		break;
-	case memPara::rjson_deseriazlize:
+	case para::rjson_deseriazlize:
 	{
 		rapidjson::Value* vlValue = (rapidjson::Value*)pValue;
 		if (vlValue->IsArray() == true)
@@ -1356,8 +1360,8 @@ memUnit::GWPP_Base(void* pValue, _array& var, memPara& para) {
 		break;
 #endif
 #if MEM_MYSQL_ON
-    case memPara::mysql_bind:
-    case memPara::mysql_bind_w:
+    case para::mysql_bind:
+    case para::mysql_bind_w:
         if constexpr (std::is_same_v<_subType, char>)
         {
             para.mysql.bind->buffer = var;
@@ -1366,7 +1370,7 @@ memUnit::GWPP_Base(void* pValue, _array& var, memPara& para) {
             para.mysql.bind++;
         }
         break;
-    case memPara::mysql_checksize:
+    case para::mysql_checksize:
         if constexpr (std::is_same_v<_subType, char>)
             para.mysql.bind++;
         break;
@@ -1374,14 +1378,14 @@ memUnit::GWPP_Base(void* pValue, _array& var, memPara& para) {
 	}
 }
 template<class _stlCont>
-inline std::enable_if_t<mem::is_stl_container<_stlCont>::value, void>
-memUnit::GWPP_Base(void* pValue, _stlCont& var, memPara& para) {
+inline std::enable_if_t<eb::is_stl_container<_stlCont>::value, void>
+base::GWPP_Base(void* pValue, _stlCont& var, para& para) {
 	using _subType = typename _stlCont::value_type;
-	static constexpr size_t _subSize = memUnit::getArrayValueTypeSize<_subType>();
+	static constexpr size_t _subSize = base::getArrayValueTypeSize<_subType>();
 	switch (para.order)
 	{
-	case memPara::binary_deserialize_memUnit:
-	case memPara::binary_deserialize_memManager:
+	case para::binary_deserialize_base:
+	case para::binary_deserialize_manager:
 	{
 		var = _stlCont();
 		uint8_t* dataPointer = (uint8_t*)pValue;
@@ -1389,7 +1393,7 @@ memUnit::GWPP_Base(void* pValue, _stlCont& var, memPara& para) {
 		uint32_t vecSize;
 		if (lowlevel::BytesTo_mem(vecData, vecSize, dataPointer, this->mngr->binSeri.start, this->mngr->binSeri.end) == true)
 		{
-			if constexpr (mem::is_array<_stlCont>::value)
+			if constexpr (eb::is_array<_stlCont>::value)
 			{
 				size_t len = std::min((size_t)vecSize / _subSize, var.size());
 				for (int iter = 0; iter < len; iter++)
@@ -1401,7 +1405,7 @@ memUnit::GWPP_Base(void* pValue, _stlCont& var, memPara& para) {
 			else
 			{
 				size_t&& len = vecSize / _subSize;
-				if constexpr (mem::is_forward_list<_stlCont>::value)
+				if constexpr (eb::is_forward_list<_stlCont>::value)
 				{
 					for (int iter = len - 1; iter >= 0; iter--)
 					{
@@ -1409,7 +1413,7 @@ memUnit::GWPP_Base(void* pValue, _stlCont& var, memPara& para) {
 						this->GWPP_Base(vecData + iter * _subSize, subVar, para);
 					}
 				}
-				else if constexpr (mem::has_emplace_back<_stlCont>::value)
+				else if constexpr (eb::has_emplace_back<_stlCont>::value)
 				{
 					for (int iter = 0; iter < len; iter++)
 					{
@@ -1418,11 +1422,11 @@ memUnit::GWPP_Base(void* pValue, _stlCont& var, memPara& para) {
 						this->GWPP_Base(vecData + iter * _subSize, subVar, para);
 					}
 				}
-				else if constexpr (mem::has_emplace<_stlCont>::value)
+				else if constexpr (eb::has_emplace<_stlCont>::value)
 				{
 					for (int iter = 0; iter < len; iter++)
 					{
-						if constexpr (mem::is_pair<_subType>::value)
+						if constexpr (eb::is_pair<_subType>::value)
 						{
 							std::pair<typename std::decay_t<typename _subType::first_type>, typename _subType::second_type> subPair;
 							this->GWPP_Base(vecData + iter * _subSize, subPair, para);
@@ -1448,13 +1452,13 @@ memUnit::GWPP_Base(void* pValue, _stlCont& var, memPara& para) {
 		}
 	}
 		break;
-	case memPara::binary_serialize_memUnit:
-	case memPara::binary_serialize_memManager:
+	case para::binary_serialize_base:
+	case para::binary_serialize_manager:
 	{
 		std::vector<uint8_t> vecData;
 		for (const _subType& element : var)
 		{
-			if constexpr (mem::is_pair<_subType>::value)
+			if constexpr (eb::is_pair<_subType>::value)
 				this->GWPP_Base(&vecData, (std::pair<typename std::decay_t<typename _subType::first_type>, typename _subType::second_type>&)element, para);
 			else
 				this->GWPP_Base(&vecData, (_subType&)element, para);
@@ -1466,22 +1470,22 @@ memUnit::GWPP_Base(void* pValue, _stlCont& var, memPara& para) {
 	}
 		break;
 #if MEM_REFLECTION_ON
-	case memPara::reflection_read:
+	case para::reflection_read:
 		//para.reflection->context.emplace_back(key, var);
 		break;
-	case memPara::reflection_write:
+	case para::reflection_write:
 		//para.reflection_single->WriteMU(key, var, size);
 		break;
 #endif
 #if MEM_RJSON_ON
-	case memPara::rjson_seriazlize:
+	case para::rjson_seriazlize:
 	{
 		rapidjson::Value* vlValue = (rapidjson::Value*)pValue;
 		*vlValue = rapidjson::kArrayType;
 		for (const _subType& element : var)
 		{
 			rapidjson::Value vlArr;
-			if constexpr (mem::is_pair<_subType>::value)
+			if constexpr (eb::is_pair<_subType>::value)
 				this->GWPP_Base(&vlArr, (std::pair<typename std::decay_t<typename _subType::first_type>, typename _subType::second_type>&)element, para);
 			else
 				this->GWPP_Base(&vlArr, (_subType&)element, para);
@@ -1489,13 +1493,13 @@ memUnit::GWPP_Base(void* pValue, _stlCont& var, memPara& para) {
 		}
 	}
 	break;
-	case memPara::rjson_deseriazlize:
+	case para::rjson_deseriazlize:
 	{
 		var = _stlCont();
 		rapidjson::Value* vlValue = (rapidjson::Value*)pValue;
 		if (vlValue->IsArray() == true)
 		{
-			if constexpr (mem::is_array<_stlCont>::value)
+			if constexpr (eb::is_array<_stlCont>::value)
 			{
 				size_t len = std::min((size_t)vlValue->Size(), var.size());
 				for (int iter = 0; iter < len; iter++)
@@ -1507,7 +1511,7 @@ memUnit::GWPP_Base(void* pValue, _stlCont& var, memPara& para) {
 			else
 			{
 				size_t&& len = (size_t)vlValue->Size();
-				if constexpr (mem::is_forward_list<_stlCont>::value)
+				if constexpr (eb::is_forward_list<_stlCont>::value)
 				{
 					for (int iter = len - 1; iter >= 0; iter--)
 					{
@@ -1515,7 +1519,7 @@ memUnit::GWPP_Base(void* pValue, _stlCont& var, memPara& para) {
 						this->GWPP_Base(&vlValue->operator[](iter), subVar, para);
 					}
 				}
-				else if constexpr (mem::has_emplace_back<_stlCont>::value)
+				else if constexpr (eb::has_emplace_back<_stlCont>::value)
 				{
 					for (int iter = 0; iter < len; iter++)
 					{
@@ -1524,11 +1528,11 @@ memUnit::GWPP_Base(void* pValue, _stlCont& var, memPara& para) {
 						this->GWPP_Base(&vlValue->operator[](iter), subVar, para);
 					}
 				}
-				else if constexpr (mem::has_emplace<_stlCont>::value)
+				else if constexpr (eb::has_emplace<_stlCont>::value)
 				{
 					for (int iter = 0; iter < len; iter++)
 					{
-						if constexpr (mem::is_pair<_subType>::value)
+						if constexpr (eb::is_pair<_subType>::value)
 						{
 							std::pair<typename std::decay_t<typename _subType::first_type>, typename _subType::second_type> subPair;
 							this->GWPP_Base(&vlValue->operator[](iter), subPair, para);
@@ -1558,27 +1562,27 @@ memUnit::GWPP_Base(void* pValue, _stlCont& var, memPara& para) {
 	}
 }
 template<class _atom>
-inline std::enable_if_t<mem::is_atomic<_atom>::value, void>
-memUnit::GWPP_Base(void* pValue, _atom& var, memPara& para) {
-	using underType = typename mem::atomic_under_type<_atom>::type;
-	static_assert(mem::memUnit::isGWPPValid<underType>, "TYPE ERROR: std::atomic<> template typename unsupported.");
+inline std::enable_if_t<eb::is_atomic<_atom>::value, void>
+base::GWPP_Base(void* pValue, _atom& var, para& para) {
+	using underType = typename eb::atomic_under_type<_atom>::type;
+	static_assert(eb::base::isGWPPValid<underType>, "TYPE ERROR: std::atomic<> template typename unsupported.");
 	static_assert(!std::is_void<underType>::value, "TYPE ERROR: std::atomic<> template unexpected void.");
 	switch (para.order)
 	{
-	case memPara::binary_serialize_memUnit:
-	case memPara::binary_serialize_memManager:
+	case para::binary_serialize_base:
+	case para::binary_serialize_manager:
 #if MEM_RJSON_ON
-	case memPara::rjson_seriazlize:
+	case para::rjson_seriazlize:
 #endif
 	{
 		underType buffer = var.load();
 		GWPP_Base(pValue, buffer, para);
 	}
 		break;
-	case memPara::binary_deserialize_memUnit:
-	case memPara::binary_deserialize_memManager:
+	case para::binary_deserialize_base:
+	case para::binary_deserialize_manager:
 #if MEM_RJSON_ON
-	case memPara::rjson_deseriazlize:
+	case para::rjson_deseriazlize:
 #endif
 	{
 		underType buffer;
@@ -1587,36 +1591,45 @@ memUnit::GWPP_Base(void* pValue, _atom& var, memPara& para) {
 	}
 		break;
 #if MEM_REFLECTION_ON
-	case memPara::reflection_read:
+	case para::reflection_read:
 		//para.reflection->context.emplace_back(key, var);
 		break;
-	case memPara::reflection_write:
+	case para::reflection_write:
 		//para.reflection_single->WriteMU(key, var, size);
 		break;
 #endif
 	}
 }
 template<class _chrono>
-inline std::enable_if_t<mem::is_chrono<_chrono>::value, void>
-memUnit::GWPP_Base(void* pValue, _chrono& var, memPara& para)
+inline std::enable_if_t<eb::is_chrono<_chrono>::value, void>
+base::GWPP_Base(void* pValue, _chrono& var, para& para)
 {
-	using underType = typename mem::chrono_under_type<_chrono>::type;
-	using isSpecial = typename mem::is_system_clock_time_point<_chrono>;	//system clock timepoint has a special json expression than common chrono
-	using isDuration = typename mem::is_chrono_duration<_chrono>;
-	using isTimepoint = typename mem::is_chrono_timepoint<_chrono>;
+	using json_const::json_time_mode;
+	using json_const::json_time_mode_t;
+	using json_const::json_year;
+	using json_const::json_month;
+	using json_const::json_day;
+	using json_const::json_date;
+	using json_const::json_hour;
+	using json_const::json_minute;
+	using json_const::json_secondT;
+	using underType = typename eb::chrono_under_type<_chrono>::type;
+	using isSpecial = typename eb::is_system_clock_time_point<_chrono>;	//system clock timepoint has a special json expression than common chrono
+	using isDuration = typename eb::is_chrono_duration<_chrono>;
+	using isTimepoint = typename eb::is_chrono_timepoint<_chrono>;
 	static_assert(!std::is_void<underType>::value, "TYPE ERROR: std::chrono<> template unexpected void.");
 	switch (para.order)
 	{
-	case memPara::binary_serialize_memUnit:
-	case memPara::binary_serialize_memManager:
+	case para::binary_serialize_base:
+	case para::binary_serialize_manager:
 #if MEM_RJSON_ON
-	case memPara::rjson_seriazlize:
+	case para::rjson_seriazlize:
 #endif
 	{
 #if MEM_RJSON_ON
 		if constexpr (isSpecial::value)
 		{
-			if (para.order == memPara::rjson_seriazlize)
+			if (para.order == para::rjson_seriazlize)
 			{
 				rapidjson::Value* vlValue = (rapidjson::Value*)pValue;
 				switch (json_time_mode)
@@ -1695,16 +1708,16 @@ memUnit::GWPP_Base(void* pValue, _chrono& var, memPara& para)
 		GWPP_Base(pValue, buffer, para);
 	}
 	break;
-	case memPara::binary_deserialize_memUnit:
-	case memPara::binary_deserialize_memManager:
+	case para::binary_deserialize_base:
+	case para::binary_deserialize_manager:
 #if MEM_RJSON_ON
-	case memPara::rjson_deseriazlize:
+	case para::rjson_deseriazlize:
 #endif
 	{
 #if MEM_RJSON_ON
 		if constexpr (isSpecial::value)
 		{
-			if (para.order == memPara::rjson_deseriazlize)
+			if (para.order == para::rjson_deseriazlize)
 			{
 				rapidjson::Value* vlValue = (rapidjson::Value*)pValue;
 				switch (json_time_mode)
@@ -1826,24 +1839,24 @@ memUnit::GWPP_Base(void* pValue, _chrono& var, memPara& para)
 	}
 	break;
 #if MEM_REFLECTION_ON
-	case memPara::reflection_read:
+	case para::reflection_read:
 		//para.reflection->context.emplace_back(key, var);
 		break;
-	case memPara::reflection_write:
+	case para::reflection_write:
 		//para.reflection_single->WriteMU(key, var, size);
 		break;
 #endif
 	}
 }
 template<class _string>
-inline std::enable_if_t<mem::is_string<_string>::value, void>
-memUnit::GWPP_Base(void* pValue, _string& var, memPara& para) {
-	using _subType = typename mem::is_string<_string>::base_type;
-	static constexpr size_t _subSize = mem::is_string<_string>::byteSize;
+inline std::enable_if_t<eb::is_string<_string>::value, void>
+base::GWPP_Base(void* pValue, _string& var, para& para) {
+	using _subType = typename eb::is_string<_string>::base_type;
+	static constexpr size_t _subSize = eb::is_string<_string>::byteSize;
 	switch (para.order)
 	{
-	case memPara::binary_deserialize_memUnit:
-	case memPara::binary_deserialize_memManager:
+	case para::binary_deserialize_base:
+	case para::binary_deserialize_manager:
 	{
 		uint8_t* dataPointer = (uint8_t*)pValue;
 		uint8_t* vecData;
@@ -1859,8 +1872,8 @@ memUnit::GWPP_Base(void* pValue, _string& var, memPara& para) {
 		}
 	}
 		break;
-	case memPara::binary_serialize_memUnit:
-	case memPara::binary_serialize_memManager:
+	case para::binary_serialize_base:
+	case para::binary_serialize_manager:
 	{
 		std::vector<uint8_t>* dataVector = (std::vector<uint8_t>*)pValue;
 		uint32_t offset;
@@ -1869,15 +1882,15 @@ memUnit::GWPP_Base(void* pValue, _string& var, memPara& para) {
 	}
 		break;
 #if MEM_REFLECTION_ON
-	case memPara::reflection_read:
+	case para::reflection_read:
 		//para.reflection->context.emplace_back(key, var);
 		break;
-	case memPara::reflection_write:
+	case para::reflection_write:
 		//para.reflection_single->WriteMU(key, var, size);
 		break;
 #endif
 #if MEM_RJSON_ON
-	case memPara::rjson_seriazlize:
+	case para::rjson_seriazlize:
 	{
 		rapidjson::Value* vlValue = (rapidjson::Value*)pValue;
 		std::string csValue;
@@ -1900,7 +1913,7 @@ memUnit::GWPP_Base(void* pValue, _string& var, memPara& para) {
 		vlValue->SetString(csValue.c_str(), *this->mngr->rjson.allocator);
 	}
 	break;
-	case memPara::rjson_deseriazlize:
+	case para::rjson_deseriazlize:
 	{
 		rapidjson::Value* vlValue = (rapidjson::Value*)pValue;
 		if (vlValue->IsString()) {
@@ -1930,18 +1943,18 @@ memUnit::GWPP_Base(void* pValue, _string& var, memPara& para) {
 	break;
 #endif
 #if MEM_MYSQL_ON
-    case memPara::mysql_bind:
-    case memPara::mysql_bind_w:
+    case para::mysql_bind:
+    case para::mysql_bind_w:
         if (var.size() == 0)
             var.resize(1);
         para.mysql.bind->buffer = (void *)var.data();
         para.mysql.bind->buffer_type = MYSQL_TYPE_MEDIUM_BLOB;
         para.mysql.bind->buffer_length = (var.size() * sizeof(_subType));
-        if (para.order == memPara::mysql_bind)
+        if (para.order == para::mysql_bind)
             para.mysql.bind->length = (size_t *)(var.size() * sizeof(_subType));
         para.mysql.bind++;
         break;
-    case memPara::mysql_checksize:
+    case para::mysql_checksize:
         if ((*para.mysql.bind->length) / sizeof(_subType) > var.size())
         {
             para.mysql.bind->buffer_length = *para.mysql.bind->length;
@@ -1956,35 +1969,35 @@ memUnit::GWPP_Base(void* pValue, _string& var, memPara& para) {
 }
 template<class _enum>
 inline std::enable_if_t<std::is_enum<_enum>::value, void>
-memUnit::GWPP_Base(void* pValue, _enum& var, memPara& para) {
+base::GWPP_Base(void* pValue, _enum& var, para& para) {
 	switch (para.order)
 	{
-	case memPara::binary_deserialize_memUnit:
-	case memPara::binary_deserialize_memManager:
-	case memPara::binary_serialize_memUnit:
-	case memPara::binary_serialize_memManager:
+	case para::binary_deserialize_base:
+	case para::binary_deserialize_manager:
+	case para::binary_serialize_base:
+	case para::binary_serialize_manager:
 #if MEM_RJSON_ON
-	case memPara::rjson_seriazlize:
-	case memPara::rjson_deseriazlize:
+	case para::rjson_seriazlize:
+	case para::rjson_deseriazlize:
 #endif
 		GWPP_Base(pValue, reinterpret_cast<typename std::underlying_type<_enum>::type&>(var), para);
 		break;
 #if MEM_REFLECTION_ON
-	case memPara::reflection_read:
+	case para::reflection_read:
 		//para.reflection->context.emplace_back(key, var);
 		break;
-	case memPara::reflection_write:
+	case para::reflection_write:
 		//para.reflection_single->WriteMU(key, var, size);
 		break;
 #endif
 	}
 }
 template<class T>
-inline void memUnit::GWPP_Base(void* pValue, std::optional<T>& var, memPara& para) {
+inline void base::GWPP_Base(void* pValue, std::optional<T>& var, para& para) {
 	switch (para.order)
 	{
-	case memPara::binary_deserialize_memUnit:
-	case memPara::binary_deserialize_memManager:
+	case para::binary_deserialize_base:
+	case para::binary_deserialize_manager:
 	{
 		optionalOfFile* dataPointer = (optionalOfFile*)pValue;
 		if (dataPointer->offset != 0)
@@ -2005,8 +2018,8 @@ inline void memUnit::GWPP_Base(void* pValue, std::optional<T>& var, memPara& par
 		}
 	}
 	break;
-	case memPara::binary_serialize_memUnit:
-	case memPara::binary_serialize_memManager:
+	case para::binary_serialize_base:
+	case para::binary_serialize_manager:
 	{
 		std::vector<uint8_t>* dataVector = (std::vector<uint8_t>*)pValue;
 		if (var.has_value())
@@ -2024,15 +2037,15 @@ inline void memUnit::GWPP_Base(void* pValue, std::optional<T>& var, memPara& par
 	}
 	break;
 #if MEM_REFLECTION_ON
-	case memPara::reflection_read:
+	case para::reflection_read:
 		//para.reflection->context.emplace_back(key, var);
 		break;
-	case memPara::reflection_write:
+	case para::reflection_write:
 		//para.reflection_single->WriteMU(key, var, size);
 		break;
 #endif
 #if MEM_RJSON_ON
-	case memPara::rjson_seriazlize:
+	case para::rjson_seriazlize:
 	{
 		rapidjson::Value* vlValue = (rapidjson::Value*)pValue;
 		if (var.has_value())
@@ -2045,7 +2058,7 @@ inline void memUnit::GWPP_Base(void* pValue, std::optional<T>& var, memPara& par
 		}
 	}
 	break;
-	case memPara::rjson_deseriazlize:
+	case para::rjson_deseriazlize:
 	{
 		rapidjson::Value* vlValue = (rapidjson::Value*)pValue;
 		if (vlValue->IsNull() == false)
@@ -2065,11 +2078,13 @@ inline void memUnit::GWPP_Base(void* pValue, std::optional<T>& var, memPara& par
 	}
 }
 template<class...Args>
-inline void memUnit::GWPP_Base(void* pValue, std::variant<Args...>& var, memPara& para) {
+inline void base::GWPP_Base(void* pValue, std::variant<Args...>& var, para& para) {
+	using json_const::json_type;
+	using json_const::json_value;
 	switch (para.order)
 	{
-	case memPara::binary_deserialize_memUnit:
-	case memPara::binary_deserialize_memManager:
+	case para::binary_deserialize_base:
+	case para::binary_deserialize_manager:
 	{
 		variantOfFile* dataPointer = (variantOfFile*)pValue;
 		uint8_t* valuePos;
@@ -2083,8 +2098,8 @@ inline void memUnit::GWPP_Base(void* pValue, std::variant<Args...>& var, memPara
 		this->mngr->statusBadValue++;
 	}
 		break;
-	case memPara::binary_serialize_memUnit:
-	case memPara::binary_serialize_memManager:
+	case para::binary_serialize_base:
+	case para::binary_serialize_manager:
 	{
 		std::vector<uint8_t> vecData;
 		std::visit([&](auto&& arg) {
@@ -2098,15 +2113,15 @@ inline void memUnit::GWPP_Base(void* pValue, std::variant<Args...>& var, memPara
 	}
 		break;
 #if MEM_REFLECTION_ON
-	case memPara::reflection_read:
+	case para::reflection_read:
 		//para.reflection->context.emplace_back(key, var);
 		break;
-	case memPara::reflection_write:
+	case para::reflection_write:
 		//para.reflection_single->WriteMU(key, var, size);
 		break;
 #endif
 #if MEM_RJSON_ON
-	case memPara::rjson_seriazlize:
+	case para::rjson_seriazlize:
 	{
 		rapidjson::Value* vlValue = (rapidjson::Value*)pValue;
 		rapidjson::Value type, value;
@@ -2121,7 +2136,7 @@ inline void memUnit::GWPP_Base(void* pValue, std::variant<Args...>& var, memPara
 		vlValue->AddMember(jsonKeyValue, value, *this->mngr->rjson.allocator);
 	}
 	break;
-	case memPara::rjson_deseriazlize:
+	case para::rjson_deseriazlize:
 	{
 		rapidjson::Value* vlValue = (rapidjson::Value*)pValue;
 		if (vlValue->IsObject())
@@ -2147,11 +2162,13 @@ inline void memUnit::GWPP_Base(void* pValue, std::variant<Args...>& var, memPara
 	}
 }
 template<class T1, class T2>
-inline void memUnit::GWPP_Base(void* pValue, std::pair<T1, T2>& var, memPara& para) {
+inline void base::GWPP_Base(void* pValue, std::pair<T1, T2>& var, para& para) {
+	using json_const::json_first;
+	using json_const::json_second;
 	switch (para.order)
 	{
-	case memPara::binary_deserialize_memUnit:
-	case memPara::binary_deserialize_memManager:
+	case para::binary_deserialize_base:
+	case para::binary_deserialize_manager:
 	{
 		pairOfFile* dataPointer = (pairOfFile*)pValue;
 		//uint32_t& index = dataPointer->sizeOfFirst;
@@ -2166,8 +2183,8 @@ inline void memUnit::GWPP_Base(void* pValue, std::pair<T1, T2>& var, memPara& pa
 		this->mngr->statusBadValue++;
 	}
 	break;
-	case memPara::binary_serialize_memUnit:
-	case memPara::binary_serialize_memManager:
+	case para::binary_serialize_base:
+	case para::binary_serialize_manager:
 	{
 		std::vector<uint8_t> vecData;
 		this->GWPP_Base(&vecData, var.first, para);
@@ -2181,15 +2198,15 @@ inline void memUnit::GWPP_Base(void* pValue, std::pair<T1, T2>& var, memPara& pa
 	}
 	break;
 #if MEM_REFLECTION_ON
-	case memPara::reflection_read:
+	case para::reflection_read:
 		//para.reflection->context.emplace_back(key, var);
 		break;
-	case memPara::reflection_write:
+	case para::reflection_write:
 		//para.reflection_single->WriteMU(key, var, size);
 		break;
 #endif
 #if MEM_RJSON_ON
-	case memPara::rjson_seriazlize:
+	case para::rjson_seriazlize:
 	{
 		rapidjson::Value* vlValue = (rapidjson::Value*)pValue;
 		rapidjson::Value first, second;
@@ -2202,7 +2219,7 @@ inline void memUnit::GWPP_Base(void* pValue, std::pair<T1, T2>& var, memPara& pa
 		vlValue->AddMember(jsonKeySecond, second, *this->mngr->rjson.allocator);
 	}
 	break;
-	case memPara::rjson_deseriazlize:
+	case para::rjson_deseriazlize:
 	{
 		rapidjson::Value* vlValue = (rapidjson::Value*)pValue;
 		if (vlValue->IsObject())
@@ -2224,12 +2241,12 @@ inline void memUnit::GWPP_Base(void* pValue, std::pair<T1, T2>& var, memPara& pa
 }
 }
 template<typename _memStruct>
-inline std::enable_if_t<mem::has_save_fetch_struct<_memStruct>::value, void>
-memUnit::GWPP_Base(void* pValue, _memStruct& varST, memPara& para) {
+inline std::enable_if_t<eb::has_save_fetch_struct<_memStruct>::value, void>
+base::GWPP_Base(void* pValue, _memStruct& varST, para& para) {
 	switch (para.order)
 	{
-	case memPara::binary_deserialize_memUnit:
-	case memPara::binary_deserialize_memManager:
+	case para::binary_deserialize_base:
+	case para::binary_deserialize_manager:
 	{
 		uint8_t* dataPointer = (uint8_t*)pValue;
 		if constexpr (_memStruct::save_fetch_size > 8)	//long value
@@ -2252,8 +2269,8 @@ memUnit::GWPP_Base(void* pValue, _memStruct& varST, memPara& para) {
 		}
 	}
 		break;
-	case memPara::binary_serialize_memUnit:
-	case memPara::binary_serialize_memManager:
+	case para::binary_serialize_base:
+	case para::binary_serialize_manager:
 	{
 		std::vector<uint8_t>* dataVector = (std::vector<uint8_t>*)pValue;
 		if constexpr (_memStruct::save_fetch_size > 8)	//long value
@@ -2271,15 +2288,15 @@ memUnit::GWPP_Base(void* pValue, _memStruct& varST, memPara& para) {
 	}
 		break;
 #if MEM_REFLECTION_ON
-	case memPara::reflection_read:
+	case para::reflection_read:
 		//para.reflection->context.emplace_back(key, var);
 		break;
-	case memPara::reflection_write:
+	case para::reflection_write:
 		//para.reflection_single->WriteMU(key, var, size);
 		break;
 #endif
 #if MEM_RJSON_ON
-	case memPara::rjson_seriazlize:
+	case para::rjson_seriazlize:
 	{
 		rapidjson::Value* vlValue = (rapidjson::Value*)pValue;
 		std::string base64;
@@ -2289,7 +2306,7 @@ memUnit::GWPP_Base(void* pValue, _memStruct& varST, memPara& para) {
 		vlValue->SetString(base64.c_str(), *this->mngr->rjson.allocator);
 	}
 	break;
-	case memPara::rjson_deseriazlize:
+	case para::rjson_deseriazlize:
 	{
 		rapidjson::Value* vlValue = (rapidjson::Value*)pValue;
 		if (vlValue->IsString())
@@ -2309,20 +2326,20 @@ memUnit::GWPP_Base(void* pValue, _memStruct& varST, memPara& para) {
 	}
 }
 template<typename _mu, bool _r>
-inline void memUnit::GWPP_Base(void* pValue, impPtr<_mu, _r>& var, memPara& para) {
+inline void base::GWPP_Base(void* pValue, impPtr<_mu, _r>& var, para& para) {
 	switch (para.order)
 	{
 #if MEM_RJSON_ON
-	case memPara::rjson_seriazlize:
-	case memPara::rjson_deseriazlize:
+	case para::rjson_seriazlize:
+	case para::rjson_deseriazlize:
 #endif
-	case memPara::binary_deserialize_memUnit:
-	case memPara::binary_serialize_memUnit:			//do nothing
+	case para::binary_deserialize_base:
+	case para::binary_serialize_base:			//do nothing
 		break;
-	case memPara::binary_deserialize_memManager:
+	case para::binary_deserialize_manager:
 	{
 		uint8_t* dataPointer = (uint8_t*)pValue;
-		memUnit* varMU;
+		base* varMU;
 		if (lowlevel::BytesTo_mem(varMU, dataPointer, this->mngr->binSeri.start, this->mngr->binSeri.end) == false)
 		{
 			this->mngr->statusBadValue++;
@@ -2344,10 +2361,10 @@ inline void memUnit::GWPP_Base(void* pValue, impPtr<_mu, _r>& var, memPara& para
 		}
 	}
 		break;
-	case memPara::binary_serialize_memManager:
+	case para::binary_serialize_manager:
 	{
 		if (var.isEmpty())return;
-		assert((var->mngr == this->mngr) || !("Serialize Assert False: memUnit`s memManager cannot be cross."));
+		assert((var->mngr == this->mngr) || !("Serialize Assert False: base`s manager cannot be cross."));
 
 		if (this->mngr->ptrTable.cend() != this->mngr->ptrTable.find(lowlevel::memPtrCorr(var.ptr->content, 0)))
 		{
@@ -2357,26 +2374,27 @@ inline void memUnit::GWPP_Base(void* pValue, impPtr<_mu, _r>& var, memPara& para
 	}
 		break;
 #if MEM_REFLECTION_ON
-	case memPara::reflection_read:
+	case para::reflection_read:
 		//para.reflection->context.emplace_back(key, var);
 		break;
-	case memPara::reflection_write:
+	case para::reflection_write:
 		//para.reflection_single->WriteMU(key, var, size);
 		break;
 #endif
 	}
 }
 template<typename _mu, bool _r>
-inline void memUnit::GWPP_Base(void* pValue, memPtr<_mu, _r>& var, memPara& para) {
-	switch (para.order)
+inline void base::GWPP_Base(void* pValue, memPtr<_mu, _r>& var, para& param) {
+	using json_const::json_recurring;
+	switch (param.order)
 	{
-	case memPara::binary_deserialize_memUnit:
-	case memPara::binary_serialize_memUnit:			//do nothing
+	case para::binary_deserialize_base:
+	case para::binary_serialize_base:			//do nothing
 		break;
-	case memPara::binary_deserialize_memManager:
+	case para::binary_deserialize_manager:
 	{
 		uint8_t* dataPointer = (uint8_t*)pValue;
-		memUnit* varMU;
+		base* varMU;
 		if (lowlevel::BytesTo_mem(varMU, dataPointer, this->mngr->binSeri.start, this->mngr->binSeri.end) == false)
 		{
 			this->mngr->statusBadValue++;
@@ -2401,13 +2419,13 @@ inline void memUnit::GWPP_Base(void* pValue, memPtr<_mu, _r>& var, memPara& para
 		}
 		else
 		{
-			memPara mp;
-			mp.order = memPara::binary_deserialize_memManager;
+			para mp;
+			mp.order = para::binary_deserialize_manager;
 			mp.section.startPointer = mp.section.likelyPointer = this->mngr->binSeri.start + iter->sectionStartOffset;
 
-			if constexpr (std::is_base_of_v<memManager, _mu>)
+			if constexpr (std::is_base_of_v<manager, _mu>)
 			{
-				assert(false || !"Serialize Assert Error: somehow causes the empty memManager.");
+				assert(false || !"Serialize Assert Error: somehow causes the empty manager.");
 			}
 			else
 			{
@@ -2415,14 +2433,14 @@ inline void memUnit::GWPP_Base(void* pValue, memPtr<_mu, _r>& var, memPara& para
 			}
 			bool& isConstructed = (bool&)iter->isConstructed;
 			isConstructed = true;
-			memUnit*& ptrRUN2 = (memUnit*&)iter->ptrRUN2;
+			base*& ptrRUN2 = (base*&)iter->ptrRUN2;
 			ptrRUN2 = var.ptr->content;
 
 			var->save_fetch(mp);
 		}
 	}
 		break;
-	case memPara::binary_serialize_memManager:
+	case para::binary_serialize_manager:
 	{
 		std::vector<uint8_t>* dataVector = (std::vector<uint8_t>*)pValue;
 		if (var.isEmpty())
@@ -2431,15 +2449,15 @@ inline void memUnit::GWPP_Base(void* pValue, memPtr<_mu, _r>& var, memPara& para
 			lowlevel::mem_toBytes(ref, dataVector, this->mngr->binSeri.bytes);
 			break;
 		}
-		assert((var->mngr == this->mngr) || !("Serialize Assert False: memUnit`s memManager cannot be cross."));
+		assert((var->mngr == this->mngr) || !("Serialize Assert False: base`s manager cannot be cross."));
 
 		lowlevel::mem_toBytes(var.ptr->content, dataVector, this->mngr->binSeri.bytes);
 
 		if (this->mngr->ptrTable.cend() == this->mngr->ptrTable.find(lowlevel::memPtrCorr(var.ptr->content, 0)))
 		{
 			std::vector<uint8_t> sectionVector = std::vector<uint8_t>();
-			memPara mp;
-			mp.order = memPara::binary_serialize_memManager;
+			para mp;
+			mp.order = para::binary_serialize_manager;
 			mp.sectionVector = &sectionVector;
 
 			auto emplaceResult = this->mngr->ptrTable.emplace(var.ptr->content, 0);
@@ -2452,15 +2470,15 @@ inline void memUnit::GWPP_Base(void* pValue, memPtr<_mu, _r>& var, memPara& para
 	}
 		break;
 #if MEM_REFLECTION_ON
-	case memPara::reflection_read:
+	case para::reflection_read:
 		//para.reflection->context.emplace_back(key, var);
 		break;
-	case memPara::reflection_write:
+	case para::reflection_write:
 		//para.reflection_single->WriteMU(key, var, size);
 		break;
 #endif
 #if MEM_RJSON_ON
-	case memPara::rjson_seriazlize:
+	case para::rjson_seriazlize:
 	{
 		rapidjson::Value* vlValue = (rapidjson::Value*)pValue;
 		if (var.isEmpty())
@@ -2472,8 +2490,8 @@ inline void memUnit::GWPP_Base(void* pValue, memPtr<_mu, _r>& var, memPara& para
 		if (this->mngr->ptrTable.cend() == this->mngr->ptrTable.find(lowlevel::memPtrCorr(var.ptr->content, 0)))
 		{
 			vlValue->SetObject();
-			memPara mp;
-			mp.order = memPara::rjson_seriazlize;
+			para mp;
+			mp.order = para::rjson_seriazlize;
 			mp.rapidJson_section = vlValue;
 
 			auto emplaceResult = this->mngr->ptrTable.emplace(var.ptr->content, 0);
@@ -2487,18 +2505,18 @@ inline void memUnit::GWPP_Base(void* pValue, memPtr<_mu, _r>& var, memPara& para
 		}
 	}
 	break;
-	case memPara::rjson_deseriazlize:
+	case para::rjson_deseriazlize:
 	{
 		rapidjson::Value* vlValue = (rapidjson::Value*)pValue;
 		if (vlValue->IsObject())
 		{
-			memPara mp;
-			mp.order = memPara::rjson_deseriazlize;
+			para mp;
+			mp.order = para::rjson_deseriazlize;
 			mp.rapidJson_section = vlValue;
 
-			if constexpr (std::is_base_of_v<memManager, _mu>)
+			if constexpr (std::is_base_of_v<manager, _mu>)
 			{
-				assert(false || !"Serialize Assert Error: somehow causes the empty memManager.");
+				assert(false || !"Serialize Assert Error: somehow causes the empty manager.");
 			}
 			else
 			{
@@ -2546,7 +2564,7 @@ inline egressFindErr Egress::getTarget(cast*& varReturn)
 	else
 		return egressFindErr::cast_failed;
 }
-inline void Egress::save_fetch(memPara para) {
+inline void Egress::save_fetch(para para) {
 	GWPP("keyword", keyword, para);
 	GWPP("type", type, para);
 }
@@ -2555,7 +2573,7 @@ inline void Egress::save_fetch(memPara para) {
 
 //Ingress
 inline Ingress::~Ingress() {}
-inline void refIngress::save_fetch(memPara para) {
+inline void refIngress::save_fetch(para para) {
 	GWPP("p", ptrIng, para);
 	GWPP("k", keyword, para);
 	GWPP("t", type, para);
@@ -2565,7 +2583,7 @@ inline void refIngress::save_fetch(memPara para) {
 
 //Subfile
 inline Subfile::~Subfile() {}
-inline void Subfile::save_fetch(memPara para) {
+inline void Subfile::save_fetch(para para) {
 	GWPP("vec", egresses, para);
 	if (para.isConstruct())
 		for (auto i : egresses)
@@ -2575,8 +2593,8 @@ inline void Subfile::save_fetch(memPara para) {
 }
 inline int Subfile::findGlobalManager()
 {
-    std::lock_guard<std::mutex> lck (memManager::global_mutex);
-	for (auto i : memManager::global_load)
+    std::lock_guard<std::mutex> lck (manager::global_mutex);
+	for (auto i : manager::global_load)
 	{
 		char* fn = i->getFileName();
 		if (fn == nullptr)
@@ -2626,12 +2644,12 @@ inline egressFindErr pEgress<cast>::getTarget(cast*& varReturn) {
 	return egressFindErr::empty_egress;
 }
 template<class cast>
-inline void pEgress<cast>::makeEIPair(memManager* egressMngr, const memPtr<cast>& target, const char* kw) {
+inline void pEgress<cast>::makeEIPair(manager* egressMngr, const memPtr<cast>& target, const char* kw) {
 	memPtr<Egress> pegr = egressMngr->makeEgress_IngressPair(target, kw);
 	this->memPtr<Egress>::operator=(pegr);
 }
 template<class cast>
-inline pEgress<cast>::pEgress(memManager* egressMngr, const memPtr<cast>& target, const char* kw) {
+inline pEgress<cast>::pEgress(manager* egressMngr, const memPtr<cast>& target, const char* kw) {
 	this->makeEIPair(egressMngr, target, kw);
 }
 
@@ -2639,10 +2657,10 @@ inline pEgress<cast>::pEgress(memManager* egressMngr, const memPtr<cast>& target
 
 //serialize functions
 
-inline bool memUnit::deserialize(uint8_t* Ptr, uint32_t StringSize)
+inline bool base::deserialize(uint8_t* Ptr, uint32_t StringSize)
 {
-	memPara mp;
-	mp.order = memPara::binary_deserialize_memUnit;
+	para mp;
+	mp.order = para::binary_deserialize_base;
 	mp.section.startPointer = mp.section.likelyPointer = Ptr;
 
 	//find long variable zone
@@ -2670,12 +2688,12 @@ inline bool memUnit::deserialize(uint8_t* Ptr, uint32_t StringSize)
 	this->save_fetch(mp);
 	return true;
 }
-inline void memUnit::serialize(std::vector<uint8_t>* bc)
+inline void base::serialize(std::vector<uint8_t>* bc)
 {
 	bc->clear();
 	std::vector<uint8_t>& sectionVector = *bc;
-	memPara mp;
-	mp.order = memPara::binary_serialize_memUnit;
+	para mp;
+	mp.order = para::binary_serialize_base;
 	mp.sectionVector = &sectionVector;
 
 	std::vector<uint8_t> longVars;
@@ -2696,64 +2714,74 @@ inline void memUnit::serialize(std::vector<uint8_t>* bc)
 	}
 }
 #if MEM_RJSON_ON
-inline void memUnit::serializeJson(std::string* bc) {
+inline void base::serializeJson(std::string* bc) {
+	if (this->mngr->rjson.doc == nullptr)
+	{
+		this->mngr->rjson.doc = new rapidjson::Document;
+		this->mngr->rjson.doc->SetObject();
+		this->mngr->rjson.allocator = &this->mngr->rjson.doc->GetAllocator();
+	}
+
 	bc->clear();
 	this->mngr->ptrTable.clear();
 
-	rapidjson::Document doc;
-	doc.SetObject();
-	rapidjson::Document::AllocatorType& allocator = doc.GetAllocator();
-	this->mngr->rjson.doc = &doc;
-	this->mngr->rjson.allocator = &allocator;
 
 	//entry the iteration of write
-	memPara mp;
-	mp.order = memPara::rjson_seriazlize;
-	mp.rapidJson_section = &doc;
+	para mp;
+	mp.order = para::rjson_seriazlize;
+	mp.rapidJson_section = this->mngr->rjson.doc;
 	this->mngr->ptrTable.emplace(this, 0);
 	this->save_fetch(mp);
 
 	// json write finish
 	rapidjson::StringBuffer buffer;
 	rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-	doc.Accept(writer);
+	this->mngr->rjson.doc->Accept(writer);
 
 	// json out
 	*bc = buffer.GetString();
 
 	//clean the table of pointer and return
 	this->mngr->ptrTable.clear();
+	this->mngr->rjson.doc->SetObject();
 }
-inline bool memUnit::deserializeJson(const std::string& bc){
+inline bool base::deserializeJson(const std::string& bc){
     return deserializeJson(bc.c_str(), bc.size());
 }
-inline bool memUnit::deserializeJson(const char* Ptr, uint32_t StringSize) {
+inline bool base::deserializeJson(const char* Ptr, uint32_t StringSize) {
+	if (this->mngr->rjson.doc == nullptr)
+	{
+		this->mngr->rjson.doc = new rapidjson::Document;
+		this->mngr->rjson.doc->SetObject();
+		this->mngr->rjson.allocator = &this->mngr->rjson.doc->GetAllocator();
+	}
+
 	this->mngr->statusBadValue = 0;
 	//json deserialize don't need that
 	//this->mngr->ptrTable.clear();
 
-	rapidjson::Document doc;
+	rapidjson::Document &doc = *this->mngr->rjson.doc;
 	doc.Parse(Ptr, StringSize);
-	this->mngr->rjson.doc = &doc;
-	this->mngr->rjson.allocator = &doc.GetAllocator();
 
 	//check error
 	if (doc.IsObject() == false) {
+		this->mngr->rjson.doc->SetObject();
 		return false;
 	}
 
 	//entry the iteration of read
-	memPara mp;
-	mp.order = memPara::rjson_deseriazlize;
-	memPtr<memUnit> self = this;
+	para mp;
+	mp.order = para::rjson_deseriazlize;
+	memPtr<base> self = this;
 	mp.rapidJson_section = &doc;
 	this->save_fetch(mp);
 
 	//this->mngr->ptrTable.clear();
+	this->mngr->rjson.doc->SetObject();
 	return true;
 }
 #endif
-inline bool memManager::deserialize(uint8_t* Ptr, uint32_t StringSize)
+inline bool manager::deserialize(uint8_t* Ptr, uint32_t StringSize)
 {
 	this->statusBadValue = 0;
 	headerOfFile* hof = (headerOfFile*)Ptr;
@@ -2792,22 +2820,22 @@ inline bool memManager::deserialize(uint8_t* Ptr, uint32_t StringSize)
 	uint32_t ptrTableSize = hof->sizeOfPtrTable;
 	for (; ptrTableSize > 0; ptrTableSize--)
 	{
-		memUnit** mu = (memUnit**)ptrTableBegin;
-		uint32_t* offset = (uint32_t*)(ptrTableBegin + sizeof(memUnit*));
+		base** mu = (base**)ptrTableBegin;
+		uint32_t* offset = (uint32_t*)(ptrTableBegin + sizeof(base*));
 		this->ptrTable.emplace(*mu, *offset);
-		ptrTableBegin += sizeof(memUnit*) + sizeof(uint32_t);
+		ptrTableBegin += sizeof(base*) + sizeof(uint32_t);
 	}
 
-	memPara mp;
-	mp.order = memPara::binary_deserialize_memManager;
+	para mp;
+	mp.order = para::binary_deserialize_manager;
 
-	auto findRes = ptrTable.find(lowlevel::memPtrCorr((memUnit*)hof->pointerOfFirst, 0));
+	auto findRes = ptrTable.find(lowlevel::memPtrCorr((base*)hof->pointerOfFirst, 0));
 	if (findRes == ptrTable.end())
 		return false;
 	mp.section.startPointer = mp.section.likelyPointer = Ptr + findRes->sectionStartOffset;
 	bool& isConstructed = (bool&)findRes->isConstructed;
 	isConstructed = true;
-	memUnit*& ptrRUN2 = (memUnit*&)findRes->ptrRUN2;
+	base*& ptrRUN2 = (base*&)findRes->ptrRUN2;
 	ptrRUN2 = this;
 	this->save_fetch(mp);
 
@@ -2820,11 +2848,11 @@ inline bool memManager::deserialize(uint8_t* Ptr, uint32_t StringSize)
 	this->ptrTable.clear();
 	return true;
 }
-inline void memManager::serialize(std::vector<uint8_t>* bc)
+inline void manager::serialize(std::vector<uint8_t>* bc)
 {
 	// head of file
 	bc->clear();
-	bc->reserve(this->memUnits.size() * likelyBytesPerUnit);	//let's assume every memUnit will cost how many bytes
+	bc->reserve(this->bases.size() * likelyBytesPerUnit);	//let's assume every base will cost how many bytes
 	bc->resize(sizeof(headerOfFile));
 	headerOfFile* hof = (headerOfFile*)bc->data();
 	if constexpr (sizeof(void*) == 4)
@@ -2849,8 +2877,8 @@ inline void memManager::serialize(std::vector<uint8_t>* bc)
 	this->ptrTable.clear();
 	this->mngr->binSeri.bytes = bc;
 	std::vector<uint8_t> sectionVector = std::vector<uint8_t>();
-	memPara mp;
-	mp.order = memPara::binary_serialize_memManager;
+	para mp;
+	mp.order = para::binary_serialize_manager;
 	mp.sectionVector = &sectionVector;
 
 	auto emplaceResult = this->ptrTable.emplace(this, 0);
@@ -2878,13 +2906,13 @@ inline void memManager::serialize(std::vector<uint8_t>* bc)
 	hof->sizeOfPtrTable = this->ptrTable.size();
 	hof->offsetOfPtrTable = bc->size();
 
-	int32_t perreserve = (sizeof(memUnit*) + sizeof(uint32_t)) * this->ptrTable.size() - (bc->capacity() - bc->size());
+	int32_t perreserve = (sizeof(base*) + sizeof(uint32_t)) * this->ptrTable.size() - (bc->capacity() - bc->size());
 	if (perreserve > 0)
 		bc->reserve(perreserve);
 	for (auto& iter : ptrTable)
 	{
-		bc->resize(bc->size() + sizeof(memUnit*));
-		memcpy(&*(bc->end() - 1) - sizeof(memUnit*) + 1, &iter.ptrRUN, sizeof(memUnit*));
+		bc->resize(bc->size() + sizeof(base*));
+		memcpy(&*(bc->end() - 1) - sizeof(base*) + 1, &iter.ptrRUN, sizeof(base*));
 		bc->resize(bc->size() + sizeof(uint32_t));
 		memcpy(&*(bc->end() - 1) - sizeof(uint32_t) + 1, &iter.sectionStartOffset, sizeof(uint32_t));
 	}
@@ -2896,7 +2924,7 @@ inline void memManager::serialize(std::vector<uint8_t>* bc)
 //variant adaptor
 template <typename First, typename ...Args>
 template<bool _void, typename IterFirst, typename... IterArgs>
-inline bool lowlevel::pushVariantHelper<First, Args...>::createIter(uint32_t i, std::variant<First, Args...>& variant, memUnit* mu, memPara& para) noexcept
+inline bool lowlevel::pushVariantHelper<First, Args...>::createIter(uint32_t i, std::variant<First, Args...>& variant, base* mu, para& para) noexcept
 {
 	if (i == 0)
 	{

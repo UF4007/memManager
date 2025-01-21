@@ -219,21 +219,21 @@ class lowlevel {
 		__MEMMNGR_INTERNAL_HEADER_PERMISSION
 	private:
 		template<bool _void>
-		inline bool createIter(uint32_t i, std::variant<First, Args...>& variant, memUnit* mu, memPara& para) noexcept
+		inline bool createIter(uint32_t i, std::variant<First, Args...>& variant, base* mu, para& para) noexcept
 		{
 			return false;
 			//assert(!("An error has happened when creating pVariant from an archive file. \n Matched type not found."));
 		}
 		template<bool _void, typename IterFirst, typename... IterArgs>
-		bool createIter(uint32_t i, std::variant<First, Args...>& variant, memUnit* mu, memPara& para) noexcept;
+		bool createIter(uint32_t i, std::variant<First, Args...>& variant, base* mu, para& para) noexcept;
 		void* pv;
 	public :
-		inline bool push(uint32_t index, std::variant<First, Args...>& variant, memUnit* mu, void* pValue, memPara& para) noexcept
+		inline bool push(uint32_t index, std::variant<First, Args...>& variant, base* mu, void* pValue, para& para) noexcept
 		{
 			pv = pValue;
 			return createIter<false, First, Args...>(index, variant, mu, para);
 		}
-		memUnit* mu;
+		base* mu;
 	};
 
 
@@ -241,9 +241,9 @@ class lowlevel {
 	//memPtr command block
 	struct memPtrComm {
 		int count;
-		memUnit* content;
+		base* content;
 		inline memPtrComm() {}
-		inline memPtrComm(memUnit* m) noexcept
+		inline memPtrComm(base* m) noexcept
 		{
 			count = 1;
 			content = m;
@@ -258,13 +258,13 @@ class lowlevel {
 
 	//corresponding pointer
 	struct memPtrCorr {
-		memUnit* ptrRUN;
+		base* ptrRUN;
 		union {
 			uint32_t sectionStartOffset;			//r w
-			memUnit* ptrRUN2;
+			base* ptrRUN2;
 		};
 		bool isConstructed = false;
-		inline memPtrCorr(memUnit* a, uint32_t b) noexcept {
+		inline memPtrCorr(base* a, uint32_t b) noexcept {
 			ptrRUN = a;
 			sectionStartOffset = b;
 		}
@@ -355,9 +355,9 @@ public:
 		tmbuf.tm_wday = (4 + * timestamp / day_s) % 7;
 	}
 };
-inline std::deque<mem::lowlevel::memPtrComm> mem::lowlevel::memPtrComm::memPool = {}; 
-inline std::stack<mem::lowlevel::memPtrComm*> mem::lowlevel::memPtrComm::memFreed = {}; 
-inline void* mem::lowlevel::memPtrComm::operator new(size_t size) noexcept
+inline std::deque<eb::lowlevel::memPtrComm> eb::lowlevel::memPtrComm::memPool = {}; 
+inline std::stack<eb::lowlevel::memPtrComm*> eb::lowlevel::memPtrComm::memFreed = {}; 
+inline void* eb::lowlevel::memPtrComm::operator new(size_t size) noexcept
 {
 	while (lockFreed.test_and_set(std::memory_order_acquire));
 	if (memFreed.size() == 0)
@@ -365,21 +365,21 @@ inline void* mem::lowlevel::memPtrComm::operator new(size_t size) noexcept
 		lockFreed.clear(std::memory_order_release);
 		while (lockPool.test_and_set(std::memory_order_acquire));
 		memPool.emplace_back();
-		mem::lowlevel::memPtrComm* ret = &*(memPool.end() - 1);
+		eb::lowlevel::memPtrComm* ret = &*(memPool.end() - 1);
 		lockPool.clear(std::memory_order_release);
 		return ret;
 	}
 	else
 	{
-		mem::lowlevel::memPtrComm* ret = memFreed.top();
+		eb::lowlevel::memPtrComm* ret = memFreed.top();
 		memFreed.pop();
 		lockFreed.clear(std::memory_order_release);
 		return ret;
 	}
 }
-inline void mem::lowlevel::memPtrComm::operator delete(void* pthis) noexcept
+inline void eb::lowlevel::memPtrComm::operator delete(void* pthis) noexcept
 {
 	while (lockFreed.test_and_set(std::memory_order_acquire));
-	memFreed.push((mem::lowlevel::memPtrComm*)pthis);
+	memFreed.push((eb::lowlevel::memPtrComm*)pthis);
 	lockFreed.clear(std::memory_order_release);
 }

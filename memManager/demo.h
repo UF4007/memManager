@@ -5,8 +5,8 @@
 #define MEM_RJSON_ON 1
 
 //include after config
-#include "memManager.h"
-using namespace mem;
+#include "ebManager.h"
+using namespace eb;
 
 //trial functions
 inline int testFoo(int a, int b) { return a + b; }
@@ -24,12 +24,12 @@ class testStlContainer;
 
 struct testSub {
 	int a = 555;
-	void save_fetch_sub(memUnit* mu, const char* key, memPara& para)
+	void save_fetch_sub(base* mu, const char* key, para& para)
 	{
 		GWPP_sub(mu, key, "a", a, para);
 	}
 };
-class testUnit :public memUnit {
+class testUnit :public base {
 	//declare variables with MACRO
 public:
 	DECLARE_VARS(
@@ -38,7 +38,7 @@ public:
 		std::string, str
 		)
 public:
-	testUnit(memManager* manager) :memUnit(manager) {};
+	testUnit(manager* manager) :base(manager) {};
 };
 class testIngr :public Ingress {
 public:
@@ -48,13 +48,13 @@ public:
 		std::string, str
 	)
 public:
-	testIngr(memManager* manager) :Ingress(manager) {};
+	testIngr(manager* manager) :Ingress(manager) {};
 	const char* getConstTypeName() override { return "testIngr"; }
 };
 class testUnit2 :public testUnit {
 	//declare without MACRO, manually
 	__MEMMNGR_INTERNAL_HEADER_PERMISSION
-	void save_fetch(memPara para) override {
+	void save_fetch(para para) override {
 		GWPP("egressTest", egressTest, para);
 		GWPP("genetest", genetest, para);
 		GWPP("optionaltest", optionalTest, para);
@@ -66,7 +66,7 @@ class testUnit2 :public testUnit {
 		GWPP("chrono", chrono, para);
 	}
 public:
-	testUnit2(memManager* manager) :testUnit(manager) {};
+	testUnit2(manager* manager) :testUnit(manager) {};
 	std::chrono::system_clock::time_point nowtp;
 	std::chrono::seconds chrono = std::chrono::seconds(0);
 	testSub sub;
@@ -85,12 +85,12 @@ public:
 #include <array>
 #include <forward_list>
 #include <bitset>
-class testStlContainer : public memUnit {
+class testStlContainer : public base {
 	__MEMMNGR_INTERNAL_HEADER_PERMISSION
 public:
-	testStlContainer(memManager* manager) : memUnit(manager) {};
+	testStlContainer(manager* manager) : base(manager) {};
 
-	void save_fetch(memPara para) override {
+	void save_fetch(para para) override {
 		GWPP("testList", testList, para);
 		GWPP("testDeque", testDeque, para);
 		GWPP("testForwardList", testForwardList, para);
@@ -161,7 +161,7 @@ public:
 	// Tuple
 	std::tuple<int, std::string, double> testTuple;
 };
-class testManager :public memManager {
+class testManager :public manager {
 	__MEMMNGR_INTERNAL_HEADER_PERMISSION
 public:
 	memPtr<testUnit> anothert1;
@@ -186,7 +186,7 @@ public:
 	bool n12;
 	char n13[30];
 private:
-	void save_fetch(memPara para) override {
+	void save_fetch(para para) override {
 		GWPP("anothert1", anothert1, para);
 		GWPP("anothert2", anothert2, para);
 		GWPP("tu2", tu2, para);
@@ -321,7 +321,7 @@ inline void mem_testmain()
 		testManagerA->tu2->genetest = testUnitA;
 		testUnit* geneGet1 = **std::get_if<memPtr<testUnit>>(&(testManagerA->tu2->genetest));
 		testUnit2* geneGet3;
-		mem::pVariantGet(testManagerA->tu2->genetest, geneGet3);
+		eb::pVariantGet(testManagerA->tu2->genetest, geneGet3);
 		//testManagerA->tu2->genetest = nullptr;
 		//testManagerA->tu2->genetest = new testUnit2(*testManagerA);
 		//speed test of variant
@@ -441,7 +441,7 @@ inline void mem_testmain()
 		std::cout << "mem test testManagerA->n2 :" << (int)testManagerA->n2 << "\n";
 		std::cout << "mem test testManagerA->n10 :" << testManagerA->n10 << "\n";
 
-		//getTarget find target memManager in global file. must upload target memManager upload before get something
+		//getTarget find target manager in global file. must upload target manager upload before get something
 		auto retFindErr = testManagerB->tu2->egressTest.getTarget(ingressSuccess);
 
 
@@ -450,11 +450,11 @@ inline void mem_testmain()
 		// read
 #if MEM_REFLECTION_ON
 		ReflectResult refRes;
-		memUnit* refTestMu = *testManagerA;
+		base* refTestMu = *testManagerA;
 		refTestMu->reflectionRead(&refRes);
 
 		ReflectResult refRes2;
-		memUnit* refTestMu2 = *testManagerA->tu2;
+		base* refTestMu2 = *testManagerA->tu2;
 		refTestMu2->reflectionRead(&refRes2);
 
 		//write
@@ -472,7 +472,7 @@ inline void mem_testmain()
 		refKW = ReflectResultKeyValue("anothert1", testManagerA->vec);			//illegal pointer write test
 		refSuccess = refTestMu->reflectionWrite(refKW);
 
-		memUnit* refTestVariant = *testManagerA->anothert1;
+		base* refTestVariant = *testManagerA->anothert1;
 		refKW = ReflectResultKeyValue("genetest", refTestVariant);
 		refTestMu2->reflectionWrite(refKW);
 		std::cout << "mem test reflection writen\n";
@@ -486,7 +486,7 @@ inline void mem_testmain()
 #if MEM_RJSON_ON
 		//rapid Json serialize
 		//testManagerA->tu2->nowtp = std::chrono::system_clock::time_point(std::chrono::seconds(1709198575)); //2024 2 29 test, 9:22:55
-		memUnit::json_time_mode = memUnit::json_time_mode_t::string_Y_M_D;
+		eb::json_const::json_time_mode = eb::json_const::json_time_mode_t::string_Y_M_D;
 		std::string serializeDumpJson;
 		testManagerA->tu2->genetest = std::string("variant string");
 		testManagerA->serializeJson(&serializeDumpJson);		//rapid json: i5-9300HF costs 1315ms for 500k meta units serialize, 1266ms for deserialize. No wonder.
@@ -498,12 +498,12 @@ inline void mem_testmain()
 
 
 
-		//serialize test(memUnit)
+		//serialize test(base)
 		std::vector<uint8_t> serializeDump;
 		testManagerA->anothert1->num = 2.72;
 		testManagerA->anothert1->serialize(&serializeDump);
 
-		//deserialize test(memUnit)
+		//deserialize test(base)
 		testManagerB.release();
 		testManagerB = new testManager();
 		testManagerB->anothert1 = new testUnit(*testManagerB);
@@ -511,18 +511,18 @@ inline void mem_testmain()
 		serializeDump.clear();
 		testManagerB.release();
 
-		//serialize test(memManager)
+		//serialize test(manager)
 		if (true)
 		{
 			testManagerA->serialize(&serializeDump);
 			testManagerA.release();
 
-			//dserialize test(memManager)
+			//dserialize test(manager)
 			testManagerB = new testManager();
 			testManagerB->deserialize(&serializeDump[0], serializeDump.size());
 		}
 #endif
-		//memManager is recommended to be released manually bcs some pointers within memManager could point to the manager, which will cause recurring references and shared pointer count errors.
+		//manager is recommended to be released manually bcs some pointers within manager could point to the manager, which will cause recurring references and shared pointer count errors.
 		testManagerA.release();
 		testManagerB.release();
 		//test: memory leak (repeat)

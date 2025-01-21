@@ -4,9 +4,9 @@ template<template<typename...> class T, typename... Args>
 struct is_template<T<Args...>> : std::true_type {};
 
 template<typename T>
-struct extract_template_memUnit { using type = void; };
+struct extract_template_base { using type = void; };
 template<typename T, bool releaseable>
-struct extract_template_memUnit<memPtr<T, releaseable>> { using type = T; };
+struct extract_template_base<memPtr<T, releaseable>> { using type = T; };
 
 template<typename T>
 struct is_impPtr {
@@ -34,7 +34,7 @@ struct has_save_fetch_struct {
 	template <typename V, typename U = void>
 	struct has_save_fetch_struct_helper : std::false_type {};
 	template <typename V>
-	struct has_save_fetch_struct_helper<V, std::void_t<decltype(V::save_fetch_size), decltype(std::declval<V>().save_fetch_struct(std::declval<uint8_t*>(), std::declval<memPara&>()))>> : std::true_type {};
+	struct has_save_fetch_struct_helper<V, std::void_t<decltype(V::save_fetch_size), decltype(std::declval<V>().save_fetch_struct(std::declval<uint8_t*>(), std::declval<para&>()))>> : std::true_type {};
 
 	static constexpr bool value = has_save_fetch_struct_helper<T>::value;
 };
@@ -45,14 +45,14 @@ struct has_save_fetch_sub {
 	template <typename V, typename U = void>
 	struct has_save_fetch_sub_helper : std::false_type {};
 	template <typename V>
-	struct has_save_fetch_sub_helper<V, std::void_t<decltype(std::declval<V>().save_fetch_sub(std::declval<memUnit*>(), std::declval<const char*>(), std::declval<memPara&>()))>> : std::true_type {};
+	struct has_save_fetch_sub_helper<V, std::void_t<decltype(std::declval<V>().save_fetch_sub(std::declval<base*>(), std::declval<const char*>(), std::declval<para&>()))>> : std::true_type {};
 
 	static constexpr bool value = has_save_fetch_sub_helper<T>::value;
 };
 
 //template <typename T>
 //struct has_save_fetch_struct_helper {
-//	template<typename V> using save_fetch_struct_ptr = void(V::*)(uint8_t*, memPara);
+//	template<typename V> using save_fetch_struct_ptr = void(V::*)(uint8_t*, para);
 //	template <typename U>
 //	static std::enable_if_t<std::is_same<save_fetch_struct_ptr<U>, decltype(U::save_fetch_struct)>::value, std::true_type> check(int);
 //	template <typename U>
