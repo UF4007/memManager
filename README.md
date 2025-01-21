@@ -73,7 +73,7 @@ int main(){
 	a->setUrl("D:\\test");		//设置一个有效的目录
 	a->download();
 
-	testM* b = new testM();
+	testM* b = new testM();		//序列化->反序列化 接抛球
 	b->setUrl("D:\\test");
 	b->upload();
 
