@@ -34,7 +34,7 @@
 ```C++
 #include "ebManager/ebManager.h"
 
-struct testU : public eb::base {			//继承memUnit
+struct testU : public eb::base {			//继承eb::base
 
 	int id;						//定义成员变量
 	std::string name;
@@ -44,12 +44,12 @@ struct testU : public eb::base {			//继承memUnit
 		GWPP("name", name, para);
 	}
 
-	testU(eb::memManager* m) :base(m) {}		//实现构造函数并传递memManager指针
+	testU(eb::memManager* m) :base(m) {}		//实现此签名的构造函数并传递eb::manager指针
 
 	MEM_PERMISSION					//权限宏(如果是public可以不写)
 };
 
-struct testM : public eb::manager {			//继承memManager
+struct testM : public eb::manager {			//继承eb::manager
 
 	std::vector<eb::memPtr<testU>> vec;		//此库能正确序列化memPtr系列智能指针的指向关系
 	
