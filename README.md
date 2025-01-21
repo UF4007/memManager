@@ -22,7 +22,9 @@
 # ebManager
 
 [English(pending)](README-en.md)  
-### 提供了对有环图、继承等复杂数据结构的整体管理（内存回收、序列化）方案。
+### 提供了对有环图、继承等复杂数据结构的整体管理（序列化、跨文件引用、内存标记与全体析构）方案。
+
+### 支持几乎所有STL容器及其任意嵌套：例如std::unordered_map<int, std::variant<std::vector<int>, std::string>>
 
 #### 如何使用
 这是一个headonly库。把ebManager文件夹复制到源目录下，在源代码中`#include "ebManager/ebManager.h"` 即可
@@ -34,7 +36,7 @@
 ```C++
 #include "ebManager/ebManager.h"
 
-struct testU : public eb::base {			//继承memUnit
+struct testU : public eb::base {			//继承eb::base
 
 	int id;						//定义成员变量
 	std::string name;
@@ -44,12 +46,12 @@ struct testU : public eb::base {			//继承memUnit
 		GWPP("name", name, para);
 	}
 
-	testU(eb::memManager* m) :base(m) {}		//实现构造函数并传递memManager指针
+	testU(eb::memManager* m) :base(m) {}		//实现此签名的构造函数并传递eb::manager指针
 
 	MEM_PERMISSION					//权限宏(如果是public可以不写)
 };
 
-struct testM : public eb::manager {			//继承memManager
+struct testM : public eb::manager {			//继承eb::manager
 
 	std::vector<eb::memPtr<testU>> vec;		//此库能正确序列化memPtr系列智能指针的指向关系
 	
@@ -100,8 +102,8 @@ eb_testmain();
 
 ### 文档目录
 
-- [memUnit](#memUnit)
-- [memManager](#memManager)
+- [eb::base](#eb::base)
+- [eb::manager](#eb::manager)
 - [支持的数据类型](#支持的数据类型)
   - [算术类型与枚举](#算术类型与枚举)
   - [原生数组](#原生数组)
