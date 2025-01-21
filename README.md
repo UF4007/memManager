@@ -24,6 +24,8 @@
 [English(pending)](README-en.md)  
 ### 提供了对有环图、继承等复杂数据结构的整体管理（内存回收、序列化）方案。
 
+### 支持几乎所有STL容器及其任意嵌套：例如std::vector<std::variant<std::vector<int>, std::string>>
+
 #### 如何使用
 这是一个headonly库。把ebManager文件夹复制到源目录下，在源代码中`#include "ebManager/ebManager.h"` 即可
 
